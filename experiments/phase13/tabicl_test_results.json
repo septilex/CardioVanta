@@ -1,0 +1,38 @@
+{
+    "Logistic Regression Baseline": {
+        "ROC-AUC": 0.9047619047619048,
+        "Average Precision": 0.9225347628444848,
+        "Accuracy": 0.8688524590163934,
+        "Precision": 0.8378378378378378,
+        "Recall": 0.9393939393939394,
+        "Specificity": 0.7857142857142857,
+        "F1": 0.8857142857142857,
+        "Brier Score": 0.12801442303953625,
+        "Log Loss": 0.3996788234577209,
+        "final_train_eval_time": 0.1524348258972168
+    },
+    "TabICLv2 Native": {
+        "ROC-AUC": 0.9166666666666666,
+        "Average Precision": 0.9273892745557779,
+        "Accuracy": 0.8688524590163934,
+        "Precision": 0.8205128205128205,
+        "Recall": 0.9696969696969697,
+        "Specificity": 0.75,
+        "F1": 0.8888888888888888,
+        "Brier Score": 0.11604702472686768,
+        "Log Loss": 0.3622075617313385,
+        "final_train_eval_time": 0.7977120876312256
+    },
+    "TabICLv2 Calibrated": {
+        "ROC-AUC": 0.9166666666666666,
+        "Average Precision": 0.9279655598689053,
+        "Accuracy": 0.8688524590163934,
+        "Precision": 0.8205128205128205,
+        "Recall": 0.9696969696969697,
+        "Specificity": 0.75,
+        "F1": 0.8888888888888888,
+        "Brier Score": 0.11834958108108808,
+        "Log Loss": 0.3856015535724504,
+        "final_train_eval_time": 3.8091185092926025
+    }
+}

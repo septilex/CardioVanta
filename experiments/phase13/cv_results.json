@@ -1,0 +1,169 @@
+{
+    "Logistic Regression": {
+        "mean": {
+            "ROC-AUC": 0.9203962703962703,
+            "Average Precision": 0.9269366311113518,
+            "Accuracy": 0.8554421768707483,
+            "Precision": 0.857264367816092,
+            "Recall": 0.8868945868945868,
+            "Specificity": 0.8181818181818181,
+            "F1": 0.8697733638910108,
+            "Brier Score": 0.1163316851764226,
+            "Log Loss": 0.3729657923470539
+        },
+        "std": {
+            "ROC-AUC": 0.01736970904342627,
+            "Average Precision": 0.0276540057428384,
+            "Accuracy": 0.022247407231209406,
+            "Precision": 0.040567541940688547,
+            "Recall": 0.05242165242165245,
+            "Specificity": 0.06428243465332249,
+            "F1": 0.019817778905535165,
+            "Brier Score": 0.012599829079745002,
+            "Log Loss": 0.02938329240536493
+        }
+    },
+    "SVM": {
+        "mean": {
+            "ROC-AUC": 0.9053742553742554,
+            "Average Precision": 0.9129771795155085,
+            "Accuracy": 0.8182823129251702,
+            "Precision": 0.8217645023642026,
+            "Recall": 0.8564102564102564,
+            "Specificity": 0.7727272727272727,
+            "F1": 0.8364458991143626,
+            "Brier Score": 0.12769298812978866,
+            "Log Loss": 0.4023302952769514
+        },
+        "std": {
+            "ROC-AUC": 0.021328462963753618,
+            "Average Precision": 0.024994960805516428,
+            "Accuracy": 0.014074606351156876,
+            "Precision": 0.030491282673476203,
+            "Recall": 0.060398860398860416,
+            "Specificity": 0.0574959574576069,
+            "F1": 0.017471062151471876,
+            "Brier Score": 0.011689093973446677,
+            "Log Loss": 0.03872328165103492
+        },
+        "best_params_on_full_dev": {
+            "model__C": 0.1,
+            "model__kernel": "linear"
+        }
+    },
+    "Random Forest": {
+        "mean": {
+            "ROC-AUC": 0.9147889147889149,
+            "Average Precision": 0.9217432366130611,
+            "Accuracy": 0.8388605442176871,
+            "Precision": 0.8388620826063395,
+            "Recall": 0.878917378917379,
+            "Specificity": 0.790909090909091,
+            "F1": 0.8558714109458896,
+            "Brier Score": 0.12134330809880467,
+            "Log Loss": 0.3913748420419209
+        },
+        "std": {
+            "ROC-AUC": 0.021173845401532776,
+            "Average Precision": 0.020686358327399103,
+            "Accuracy": 0.020027270384967783,
+            "Precision": 0.044487708496838516,
+            "Recall": 0.05530295411305269,
+            "Specificity": 0.07385489458759965,
+            "F1": 0.01782950137282513,
+            "Brier Score": 0.013389557958254217,
+            "Log Loss": 0.031959878689522485
+        },
+        "best_params_on_full_dev": {
+            "model__max_depth": 5,
+            "model__n_estimators": 100
+        }
+    },
+    "XGBoost": {
+        "mean": {
+            "ROC-AUC": 0.9018518518518517,
+            "Average Precision": 0.91432077264583,
+            "Accuracy": 0.8431122448979591,
+            "Precision": 0.8339138176638177,
+            "Recall": 0.8940170940170941,
+            "Specificity": 0.781818181818182,
+            "F1": 0.8617984498061251,
+            "Brier Score": 0.12492769312411492,
+            "Log Loss": 0.40994044615885733
+        },
+        "std": {
+            "ROC-AUC": 0.02720336325907527,
+            "Average Precision": 0.03645969628952129,
+            "Accuracy": 0.019963987198407043,
+            "Precision": 0.03778311726649587,
+            "Recall": 0.02763092160958254,
+            "Specificity": 0.06680426571226852,
+            "F1": 0.013299698501020469,
+            "Brier Score": 0.012933678848287281,
+            "Log Loss": 0.03200224885754123
+        },
+        "best_params_on_full_dev": {
+            "model__learning_rate": 0.1,
+            "model__max_depth": 5,
+            "model__n_estimators": 200
+        }
+    },
+    "LightGBM": {
+        "mean": {
+            "ROC-AUC": 0.8958300958300958,
+            "Average Precision": 0.9068056598880201,
+            "Accuracy": 0.8098639455782314,
+            "Precision": 0.8083551931939029,
+            "Recall": 0.8561253561253561,
+            "Specificity": 0.7545454545454545,
+            "F1": 0.830112956580624,
+            "Brier Score": 0.13394445641856234,
+            "Log Loss": 0.4200260552874518
+        },
+        "std": {
+            "ROC-AUC": 0.014346685742344066,
+            "Average Precision": 0.02051764133296214,
+            "Accuracy": 0.02080711247323449,
+            "Precision": 0.02410928396520393,
+            "Recall": 0.05590147256509568,
+            "Specificity": 0.04635472285084352,
+            "F1": 0.023907261257184086,
+            "Brier Score": 0.010392929980058797,
+            "Log Loss": 0.022770783092909534
+        },
+        "best_params_on_full_dev": {
+            "model__learning_rate": 0.01,
+            "model__max_depth": 5,
+            "model__n_estimators": 200
+        }
+    },
+    "CatBoost": {
+        "mean": {
+            "ROC-AUC": 0.9147500647500648,
+            "Average Precision": 0.9199666714606274,
+            "Accuracy": 0.8389455782312926,
+            "Precision": 0.8433737563882169,
+            "Recall": 0.8715099715099714,
+            "Specificity": 0.8,
+            "F1": 0.8541170249809772,
+            "Brier Score": 0.11835409164433597,
+            "Log Loss": 0.3851735705052795
+        },
+        "std": {
+            "ROC-AUC": 0.015316728753037518,
+            "Average Precision": 0.022228771456546902,
+            "Accuracy": 0.014222304200993519,
+            "Precision": 0.03518013978336,
+            "Recall": 0.07034441312789502,
+            "Specificity": 0.061657545301138796,
+            "F1": 0.019455201684881865,
+            "Brier Score": 0.011549175269244061,
+            "Log Loss": 0.025660410941146263
+        },
+        "best_params_on_full_dev": {
+            "model__depth": 3,
+            "model__iterations": 200,
+            "model__learning_rate": 0.01
+        }
+    }
+}

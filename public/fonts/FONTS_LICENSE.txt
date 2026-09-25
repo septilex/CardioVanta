@@ -1,0 +1,15 @@
+CardioVanta Font Substitutes
+
+As of the V1 frontend implementation, the authorized Mayo Clinic fonts were unavailable. The following legally usable open-source substitutes have been downloaded and bundled locally.
+
+1. Inter
+Source: Google Fonts / Fontsource (https://fontsource.org/fonts/inter)
+Designer: Rasmus Andersson
+License: SIL Open Font License, 1.1
+
+2. Newsreader
+Source: Google Fonts / Fontsource (https://fontsource.org/fonts/newsreader)
+Designer: Production Type
+License: SIL Open Font License, 1.1
+
+These fonts are used solely as typographic substitutes to approximate the visual character of the design references. They are not the Mayo Clinic proprietary fonts and must not be presented as such.

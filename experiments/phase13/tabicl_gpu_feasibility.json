@@ -1,0 +1,61 @@
+{
+    "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "pytorch_version": "2.5.1+cu121",
+    "tabicl_version": "unknown",
+    "device_used": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "ram_before_init_mb": 517.85546875,
+    "vram_before_init_mb": 0.0,
+    "model_init_time_sec": 0.0,
+    "ram_after_init_mb": 517.88671875,
+    "vram_after_init_mb": 0.0,
+    "checkpoint_dir": "C:\\Users\\praji/.cache/huggingface/hub\\models--jingang--TabICL",
+    "checkpoint_size_mb": 105.25520133972168,
+    "dataset_shape": [
+        242,
+        13
+    ],
+    "inference_time_predict_sec": 0.5069677829742432,
+    "inference_time_predict_proba_sec": 0.17885684967041016,
+    "inference_time_repeated_sec": 0.18564462661743164,
+    "predictions_shape": [
+        49
+    ],
+    "probabilities_shape": [
+        49,
+        2
+    ],
+    "sample_probabilities": [
+        [
+            0.1543690264225006,
+            0.8456310033798218
+        ],
+        [
+            0.9437933564186096,
+            0.05620669946074486
+        ],
+        [
+            0.9495861530303955,
+            0.050413839519023895
+        ],
+        [
+            0.2244187444448471,
+            0.7755811810493469
+        ],
+        [
+            0.7018296718597412,
+            0.2981703579425812
+        ]
+    ],
+    "sample_predictions": [
+        1,
+        0,
+        0,
+        1,
+        0
+    ],
+    "ram_after_inference_mb": 1194.6328125,
+    "vram_after_inference_mb": 116.2451171875,
+    "vram_peak_mb": 211.74560546875,
+    "success": true
+}

@@ -1,0 +1,29 @@
+{
+    "shap_configuration": {
+        "explainer": "shap.LinearExplainer",
+        "feature_dependence": "independent",
+        "background": "implicit_kmeans_100_clusters"
+    },
+    "mathematical_formula": "contribution_i = coefficient_i * (transformed_value_i - background_mean_i)",
+    "expected_value_comparison": {
+        "shap_expected_value": -0.11094069728767436,
+        "manual_expected_value": -0.11094069728767425,
+        "difference": 1.1102230246251565e-16
+    },
+    "validation_errors": {
+        "max_absolute_difference_transformed": 0.0,
+        "mean_absolute_difference_transformed": 0.0,
+        "max_absolute_difference_raw": 0.0,
+        "mean_absolute_difference_raw": 0.0
+    },
+    "pass_rates": {
+        "total_samples": 242,
+        "additivity_pass_rate": 1.0,
+        "raw_mapping_pass_rate": 1.0,
+        "exact_shap_match_rate": 1.0
+    },
+    "background_artifact": {
+        "path": "C:\\Users\\praji\\OneDrive\\Desktop\\Cardio-Vanta\\experiments\\phase13\\artifacts\\shap_background.json",
+        "size_bytes": 1906
+    }
+}

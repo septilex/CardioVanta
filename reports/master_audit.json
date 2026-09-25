@@ -1,0 +1,62 @@
+{
+  "project_origins": {
+    "data_source": "heart.csv",
+    "sha256": "7c3014365675306819510a49ff289efbec1d1a6a666a2dc7652f1547b383d859",
+    "development_samples": 242,
+    "locked_test_samples": 61,
+    "features": 13,
+    "sources": ["docs/ml-methodology.md", "artifacts/model/metadata.json"]
+  },
+  "ml_lifecycle": {
+    "baseline_and_cv": {
+      "methodology": "Nested 5-fold Cross-Validation",
+      "algorithm": "Logistic Regression",
+      "hyperparameters": {
+        "C": 0.1,
+        "class_weight": "balanced",
+        "solver": "lbfgs",
+        "random_state": 42
+      }
+    },
+    "calibration": {
+      "selected_method": "sigmoid",
+      "rationale": "Isotonic showed high risk of overfitting with Log Loss 0.6516; Sigmoid was better generalized at 0.3860."
+    },
+    "threshold_policy": {
+      "clinical_threshold": null,
+      "default": 0.5,
+      "youden_j": 0.46,
+      "max_f1": 0.43
+    },
+    "sources": [
+      "docs/calibration.md", 
+      "docs/threshold-policy.md", 
+      "reports/phase2c_model_selection.json"
+    ]
+  },
+  "explainability_and_shap": {
+    "phase": "13C",
+    "objective": "Evaluate SHAP for production explainability",
+    "decision": "Do NOT install shap package due to 147MB bundle size increase and 2.65s cold start penalty.",
+    "implementation": "Custom mathematical SHAP equivalent: coef * (X - E[X]) via src/inference/predict.py",
+    "sources": ["reports/phase13/shap_production_decision.md", "reports/phase13/shap_equivalent_validation.md"]
+  },
+  "advanced_research_tabicl": {
+    "phase": "13B",
+    "objective": "Benchmark TabICLv2 against Logistic Regression",
+    "result": "TabICLv2 Native matched Logistic Regression with no statistically significant difference.",
+    "decision": "Retained Logistic Regression due to 0 VRAM requirement and microsecond latency.",
+    "sources": ["reports/phase13/tabicl_benchmark.md", "reports/phase13/tabicl_statistical_audit.md"]
+  },
+  "architecture": {
+    "frontend": "Next.js 16.3.5 (React 19)",
+    "backend": "FastAPI",
+    "local_routing_fix": "Changed localhost to 127.0.0.1:8000 in .env.local and src/lib/api.ts to resolve IPv6 routing issues.",
+    "sources": ["docs/architecture.md", "docs/api.md", "README.md"]
+  },
+  "test_and_tools_status": {
+    "backend_tests": "Passed (46/46)",
+    "frontend_tests": "Passed (13/13)",
+    "openspec_integration": "Installed and initialized with --tools antigravity. No app code touched."
+  }
+}

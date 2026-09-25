@@ -1,0 +1,207 @@
+{
+    "Logistic Regression": [
+        {
+            "Fold 1": {
+                "model__C": 0.1,
+                "model__class_weight": "balanced",
+                "model__solver": "lbfgs"
+            }
+        },
+        {
+            "Fold 2": {
+                "model__C": 0.1,
+                "model__class_weight": "balanced",
+                "model__solver": "lbfgs"
+            }
+        },
+        {
+            "Fold 3": {
+                "model__C": 0.1,
+                "model__class_weight": "balanced",
+                "model__solver": "lbfgs"
+            }
+        },
+        {
+            "Fold 4": {
+                "model__C": 0.1,
+                "model__class_weight": "balanced",
+                "model__solver": "lbfgs"
+            }
+        },
+        {
+            "Fold 5": {
+                "model__C": 0.1,
+                "model__class_weight": null,
+                "model__solver": "lbfgs"
+            }
+        }
+    ],
+    "KNN": [
+        {
+            "Fold 1": {
+                "model__metric": "manhattan",
+                "model__n_neighbors": 15,
+                "model__weights": "distance"
+            }
+        },
+        {
+            "Fold 2": {
+                "model__metric": "manhattan",
+                "model__n_neighbors": 15,
+                "model__weights": "distance"
+            }
+        },
+        {
+            "Fold 3": {
+                "model__metric": "manhattan",
+                "model__n_neighbors": 21,
+                "model__weights": "distance"
+            }
+        },
+        {
+            "Fold 4": {
+                "model__metric": "manhattan",
+                "model__n_neighbors": 21,
+                "model__weights": "distance"
+            }
+        },
+        {
+            "Fold 5": {
+                "model__metric": "manhattan",
+                "model__n_neighbors": 21,
+                "model__weights": "distance"
+            }
+        }
+    ],
+    "SVM": [
+        {
+            "Fold 1": {
+                "model__C": 1,
+                "model__gamma": "auto",
+                "model__kernel": "rbf"
+            }
+        },
+        {
+            "Fold 2": {
+                "model__C": 0.1,
+                "model__gamma": "scale",
+                "model__kernel": "linear"
+            }
+        },
+        {
+            "Fold 3": {
+                "model__C": 1,
+                "model__gamma": "auto",
+                "model__kernel": "rbf"
+            }
+        },
+        {
+            "Fold 4": {
+                "model__C": 0.1,
+                "model__gamma": "scale",
+                "model__kernel": "linear"
+            }
+        },
+        {
+            "Fold 5": {
+                "model__C": 0.1,
+                "model__gamma": "scale",
+                "model__kernel": "linear"
+            }
+        }
+    ],
+    "Random Forest": [
+        {
+            "Fold 1": {
+                "model__n_estimators": 500,
+                "model__min_samples_split": 5,
+                "model__min_samples_leaf": 4,
+                "model__max_features": "log2",
+                "model__max_depth": 5
+            }
+        },
+        {
+            "Fold 2": {
+                "model__n_estimators": 100,
+                "model__min_samples_split": 2,
+                "model__min_samples_leaf": 4,
+                "model__max_features": "log2",
+                "model__max_depth": null
+            }
+        },
+        {
+            "Fold 3": {
+                "model__n_estimators": 500,
+                "model__min_samples_split": 5,
+                "model__min_samples_leaf": 4,
+                "model__max_features": "log2",
+                "model__max_depth": 3
+            }
+        },
+        {
+            "Fold 4": {
+                "model__n_estimators": 100,
+                "model__min_samples_split": 5,
+                "model__min_samples_leaf": 1,
+                "model__max_features": "log2",
+                "model__max_depth": null
+            }
+        },
+        {
+            "Fold 5": {
+                "model__n_estimators": 500,
+                "model__min_samples_split": 5,
+                "model__min_samples_leaf": 4,
+                "model__max_features": "log2",
+                "model__max_depth": 3
+            }
+        }
+    ],
+    "XGBoost": [
+        {
+            "Fold 1": {
+                "model__colsample_bytree": 1.0,
+                "model__learning_rate": 0.05,
+                "model__max_depth": 2,
+                "model__n_estimators": 100,
+                "model__subsample": 0.8
+            }
+        },
+        {
+            "Fold 2": {
+                "model__colsample_bytree": 0.8,
+                "model__learning_rate": 0.01,
+                "model__max_depth": 2,
+                "model__n_estimators": 200,
+                "model__subsample": 0.8
+            }
+        },
+        {
+            "Fold 3": {
+                "model__colsample_bytree": 0.8,
+                "model__learning_rate": 0.01,
+                "model__max_depth": 3,
+                "model__n_estimators": 200,
+                "model__subsample": 0.8
+            }
+        },
+        {
+            "Fold 4": {
+                "model__colsample_bytree": 1.0,
+                "model__learning_rate": 0.05,
+                "model__max_depth": 2,
+                "model__n_estimators": 100,
+                "model__subsample": 0.8
+            }
+        },
+        {
+            "Fold 5": {
+                "model__colsample_bytree": 0.8,
+                "model__learning_rate": 0.05,
+                "model__max_depth": 2,
+                "model__n_estimators": 200,
+                "model__subsample": 0.8
+            }
+        }
+    ]
+}

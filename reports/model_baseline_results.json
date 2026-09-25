@@ -1,0 +1,214 @@
+{
+    "experiment_name": "Phase 2A Baseline",
+    "random_seed": 42,
+    "cv_folds": 5,
+    "results": [
+        {
+            "model": "Logistic Regression",
+            "family": "linear",
+            "params": {
+                "max_iter": 1000,
+                "random_state": 42
+            },
+            "accuracy_mean": 0.8181122448979592,
+            "accuracy_std": 0.05631884313605716,
+            "precision_mean": 0.8294814814814815,
+            "precision_std": 0.05541691342498975,
+            "recall_mean": 0.8404558404558404,
+            "recall_std": 0.05742702188014268,
+            "f1_mean": 0.8343348196610652,
+            "f1_std": 0.05219386066364676,
+            "roc_auc_mean": 0.8924242424242423,
+            "roc_auc_std": 0.03217473914255781,
+            "pr_auc_mean": 0.9059150316033415,
+            "pr_auc_std": 0.021172529231461755,
+            "confusion_matrix": [
+                [
+                    87,
+                    23
+                ],
+                [
+                    21,
+                    111
+                ]
+            ]
+        },
+        {
+            "model": "KNN",
+            "family": "distance",
+            "params": {
+                "n_neighbors": 7
+            },
+            "accuracy_mean": 0.8264455782312925,
+            "accuracy_std": 0.03357325498688173,
+            "precision_mean": 0.8229298777685875,
+            "precision_std": 0.036294906620043206,
+            "recall_mean": 0.8712250712250713,
+            "recall_std": 0.05197849347936959,
+            "f1_mean": 0.8452497729986345,
+            "f1_std": 0.030757137401367554,
+            "roc_auc_mean": 0.8772274022274023,
+            "roc_auc_std": 0.05748534816405134,
+            "pr_auc_mean": 0.854604638059963,
+            "pr_auc_std": 0.07051931806094297,
+            "confusion_matrix": [
+                [
+                    85,
+                    25
+                ],
+                [
+                    17,
+                    115
+                ]
+            ]
+        },
+        {
+            "model": "Decision Tree",
+            "family": "tree",
+            "params": {
+                "random_state": 42
+            },
+            "accuracy_mean": 0.7192176870748299,
+            "accuracy_std": 0.07988564296346871,
+            "precision_mean": 0.7670663728286233,
+            "precision_std": 0.09516774875490289,
+            "recall_mean": 0.7128205128205128,
+            "recall_std": 0.08580466327614787,
+            "f1_mean": 0.7347283183804924,
+            "f1_std": 0.07349343121364808,
+            "roc_auc_mean": 0.72004662004662,
+            "roc_auc_std": 0.08254341301877606,
+            "pr_auc_mean": 0.7057111604006859,
+            "pr_auc_std": 0.08202313152400137,
+            "confusion_matrix": [
+                [
+                    80,
+                    30
+                ],
+                [
+                    38,
+                    94
+                ]
+            ]
+        },
+        {
+            "model": "Random Forest",
+            "family": "tree",
+            "params": {
+                "n_estimators": 100,
+                "random_state": 42
+            },
+            "accuracy_mean": 0.8097789115646259,
+            "accuracy_std": 0.06096505881272227,
+            "precision_mean": 0.8293490617328698,
+            "precision_std": 0.07494047646510692,
+            "recall_mean": 0.825925925925926,
+            "recall_std": 0.0618856933669993,
+            "f1_mean": 0.82593006993007,
+            "f1_std": 0.055227693213699316,
+            "roc_auc_mean": 0.8854182854182854,
+            "roc_auc_std": 0.04852260897541534,
+            "pr_auc_mean": 0.8977445994131182,
+            "pr_auc_std": 0.03832674161896661,
+            "confusion_matrix": [
+                [
+                    87,
+                    23
+                ],
+                [
+                    23,
+                    109
+                ]
+            ]
+        },
+        {
+            "model": "SVM",
+            "family": "svm",
+            "params": {
+                "probability": true,
+                "random_state": 42
+            },
+            "accuracy_mean": 0.8264455782312925,
+            "accuracy_std": 0.053246775692639546,
+            "precision_mean": 0.8422824582824582,
+            "precision_std": 0.05737625581513658,
+            "recall_mean": 0.8410256410256409,
+            "recall_std": 0.04417883964068987,
+            "f1_mean": 0.841277213352685,
+            "f1_std": 0.04766754036777546,
+            "roc_auc_mean": 0.89014504014504,
+            "roc_auc_std": 0.03425702150911358,
+            "pr_auc_mean": 0.905712729477805,
+            "pr_auc_std": 0.02111391105242376,
+            "confusion_matrix": [
+                [
+                    89,
+                    21
+                ],
+                [
+                    21,
+                    111
+                ]
+            ]
+        },
+        {
+            "model": "Gradient Boosting",
+            "family": "tree",
+            "params": {
+                "random_state": 42
+            },
+            "accuracy_mean": 0.7728741496598639,
+            "accuracy_std": 0.09023483228329163,
+            "precision_mean": 0.7863448275862067,
+            "precision_std": 0.08142852512588687,
+            "recall_mean": 0.8034188034188035,
+            "recall_std": 0.0910210709141703,
+            "f1_mean": 0.7939060939060939,
+            "f1_std": 0.08105438792922338,
+            "roc_auc_mean": 0.8432400932400931,
+            "roc_auc_std": 0.07370170822700216,
+            "pr_auc_mean": 0.863563923162325,
+            "pr_auc_std": 0.06788991765414105,
+            "confusion_matrix": [
+                [
+                    81,
+                    29
+                ],
+                [
+                    26,
+                    106
+                ]
+            ]
+        },
+        {
+            "model": "XGBoost",
+            "family": "tree",
+            "params": {
+                "random_state": 42,
+                "eval_metric": "logloss"
+            },
+            "accuracy_mean": 0.8056122448979591,
+            "accuracy_std": 0.08783210972806421,
+            "precision_mean": 0.8266691480562448,
+            "precision_std": 0.08873102897513331,
+            "recall_mean": 0.8173789173789174,
+            "recall_std": 0.08678663136550026,
+            "f1_mean": 0.8208508043425569,
+            "f1_std": 0.08293073292384136,
+            "roc_auc_mean": 0.8738409738409739,
+            "roc_auc_std": 0.05424195435952952,
+            "pr_auc_mean": 0.8909621263161516,
+            "pr_auc_std": 0.03831904147926695,
+            "confusion_matrix": [
+                [
+                    87,
+                    23
+                ],
+                [
+                    24,
+                    108
+                ]
+            ]
+        }
+    ]
+}

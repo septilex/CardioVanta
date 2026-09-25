@@ -1,0 +1,10 @@
+{
+    "experiment_name": "Phase 2B Nested CV",
+    "random_seed": 42,
+    "outer_cv": "StratifiedKFold(n_splits=5)",
+    "inner_cv": "StratifiedKFold(n_splits=5)",
+    "results": [
+        {
+            "model": "Logistic Regression",
+            "search_strategy": "GridSearchCV",
+            "search_combinations": 

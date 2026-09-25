@@ -1,0 +1,16 @@
+venv
+.venv*
+testenv
+data
+notebooks
+reports
+.pytest_cache
+__pycache__
+.git
+.next
+node_modules
+Syne_extracted
+*.zip
+*.log
+docs
+tests

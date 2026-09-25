@@ -1,0 +1,55 @@
+{
+    "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "pytorch_version": "2.14.0+cpu",
+    "tabicl_version": "unknown",
+    "device_used": "cpu",
+    "ram_before_init_mb": 303.5390625,
+    "model_init_time_sec": 0.0,
+    "ram_after_init_mb": 303.5390625,
+    "checkpoint_size_mb": "unknown",
+    "dataset_shape": [
+        242,
+        13
+    ],
+    "inference_time_predict_sec": 1.7779734134674072,
+    "inference_time_predict_proba_sec": 1.6140103340148926,
+    "inference_time_repeated_sec": 1.6503608226776123,
+    "predictions_shape": [
+        49
+    ],
+    "probabilities_shape": [
+        49,
+        2
+    ],
+    "sample_probabilities": [
+        [
+            0.1543687880039215,
+            0.8456312417984009
+        ],
+        [
+            0.9437932372093201,
+            0.05620674416422844
+        ],
+        [
+            0.9495861530303955,
+            0.050413839519023895
+        ],
+        [
+            0.22441862523555756,
+            0.775581419467926
+        ],
+        [
+            0.7018288373947144,
+            0.29817113280296326
+        ]
+    ],
+    "sample_predictions": [
+        1,
+        0,
+        0,
+        1,
+        0
+    ],
+    "ram_after_inference_mb": 595.5234375,
+    "success": true
+}

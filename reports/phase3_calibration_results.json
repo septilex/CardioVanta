@@ -1,0 +1,63 @@
+{
+    "base_model": "Logistic Regression",
+    "cv_configuration": "StratifiedKFold(n_splits=5)",
+    "selection_rule": "Lowest mean Brier score with Log Loss stability check",
+    "temperature_scaling_evaluated": true,
+    "selected_method": "sigmoid",
+    "calibration_cv": 5,
+    "selection_reason": "Isotonic rejected. While it had a lower Brier score, its high Log Loss (0.65) is consistent with overfitting risk on this small calibration dataset.",
+    "results": [
+        {
+            "brier_mean": 0.12349735468300196,
+            "brier_std": 0.024659056905616945,
+            "log_loss_mean": 0.39588047087931144,
+            "log_loss_std": 0.0549387146710809,
+            "roc_auc_mean": 0.9026677026677028,
+            "roc_auc_std": 0.03686041876613154,
+            "avg_precision_mean": 0.9152133944157163,
+            "avg_precision_std": 0.029633724244265552,
+            "brier_min": 0.10000828772201571,
+            "brier_max": 0.1656873525829181,
+            "method": "uncalibrated"
+        },
+        {
+            "brier_mean": 0.12101994364600752,
+            "brier_std": 0.029306693977042192,
+            "log_loss_mean": 0.38595140669681727,
+            "log_loss_std": 0.06610613706215174,
+            "roc_auc_mean": 0.8981092981092982,
+            "roc_auc_std": 0.04486035890813393,
+            "avg_precision_mean": 0.9105592416997652,
+            "avg_precision_std": 0.03584221752058681,
+            "brier_min": 0.09077209220340754,
+            "brier_max": 0.17160702522803117,
+            "method": "sigmoid"
+        },
+        {
+            "brier_mean": 0.12003749508479597,
+            "brier_std": 0.030586829767649985,
+            "log_loss_mean": 0.6515848147830147,
+            "log_loss_std": 0.31249455699788165,
+            "roc_auc_mean": 0.9015734265734267,
+            "roc_auc_std": 0.039326288581350406,
+            "avg_precision_mean": 0.9048208754108791,
+            "avg_precision_std": 0.03748301875644354,
+            "brier_min": 0.08821444614842314,
+            "brier_max": 0.17354164162708216,
+            "method": "isotonic"
+        },
+        {
+            "brier_mean": 0.12175411470959559,
+            "brier_std": 0.03129420114999488,
+            "log_loss_mean": 0.3870771126474579,
+            "log_loss_std": 0.07142505823103155,
+            "roc_auc_mean": 0.8981092981092982,
+            "roc_auc_std": 0.04486035890813393,
+            "avg_precision_mean": 0.9108899526554761,
+            "avg_precision_std": 0.03609118994170456,
+            "brier_min": 0.08944700920433102,
+            "brier_max": 0.17538697351515173,
+            "method": "temperature"
+        }
+    ]
+}

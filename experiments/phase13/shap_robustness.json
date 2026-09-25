@@ -1,0 +1,89 @@
+{
+    "additivity": {
+        "samples_tested": 242,
+        "additivity_pass_rate": 1.0,
+        "raw_mapping_pass_rate": 1.0
+    },
+    "background_sensitivity": {
+        "global_importance": {
+            "thal": {
+                "all_dev": 0.5258281296791872,
+                "stratified_100": 0.5221030557897115,
+                "stratified_25": 0.5121742579812665
+            },
+            "cp": {
+                "all_dev": 0.4739864958669875,
+                "stratified_100": 0.4698866475993707,
+                "stratified_25": 0.46943080658789454
+            },
+            "ca": {
+                "all_dev": 0.38174739061229773,
+                "stratified_100": 0.3743401330252496,
+                "stratified_25": 0.371809943838144
+            },
+            "oldpeak": {
+                "all_dev": 0.3293397649320571,
+                "stratified_100": 0.3257700218737426,
+                "stratified_25": 0.32953120225695126
+            },
+            "thalach": {
+                "all_dev": 0.24058753406690303,
+                "stratified_100": 0.23730960280984176,
+                "stratified_25": 0.23736606160555604
+            },
+            "slope": {
+                "all_dev": 0.23727025606467786,
+                "stratified_100": 0.2371906411921812,
+                "stratified_25": 0.23810804496775864
+            },
+            "chol": {
+                "all_dev": 0.21972405610416448,
+                "stratified_100": 0.21843365466206308,
+                "stratified_25": 0.22053519240534716
+            },
+            "exang": {
+                "all_dev": 0.1981420100967056,
+                "stratified_100": 0.1939596873145817,
+                "stratified_25": 0.1911714721264995
+            },
+            "sex": {
+                "all_dev": 0.18830153116001017,
+                "stratified_100": 0.1851500410987551,
+                "stratified_25": 0.2009074914050329
+            },
+            "restecg": {
+                "all_dev": 0.12703086061834978,
+                "stratified_100": 0.12701886379554442,
+                "stratified_25": 0.12657129632142503
+            },
+            "trestbps": {
+                "all_dev": 0.08680180602926221,
+                "stratified_100": 0.08654404268544852,
+                "stratified_25": 0.08410199276615751
+            },
+            "age": {
+                "all_dev": 0.007548872968073764,
+                "stratified_100": 0.0076378981806345505,
+                "stratified_25": 0.007924572652425422
+            },
+            "fbs": {
+                "all_dev": 0.0039179355046475165,
+                "stratified_100": 0.003612960507119036,
+                "stratified_25": 0.004019593837156976
+            }
+        }
+    },
+    "performance": {
+        "runs": 5000,
+        "median_latency_ms": 0.004800000169780105,
+        "p95_latency_ms": 0.006300000677583739,
+        "max_latency_ms": 0.05509999937203247,
+        "total_time_sec": 0.024077177047729492,
+        "rss_memory_mb_before": 203.7890625,
+        "rss_memory_mb_after": 203.94140625,
+        "rss_memory_diff_mb": 0.15234375
+    },
+    "reproducibility": {
+        "exact_match_across_runs": true
+    }
+}

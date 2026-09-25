@@ -1,0 +1,113 @@
+{
+    "package_version": "1.0.0",
+    "model_version": "Phase5-Final",
+    "training_data_provenance": {
+        "source_dataset_name": "heart.csv",
+        "raw_dataset_sha256": "7c3014365675306819510a49ff289efbec1d1a6a666a2dc7652f1547b383d859",
+        "development_indices_sha256": "382f0f524cca62b2222338809d1acaa7f629f116ca804e42f0d225ee76e885e6",
+        "development_sample_count": 242,
+        "locked_test_sample_count_provenance_only": 61
+    },
+    "random_seed": 42,
+    "environment": {
+        "sklearn_version": "1.9.1"
+    },
+    "feature_schema_version": "1.0",
+    "model_configuration": {
+        "algorithm": "Logistic Regression",
+        "hyperparameters": {
+            "C": 0.1,
+            "class_weight": "balanced",
+            "solver": "lbfgs",
+            "random_state": 42
+        },
+        "preprocessing": "StandardScaler for continuous, OneHotEncoder(ignore) for categorical, passthrough for binary."
+    },
+    "calibration_configuration": {
+        "method": "sigmoid",
+        "cv": 5,
+        "duplicate_aware_grouping": true
+    },
+    "threshold_policy": {
+        "note": "A statistically selected threshold is NOT automatically a clinically validated decision threshold. Production inference must return calibrated probability. Applying a threshold is optional. Any threshold is a mathematical operating point, not a clinical diagnosis.",
+        "candidates": {
+            "default": 0.5,
+            "youden_j": 0.46,
+            "max_f1": 0.43
+        },
+        "authoritative_clinical_threshold": null
+    },
+    "explainability_context": {
+        "note": "Local explanations detail the underlying uncalibrated Logistic Regression decision function/log-odds. They do NOT decompose the final calibrated ensemble probability. Neither global nor local explanations imply clinical causality.",
+        "global_permutation_importance": {
+            "method": "Out-of-Fold Permutation Importance (ROC-AUC)",
+            "features": [
+                {
+                    "feature": "thal",
+                    "importance_mean": 0.046819476819476846,
+                    "importance_std": 0.02586802166649049
+                },
+                {
+                    "feature": "cp",
+                    "importance_mean": 0.03189847189847195,
+                    "importance_std": 0.012481940771087444
+                },
+                {
+                    "feature": "ca",
+                    "importance_mean": 0.021056721056721073,
+                    "importance_std": 0.01868626290721326
+                },
+                {
+                    "feature": "oldpeak",
+                    "importance_mean": 0.016881636881636894,
+                    "importance_std": 0.0015205234419701913
+                },
+                {
+                    "feature": "sex",
+                    "importance_mean": 0.013493913493913509,
+                    "importance_std": 0.01519503332259739
+                },
+                {
+                    "feature": "chol",
+                    "importance_mean": 0.008401968401968425,
+                    "importance_std": 0.00859588030510215
+                },
+                {
+                    "feature": "slope",
+                    "importance_mean": 0.002336182336182358,
+                    "importance_std": 0.009343592201233038
+                },
+                {
+                    "feature": "thalach",
+                    "importance_mean": 0.0021004921004921283,
+                    "importance_std": 0.007468026241061022
+                },
+                {
+                    "feature": "restecg",
+                    "importance_mean": 0.001390831390831395,
+                    "importance_std": 0.006492044922430268
+                },
+                {
+                    "feature": "age",
+                    "importance_mean": 0.0005568505568506056,
+                    "importance_std": 0.0006438644338076314
+                },
+                {
+                    "feature": "fbs",
+                    "importance_mean": -0.0005620305620305599,
+                    "importance_std": 0.0011384703956749756
+                },
+                {
+                    "feature": "exang",
+                    "importance_mean": -0.0007718207718207242,
+                    "importance_std": 0.01477144712990849
+                },
+                {
+                    "feature": "trestbps",
+                    "importance_mean": -0.0012742812742812678,
+                    "importance_std": 0.00684806970281921
+                }
+            ]
+        }
+    }
+}

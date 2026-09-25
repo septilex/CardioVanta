@@ -1,0 +1,55 @@
+{
+    "note": "A statistically selected threshold is NOT automatically a clinically validated decision threshold. These are descriptive mathematical operating points on the pooled development dataset. Do not call 0.41 or 0.45 a production threshold.",
+    "calibration_method": "sigmoid",
+    "calibration_cv": 5,
+    "candidates": {
+        "default": {
+            "threshold": 0.5,
+            "accuracy": 0.8347107438016529,
+            "precision": 0.8432835820895522,
+            "recall": 0.8560606060606061,
+            "specificity": 0.8090909090909091,
+            "f1": 0.849624060150376,
+            "tp": 113,
+            "tn": 89,
+            "fp": 21,
+            "fn": 19,
+            "fpr": 0.19090909090909092,
+            "fnr": 0.14393939393939395,
+            "balanced_accuracy": 0.8325757575757575,
+            "youden_j": 0.665151515151515
+        },
+        "youden_j": {
+            "threshold": 0.46,
+            "accuracy": 0.8512396694214877,
+            "precision": 0.8380281690140845,
+            "recall": 0.9015151515151515,
+            "specificity": 0.7909090909090909,
+            "f1": 0.8686131386861314,
+            "tp": 119,
+            "tn": 87,
+            "fp": 23,
+            "fn": 13,
+            "fpr": 0.20909090909090908,
+            "fnr": 0.09848484848484848,
+            "balanced_accuracy": 0.8462121212121212,
+            "youden_j": 0.6924242424242424
+        },
+        "max_f1": {
+            "threshold": 0.43,
+            "accuracy": 0.8471074380165289,
+            "precision": 0.8145695364238411,
+            "recall": 0.9318181818181818,
+            "specificity": 0.7454545454545455,
+            "f1": 0.8692579505300353,
+            "tp": 123,
+            "tn": 82,
+            "fp": 28,
+            "fn": 9,
+            "fpr": 0.2545454545454545,
+            "fnr": 0.06818181818181818,
+            "balanced_accuracy": 0.8386363636363636,
+            "youden_j": 0.6772727272727272
+        }
+    }
+}

@@ -1,0 +1,70 @@
+{
+    "method": "Out-of-Fold Permutation Importance (ROC-AUC)",
+    "features": [
+        {
+            "feature": "thal",
+            "importance_mean": 0.046819476819476846,
+            "importance_std": 0.02586802166649049
+        },
+        {
+            "feature": "cp",
+            "importance_mean": 0.03189847189847195,
+            "importance_std": 0.012481940771087444
+        },
+        {
+            "feature": "ca",
+            "importance_mean": 0.021056721056721073,
+            "importance_std": 0.01868626290721326
+        },
+        {
+            "feature": "oldpeak",
+            "importance_mean": 0.016881636881636894,
+            "importance_std": 0.0015205234419701913
+        },
+        {
+            "feature": "sex",
+            "importance_mean": 0.013493913493913509,
+            "importance_std": 0.01519503332259739
+        },
+        {
+            "feature": "chol",
+            "importance_mean": 0.008401968401968425,
+            "importance_std": 0.00859588030510215
+        },
+        {
+            "feature": "slope",
+            "importance_mean": 0.002336182336182358,
+            "importance_std": 0.009343592201233038
+        },
+        {
+            "feature": "thalach",
+            "importance_mean": 0.0021004921004921283,
+            "importance_std": 0.007468026241061022
+        },
+        {
+            "feature": "restecg",
+            "importance_mean": 0.001390831390831395,
+            "importance_std": 0.006492044922430268
+        },
+        {
+            "feature": "age",
+            "importance_mean": 0.0005568505568506056,
+            "importance_std": 0.0006438644338076314
+        },
+        {
+            "feature": "fbs",
+            "importance_mean": -0.0005620305620305599,
+            "importance_std": 0.0011384703956749756
+        },
+        {
+            "feature": "exang",
+            "importance_mean": -0.0007718207718207242,
+            "importance_std": 0.01477144712990849
+        },
+        {
+            "feature": "trestbps",
+            "importance_mean": -0.0012742812742812678,
+            "importance_std": 0.00684806970281921
+        }
+    ]
+}

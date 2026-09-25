@@ -1,0 +1,139 @@
+{
+    "method": "Base Logistic Regression Contribution (Option A)",
+    "note": "The contribution values explain the base uncalibrated Logistic Regression logit. They do not decompose the calibrated ensemble probability.",
+    "examples": [
+        {
+            "sample_index_in_dev": 0,
+            "true_label": 1,
+            "predicted_class": 1,
+            "base_logistic_regression_probability": 0.729631779385054,
+            "calibrated_final_probability": 0.7782351404707958,
+            "explanation_target": "Base Logistic Regression logit contribution",
+            "base_intercept": 0.3614649566593082,
+            "reconstructed_logit": 0.9927551851323697,
+            "actual_logit": 0.9927551851323697,
+            "top_positive_contributors": [
+                {
+                    "feature": "thal",
+                    "contribution": 0.5713488844541204,
+                    "direction": "positive"
+                },
+                {
+                    "feature": "slope",
+                    "contribution": 0.2560304121562286,
+                    "direction": "positive"
+                },
+                {
+                    "feature": "cp",
+                    "contribution": 0.1858933094448216,
+                    "direction": "positive"
+                }
+            ],
+            "top_negative_contributors": [
+                {
+                    "feature": "ca",
+                    "contribution": -0.24980614057962686,
+                    "direction": "negative"
+                },
+                {
+                    "feature": "oldpeak",
+                    "contribution": -0.24802394592862495,
+                    "direction": "negative"
+                },
+                {
+                    "feature": "trestbps",
+                    "contribution": -0.05173310310340884,
+                    "direction": "negative"
+                }
+            ],
+            "all_features_represented": true
+        },
+        {
+            "sample_index_in_dev": 50,
+            "true_label": 0,
+            "predicted_class": 0,
+            "base_logistic_regression_probability": 0.263996299206807,
+            "calibrated_final_probability": 0.24354285464453213,
+            "explanation_target": "Base Logistic Regression logit contribution",
+            "base_intercept": 0.3614649566593082,
+            "reconstructed_logit": -1.0253000620758288,
+            "actual_logit": -1.0253000620758288,
+            "top_positive_contributors": [
+                {
+                    "feature": "cp",
+                    "contribution": 0.3999108136598803,
+                    "direction": "positive"
+                },
+                {
+                    "feature": "restecg",
+                    "contribution": 0.1372065904740402,
+                    "direction": "positive"
+                },
+                {
+                    "feature": "trestbps",
+                    "contribution": 0.01064562609950562,
+                    "direction": "positive"
+                }
+            ],
+            "top_negative_contributors": [
+                {
+                    "feature": "thalach",
+                    "contribution": -0.7116022330425503,
+                    "direction": "negative"
+                },
+                {
+                    "feature": "thal",
+                    "contribution": -0.5451106904517985,
+                    "direction": "negative"
+                },
+                {
+                    "feature": "ca",
+                    "contribution": -0.2709050266005686,
+                    "direction": "negative"
+                }
+            ],
+            "all_features_represented": true
+        },
+        {
+            "sample_index_in_dev": 100,
+            "true_label": 1,
+            "predicted_class": 1,
+            "base_logistic_regression_probability": 0.8723763034056697,
+            "calibrated_final_probability": 0.9057154320685203,
+            "explanation_target": "Base Logistic Regression logit contribution",
+            "base_intercept": 0.3614649566593082,
+            "reconstructed_logit": 1.9221348077693061,
+            "actual_logit": 1.9221348077693061,
+            "top_positive_contributors": [
+                {
+                    "feature": "thal",
+                    "contribution": 0.5713488844541204,
+                    "direction": "positive"
+                },
+                {
+                    "feature": "ca",
+                    "contribution": 0.5548763195902331,
+                    "direction": "positive"
+                },
+                {
+                    "feature": "cp",
+                    "contribution": 0.3999108136598803,
+                    "direction": "positive"
+                }
+            ],
+            "top_negative_contributors": [
+                {
+                    "feature": "slope",
+                    "contribution": -0.2526313247622314,
+                    "direction": "negative"
+                },
+                {
+                    "feature": "oldpeak",
+                    "contribution": -0.179894780304644,
+                    "direction": "negative"
+                }
+            ],
+            "all_features_represented": true
+        }
+    ]
+}

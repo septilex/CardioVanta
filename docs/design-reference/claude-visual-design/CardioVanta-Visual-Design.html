@@ -1,0 +1,943 @@
+<!--
+This file is a visual design reference for CardioVanta and is intended for recreation in the production frontend.
+A complete, self-contained HTML artifact with all CSS and JavaScript embedded.
+Design: Premium cardiovascular health-tech assessment platform.
+Built with system fonts, inline SVG, and CSS variables for theming.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CardioVanta — Cardiovascular Assessment</title>
+<style>
+  /* ---------- CSS Variables: Color System ---------- */
+  :root{
+    --ink:#17120F;
+    --ink-soft:#332A24;
+    --paper:#FAF7F2;
+    --panel:#F2ECE3;
+    --panel-2:#EDE5D9;
+    --line:#E1D8C9;
+    --line-strong:#CBBEA9;
+    --red:#9E1B2E;
+    --red-deep:#5E1119;
+    --red-bright:#C22436;
+    --red-tint:#F3DEDD;
+    --muted:#75695C;
+    --muted-2:#9C9184;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html[data-theme="dark"]{
+      --ink:#F4EFE8;
+      --ink-soft:#D9CFC2;
+      --paper:#0E0C0A;
+      --panel:#171310;
+      --panel-2:#1D1815;
+      --line:#2B2521;
+      --line-strong:#3A322B;
+      --red:#D5495B;
+      --red-deep:#8C2230;
+      --red-bright:#E85F6F;
+      --red-tint:#2A1417;
+      --muted:#B4A99B;
+      --muted-2:#82796D;
+    }
+  }
+
+  /* ---------- Reset & Base Styles ---------- */
+  * { box-sizing: border-box; }
+  html {
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+    color-scheme: light;
+  }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  img, svg { max-width: 100%; display: block; }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  @media (max-width: 720px) {
+    .wrap { padding: 0 20px; }
+  }
+
+  /* ---------- Typography: System Fonts ---------- */
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  /* Serif display (using system serif fallback) */
+  .serif, h1, h2, h3, h4 {
+    font-family: Georgia, "Times New Roman", serif;
+  }
+
+  /* ---------- Top Navigation Bar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(23, 18, 15, 0.94);
+    backdrop-filter: saturate(140%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .topbar-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  @media (max-width: 720px) {
+    .topbar-inner { padding: 16px 20px; }
+  }
+
+  .brandmark {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brandmark svg {
+    width: 30px;
+    height: 30px;
+    flex: none;
+  }
+  .brandmark .word {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 20px;
+    letter-spacing: 0.01em;
+    color: #F6F1E9;
+    font-weight: 500;
+  }
+  .brandmark .word em {
+    font-style: normal;
+    color: var(--red-bright);
+  }
+
+  .tagline-tag {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: #B7ADA0;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    padding: 6px 11px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  /* ---------- Hero Section ---------- */
+  .hero {
+    background:
+      radial-gradient(ellipse 900px 420px at 82% -10%, rgba(158, 27, 46, 0.30), transparent 60%),
+      linear-gradient(180deg, #17120F 0%, #1B1512 100%);
+    color: #F6F1E9;
+    padding: 76px 0 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 56px;
+    align-items: end;
+    padding-bottom: 56px;
+  }
+  @media (max-width: 900px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+  }
+
+  .hero-eyebrow {
+    font-size: 13px;
+    color: var(--red-bright);
+    letter-spacing: 0.02em;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    margin: 0 0 18px;
+  }
+
+  h1.hero-head {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 500;
+    font-size: clamp(34px, 4.6vw, 58px);
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+    margin: 0 0 22px;
+    max-width: 14ch;
+  }
+
+  .hero-sub {
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: #C9BFB2;
+    max-width: 46ch;
+    margin: 0;
+  }
+
+  .hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    border-left: 1px solid rgba(255, 255, 255, 0.14);
+    padding-left: 28px;
+  }
+  @media (max-width: 900px) {
+    .hero-stats {
+      border-left: none;
+      padding-left: 0;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
+
+  .hero-stat .n {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 30px;
+    color: #F6F1E9;
+    font-weight: 500;
+  }
+  .hero-stat .l {
+    font-size: 12.5px;
+    color: #9C9184;
+    margin-top: 2px;
+  }
+
+  /* EKG horizon divider */
+  .ekg-band {
+    position: relative;
+    height: 96px;
+  }
+  .ekg-band svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .ekg-line {
+    fill: none;
+    stroke: var(--red-bright);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+    animation: draw 2.6s ease-out 0.2s forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ekg-line {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes draw {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* ---------- Body Layout ---------- */
+  .body-section {
+    padding: 64px 0 120px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .intro-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .intro-row h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 500;
+    font-size: 26px;
+    margin: 0 0 6px;
+  }
+  .intro-row p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14.5px;
+    max-width: 52ch;
+  }
+
+  .reset-link {
+    font-size: 13px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+  }
+  .reset-link:hover { color: var(--red); }
+  .reset-link:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+  /* ---------- Form Styling ---------- */
+  form { display: flex; flex-direction: column; }
+
+  .field-group {
+    border-top: 1px solid var(--line);
+    padding: 28px 0 8px;
+  }
+  .field-group:first-child { border-top: 1px solid var(--line-strong); }
+
+  .group-label {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--red);
+    margin-bottom: 22px;
+  }
+  .group-label .rule {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 32px;
+  }
+  @media (max-width: 560px) {
+    .field-row { grid-template-columns: 1fr; }
+  }
+
+  .field { position: relative; }
+
+  .field label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin-bottom: 9px;
+    font-weight: 500;
+  }
+  .field label .code {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--muted-2);
+    font-size: 12.5px;
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--line-strong);
+    background: transparent;
+    padding: 9px 2px 10px;
+    font-family: inherit;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+  }
+
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%2375695C' stroke-width='1.3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    padding-right: 20px;
+    cursor: pointer;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    outline: none;
+    border-bottom-color: var(--red);
+    background-color: rgba(158, 27, 46, 0.045);
+  }
+
+  .field input:focus-visible,
+  .field select:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+  }
+
+  .submit-row {
+    margin-top: 38px;
+    padding-top: 30px;
+    border-top: 1px solid var(--line-strong);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14.5px;
+    padding: 15px 30px;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: background-color 0.18s ease, transform 0.18s ease;
+  }
+  .btn-primary:hover { background: var(--red-deep); }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-primary:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+  .submit-hint {
+    font-size: 13px;
+    color: var(--muted-2);
+  }
+
+  /* ---------- Result Panel ---------- */
+  .panel {
+    position: sticky;
+    top: 96px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+  }
+
+  .panel-head {
+    padding: 26px 28px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .panel-head h3 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 16px;
+    margin: 0;
+    color: var(--red);
+  }
+  .panel-head .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted-2);
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .panel-head .dot.ready { background: #6E9B6B; }
+
+  .panel-status {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+  }
+
+  .panel-body {
+    padding: 30px 28px 34px;
+  }
+
+  .empty-state { text-align: left; }
+  .empty-state p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .empty-ekg {
+    width: 100%;
+    height: 52px;
+    margin-bottom: 22px;
+    opacity: 0.55;
+  }
+  .empty-ekg path {
+    fill: none;
+    stroke: var(--muted-2);
+    stroke-width: 1.4;
+  }
+
+  .gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .gauge-num {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 500;
+    font-size: 52px;
+    line-height: 1;
+    margin-top: 14px;
+  }
+  .gauge-num sup {
+    font-size: 20px;
+    font-weight: 400;
+  }
+
+  .gauge-band {
+    font-size: 12.5px;
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+    padding: 5px 12px;
+    border: 1px solid var(--line-strong);
+    display: inline-block;
+    color: var(--ink-soft);
+  }
+
+  .result-copy {
+    margin-top: 20px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--muted);
+    text-align: left;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+
+  .factors {
+    margin-top: 22px;
+    text-align: left;
+  }
+  .factors h4 {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--muted-2);
+    margin: 0 0 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .factor-row { margin-bottom: 12px; }
+  .factor-row .flabel {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+
+  .factor-track {
+    height: 5px;
+    background: var(--panel-2);
+    position: relative;
+  }
+  .factor-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+  }
+  .factor-fill.up { background: var(--red); left: 50%; }
+  .factor-fill.down { background: var(--muted-2); right: 50%; }
+
+  .factor-track::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -3px;
+    bottom: -3px;
+    width: 1px;
+    background: var(--line-strong);
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 34px 0 48px;
+  }
+  footer p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--muted-2);
+    max-width: 64ch;
+  }
+  footer strong {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  /* ---------- Responsive adjustments ---------- */
+  @media (max-width: 980px) {
+    .panel {
+      position: static;
+      top: auto;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== TOP NAVIGATION ========== -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brandmark">
+      <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M16 27.5C8.5 22.6 3 17.6 3 11.9 3 7.6 6.3 4.5 10.3 4.5c2.3 0 4.5 1.1 5.7 3 1.2-1.9 3.4-3 5.7-3 4 0 7.3 3.1 7.3 7.4 0 5.7-5.5 10.7-13 15.6Z" fill="none" stroke="#D5495B" stroke-width="1.6"/>
+        <path d="M4 15h5l2.2-5 3 10 2.4-7 1.8 4H28" fill="none" stroke="#F6F1E9" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+      <span class="word">Cardio<em>Vanta</em></span>
+    </div>
+    <span class="tagline-tag">Cardiovascular Assessment</span>
+  </div>
+</div>
+
+<!-- ========== HERO SECTION ========== -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <p class="hero-eyebrow">Intelligent cardiovascular insight</p>
+        <h1 class="hero-head">Thirteen data points. One clearer picture of heart risk.</h1>
+        <p class="hero-sub">CardioVanta reads standard clinical intake values — vitals, exercise response, and diagnostic markers — and returns a modelled probability with the reasoning behind it, in the time it takes to fill out a form.</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="n">13</div><div class="l">Clinical input fields</div></div>
+        <div class="hero-stat"><div class="n">&lt;1s</div><div class="l">Model inference time</div></div>
+        <div class="hero-stat"><div class="n">4</div><div class="l">Grouped assessment domains</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ekg-band">
+    <svg viewBox="0 0 1200 96" preserveAspectRatio="none" aria-hidden="true">
+      <path class="ekg-line" d="M0,52 L140,52 L162,52 L176,20 L192,80 L208,10 L224,68 L240,52 L420,52 L442,52 L456,30 L472,74 L488,52 L668,52 L690,52 L704,18 L720,82 L736,8 L752,70 L768,52 L948,52 L970,52 L984,32 L1000,72 L1016,52 L1200,52" />
+    </svg>
+  </div>
+</section>
+
+<!-- ========== BODY SECTION ========== -->
+<section class="body-section">
+  <div class="wrap">
+    <div class="intro-row">
+      <div>
+        <h2>Patient intake</h2>
+        <p>Values below map directly to the model's feature set. Adjust any field and generate a new read.</p>
+      </div>
+      <button type="button" class="reset-link" id="resetBtn">Reset to defaults</button>
+    </div>
+
+    <div class="layout">
+      <form id="cvForm">
+
+        <!-- Patient Profile -->
+        <div class="field-group">
+          <div class="group-label">Patient profile<span class="rule"></span></div>
+          <div class="field-row">
+            <div class="field">
+              <label for="age">Age <span class="code">age</span></label>
+              <input type="number" id="age" value="45" min="1" max="110">
+            </div>
+            <div class="field">
+              <label for="sex">Sex <span class="code">sex</span></label>
+              <select id="sex">
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vitals & Laboratory -->
+        <div class="field-group">
+          <div class="group-label">Vitals &amp; laboratory<span class="rule"></span></div>
+          <div class="field-row">
+            <div class="field">
+              <label for="trestbps">Resting blood pressure <span class="code">trestbps</span></label>
+              <input type="number" id="trestbps" value="120">
+            </div>
+            <div class="field">
+              <label for="chol">Serum cholesterol, mg/dl <span class="code">chol</span></label>
+              <input type="number" id="chol" value="200">
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:28px;">
+            <div class="field">
+              <label for="fbs">Fasting blood sugar &gt; 120 mg/dl <span class="code">fbs</span></label>
+              <select id="fbs">
+                <option>False</option>
+                <option>True</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="restecg">Resting ECG result <span class="code">restecg</span></label>
+              <select id="restecg">
+                <option>Normal</option>
+                <option selected>ST-T Wave Abnormality</option>
+                <option>Left Ventricular Hypertrophy</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise Response -->
+        <div class="field-group">
+          <div class="group-label">Exercise response<span class="rule"></span></div>
+          <div class="field-row">
+            <div class="field">
+              <label for="thalach">Max heart rate achieved <span class="code">thalach</span></label>
+              <input type="number" id="thalach" value="150">
+            </div>
+            <div class="field">
+              <label for="exang">Exercise-induced angina <span class="code">exang</span></label>
+              <select id="exang">
+                <option>No</option>
+                <option>Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:28px;">
+            <div class="field">
+              <label for="oldpeak">ST depression, exercise <span class="code">oldpeak</span></label>
+              <input type="number" id="oldpeak" value="1" step="0.1">
+            </div>
+            <div class="field">
+              <label for="slope">Peak exercise ST slope <span class="code">slope</span></label>
+              <select id="slope">
+                <option>Upsloping</option>
+                <option selected>Flat</option>
+                <option>Downsloping</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Diagnostic Markers -->
+        <div class="field-group">
+          <div class="group-label">Diagnostic markers<span class="rule"></span></div>
+          <div class="field-row">
+            <div class="field">
+              <label for="cp">Chest pain type <span class="code">cp</span></label>
+              <select id="cp">
+                <option>Typical Angina</option>
+                <option>Atypical Angina</option>
+                <option>Non-Anginal Pain</option>
+                <option>Asymptomatic</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="ca">Major vessels, fluoroscopy <span class="code">ca</span></label>
+              <select id="ca">
+                <option>0</option><option>1</option><option>2</option><option>3</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:28px;">
+            <div class="field">
+              <label for="thal">Thalassemia <span class="code">thal</span></label>
+              <select id="thal">
+                <option>Normal</option>
+                <option>Fixed Defect</option>
+                <option>Reversible Defect</option>
+              </select>
+            </div>
+            <div class="field"></div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="submit-row">
+          <button type="submit" class="btn-primary">Generate Analysis</button>
+          <span class="submit-hint">Runs the demo model against the values above.</span>
+        </div>
+      </form>
+
+      <!-- Result Panel -->
+      <aside class="panel">
+        <div class="panel-head">
+          <h3>Model Output</h3>
+          <span class="panel-status"><span class="dot" id="statusDot"></span><span id="statusText">Awaiting input</span></span>
+        </div>
+        <div class="panel-body" id="panelBody">
+          <div class="empty-state" id="emptyState">
+            <svg class="empty-ekg" viewBox="0 0 400 52" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0,26 L120,26 L134,26 L146,10 L160,42 L172,4 L186,36 L198,26 L400,26"/>
+            </svg>
+            <p>Complete the intake and generate an analysis. CardioVanta will return a modelled probability, a risk band, and the leading contributing factors.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="wrap">
+    <p><strong>Disclaimer.</strong> CardioVanta is a demonstration of machine learning techniques for educational and evaluation purposes. It is not a medical device, nor is it intended for clinical diagnosis, treatment, or medical advice. Always consult a qualified healthcare professional.</p>
+  </div>
+</footer>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const form = $('cvForm');
+  const panelBody = $('panelBody');
+  const emptyState = $('emptyState');
+  const statusDot = $('statusDot');
+  const statusText = $('statusText');
+
+  // Default form values
+  const defaults = {
+    age: 45,
+    sex: 'Male',
+    trestbps: 120,
+    chol: 200,
+    fbs: 'False',
+    restecg: 'ST-T Wave Abnormality',
+    thalach: 150,
+    exang: 'No',
+    oldpeak: 1,
+    slope: 'Flat',
+    cp: 'Typical Angina',
+    ca: '0',
+    thal: 'Normal'
+  };
+
+  // Set form to default values
+  function setDefaults() {
+    Object.keys(defaults).forEach(k => {
+      const el = $(k);
+      if (el) el.value = defaults[k];
+    });
+  }
+
+  // Lightweight illustrative scoring heuristic
+  function scoreAndExplain(v) {
+    let score = 0;
+    const factors = [];
+
+    function push(label, weight) {
+      if (weight !== 0) factors.push({ label, weight });
+      score += weight;
+    }
+
+    // Scoring logic
+    push('Age ' + v.age, (v.age - 50) * 0.9);
+    push('Chest pain: ' + v.cp, v.cp === 'Asymptomatic' ? 14 : v.cp === 'Typical Angina' ? -6 : v.cp === 'Non-Anginal Pain' ? -3 : 4);
+    push('Resting BP ' + v.trestbps, (v.trestbps - 120) * 0.28);
+    push('Cholesterol ' + v.chol, (v.chol - 200) * 0.06);
+    push('Fasting glucose elevated', v.fbs === 'True' ? 5 : 0);
+    push('Resting ECG: ' + v.restecg, v.restecg === 'Left Ventricular Hypertrophy' ? 10 : v.restecg === 'ST-T Wave Abnormality' ? 6 : -2);
+    push('Max heart rate ' + v.thalach, (150 - v.thalach) * 0.22);
+    push('Exercise-induced angina', v.exang === 'Yes' ? 14 : -4);
+    push('ST depression ' + v.oldpeak, v.oldpeak * 8);
+    push('ST slope: ' + v.slope, v.slope === 'Downsloping' ? 12 : v.slope === 'Flat' ? 5 : -6);
+    push('Vessels visible: ' + v.ca, parseInt(v.ca, 10) * 9);
+    push('Thalassemia: ' + v.thal, v.thal === 'Reversible Defect' ? 12 : v.thal === 'Fixed Defect' ? 8 : -4);
+    push('Sex: ' + v.sex, v.sex === 'Male' ? 4 : -2);
+
+    const prob = Math.max(2, Math.min(97, Math.round(50 + score)));
+    factors.sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight));
+    return { prob, factors: factors.slice(0, 6) };
+  }
+
+  // Risk band classification
+  function band(prob) {
+    if (prob < 30) return { label: 'Lower likelihood', tone: '#6E9B6B' };
+    if (prob < 60) return { label: 'Moderate likelihood', tone: '#B08A2E' };
+    return { label: 'Elevated likelihood', tone: 'var(--red)' };
+  }
+
+  // Read form values
+  function readValues() {
+    return {
+      age: parseFloat($('age').value) || 0,
+      sex: $('sex').value,
+      trestbps: parseFloat($('trestbps').value) || 0,
+      chol: parseFloat($('chol').value) || 0,
+      fbs: $('fbs').value,
+      restecg: $('restecg').value,
+      thalach: parseFloat($('thalach').value) || 0,
+      exang: $('exang').value,
+      oldpeak: parseFloat($('oldpeak').value) || 0,
+      slope: $('slope').value,
+      cp: $('cp').value,
+      ca: $('ca').value,
+      thal: $('thal').value
+    };
+  }
+
+  // Render result in panel
+  function render(result) {
+    const b = band(result.prob);
+    const maxW = Math.max(...result.factors.map(f => Math.abs(f.weight)), 1);
+
+    const factorsHtml = result.factors.map(f => {
+      const pct = Math.min(50, Math.round((Math.abs(f.weight) / maxW) * 46));
+      const cls = f.weight >= 0 ? 'up' : 'down';
+      const style = f.weight >= 0 ? `width:${pct}%` : `width:${pct}%`;
+      return `<div class="factor-row">
+        <div class="flabel"><span>${f.label}</span><span>${f.weight >= 0 ? '+' : ''}${Math.round(f.weight)}</span></div>
+        <div class="factor-track"><div class="factor-fill ${cls}" style="${style}"></div></div>
+      </div>`;
+    }).join('');
+
+    panelBody.innerHTML = `
+      <div class="gauge-wrap">
+        <div class="gauge-num">${result.prob}<sup>%</sup></div>
+        <div class="gauge-band" style="border-color:${b.tone};color:${b.tone}">${b.label.toUpperCase()}</div>
+        <div class="result-copy">Modelled probability of cardiovascular disease presence, based on the thirteen intake values. Highest-weighted factors below, ranked by influence on this read.</div>
+        <div class="factors">
+          <h4>Leading factors</h4>
+          ${factorsHtml}
+        </div>
+      </div>
+    `;
+    statusDot.classList.add('ready');
+    statusText.textContent = 'Analysis complete';
+  }
+
+  // Form submission
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const result = scoreAndExplain(readValues());
+    render(result);
+  });
+
+  // Reset button
+  $('resetBtn').addEventListener('click', function() {
+    setDefaults();
+    panelBody.innerHTML = '';
+    panelBody.appendChild(emptyState);
+    statusDot.classList.remove('ready');
+    statusText.textContent = 'Awaiting input';
+  });
+})();
+</script>
+
+</body>
+</html>

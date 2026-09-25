@@ -1,0 +1,42 @@
+# Node & Next.js
+node_modules/
+.next/
+tsconfig.tsbuildinfo
+
+# Python Virtual Environments
+venv/
+.venv/
+.venv*/
+testenv/
+
+# Python Caches & Build
+__pycache__/
+.pytest_cache/
+*.pyc
+*.py[cod]
+.ipynb_checkpoints/
+
+# Secrets & Local Configs
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Editor
+.vscode/
+
+# Temp, Logs, & Generated
+*.log
+*.zip
+catboost_info/
+Syne_extracted/
+
+# Stale / abandoned architecture
+frontend/
+render.yaml
+docker-compose.yml
+.dockerignore
+
+# Scratch / local-only scripts
+local_predict.py
+make_transparent.py
