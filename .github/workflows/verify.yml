@@ -1,0 +1,78 @@
+name: CI Verification
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+
+      - name: Install Backend Dependencies
+        run: |
+          pip install -r requirements.txt -r backend/requirements.txt -r api/requirements.txt
+          pip install pytest pip-audit
+
+      - name: Verify Artifact Integrity
+        run: |
+          # Verify expected ML artifact files exist without modifying them
+          test -f artifacts/model/model.joblib
+          test -f artifacts/model/explanation_model.joblib
+          test -f artifacts/model/feature_schema.json
+          test -f artifacts/model/metadata.json
+          test -f artifacts/model/reference_predictions.csv
+          test -f artifacts/model/shap_background.json
+
+      - name: Run Backend Pytest Suite
+        run: |
+          # Intrinsically validates backend, models, and drift logic
+          pytest tests/
+
+      - name: Run Security Audit (pip)
+        run: |
+          pip-audit -r requirements.txt -r backend/requirements.txt -r api/requirements.txt
+
+  verify-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+
+      - name: Install Frontend Dependencies
+        run: |
+          npm ci
+
+      - name: Run TypeScript Check
+        run: |
+          npx tsc --noEmit
+
+      - name: Run Jest Tests
+        run: |
+          npm run test -- --passWithNoTests
+
+      - name: Run Next.js Production Build
+        run: |
+          npm run build
+
+      - name: Run Security Audit (npm)
+        run: |
+          npm audit --audit-level=high

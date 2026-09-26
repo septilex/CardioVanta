@@ -1,0 +1,74 @@
+{
+  "project_identity": {
+    "purpose": "Clinical decision-support cardiovascular risk assessment via Logistic Regression.",
+    "architecture_drift": false,
+    "evidence": "DESIGN DECISION"
+  },
+  "data_foundation": {
+    "sha256": "7c3014365675306819510a49ff289efbec1d1a6a666a2dc7652f1547b383d859",
+    "development_samples": 242,
+    "locked_test_samples": 61,
+    "isolation_status": "Strictly maintained",
+    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  },
+  "ml_development": {
+    "model": "Logistic Regression",
+    "calibration": "sigmoid",
+    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  },
+  "advanced_research": {
+    "tabicl_xgboost": "Rejected for production (performance parity not worth complexity/VRAM overhead).",
+    "shap": "Implemented as mathematical equivalent to avoid 147MB bundle penalty.",
+    "evidence": "HISTORICAL FACT"
+  },
+  "backend": {
+    "framework": "FastAPI",
+    "canonical_prediction": 0.8061117606132114,
+    "security": "CORS enforced, Docs disabled.",
+    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  },
+  "frontend": {
+    "framework": "Next.js 16.3.5",
+    "features": "Assessment form, dual explanations, support boundary warnings.",
+    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  },
+  "phase_15a_monitoring": {
+    "status": "Complete",
+    "privacy": "Raw features excluded.",
+    "evidence": "VERIFIED BY SOURCE CODE"
+  },
+  "phase_15b_drift_detection": {
+    "status": "Complete",
+    "methodology": "Two-sample KS test (10,000 permutations)",
+    "policy": "Minimum N=50, D>=0.2 engineering threshold.",
+    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  },
+  "openspec": {
+    "active_changes": 0,
+    "sync_status": "Fully Synced",
+    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  },
+  "git_repository": {
+    "initial_commit": "4683cb2 Initial CardioVanta repository",
+    "clean_tree": true,
+    "remote": "https://github.com/septilex/CardioVanta.git",
+    "evidence": "VERIFIED BY SOURCE CODE"
+  },
+  "testing": {
+    "frontend_jest": "13/13 passed",
+    "backend_pytest": "Passed",
+    "audit_script": "Passed",
+    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  },
+  "limitations": {
+    "data_size": "Small sample size (303 total)",
+    "ground_truth": "No post-prediction clinical outcomes collected",
+    "feature_drift": "Blocked by privacy mandate on raw telemetry",
+    "evidence": "LIMITATION"
+  },
+  "next_phase_recommendation": {
+    "focus": "Automated CI/CD Deployment Pipeline",
+    "evidence": "INFERENCE"
+  },
+  "final_verdict": "CURRENT STATE: VERIFIED AND STABLE"
+}
