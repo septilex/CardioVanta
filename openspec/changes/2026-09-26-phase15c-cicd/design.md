@@ -10,7 +10,7 @@ CardioVanta consists of a monolithic repository where the root directory serves 
 - Guarantee backend inference, drift detection, and ML artifact integrity remain intact via automated `pytest` on PRs/main.
 - Guarantee frontend form logic, TypeScript compilation, and static build generation via automated Next.js tools.
 - Provide a clean separation between pre-merge verification (GH Actions) and deployment (Vercel).
-- Utilize standard Linux paths, reproducible environments (Node 20, Python 3.11), and dependency lockfiles.
+- Utilize standard Linux paths, reproducible environments (Node 24, Python 3.11), and dependency lockfiles.
 
 **Non-Goals:**
 - Do NOT introduce Docker, Kubernetes, or alternative CI platforms.
@@ -40,7 +40,7 @@ CardioVanta consists of a monolithic repository where the root directory serves 
 
 3. **Frontend Job Definition (`verify-frontend`)**:
    - Standardize to Linux runner in the repository root.
-   - Use `actions/setup-node@v4` targeting Node.js 20.
+   - Use `actions/setup-node@v4` targeting Node.js 24.
    - Cache dependencies using `cache: 'npm'`.
    - Commands:
      ```bash
