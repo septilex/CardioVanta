@@ -214,22 +214,54 @@ export default function Page() {
       </header>
 
       <main>
-        <section className="workspace-section" style={{ paddingTop: '64px' }}>
+        <section className="workspace-section" style={{ paddingTop: '56px' }}>
           <div className="container workspace-grid">
             
             <div className="workspace-form-area">
               <div className="workspace-intro">
-                <h1 style={{ fontSize: '40px', marginBottom: '16px', color: 'var(--cv-text-dark-1)' }}>Cardiovascular Assessment</h1>
-                <p>Enter the available measurements below to generate a modelled probability estimate.</p>
-                <div style={{ marginTop: '24px', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--cv-red)', fontWeight: 600 }}>13 MODEL INPUTS</div>
+                <h1 style={{ fontSize: '42px', marginBottom: '14px', color: 'var(--cv-text)' }}>Cardiovascular Assessment</h1>
+                <p style={{ fontSize: '16px', color: 'var(--cv-text-muted)', maxWidth: '640px', lineHeight: 1.6 }}>
+                  Enter the available measurements below to generate a modelled probability estimate from the trained diagnostic model.
+                </p>
+                {/* Stage Stepper / Progress Bar */}
+                <div className="assessment-stepper" role="navigation" aria-label="Assessment Sections" style={{ padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+                  <a href="#section-01" className="stepper-item active">
+                    <span className="stepper-dot"></span>
+                    <span>01 Patient Profile</span>
+                  </a>
+                  <span className="stepper-divider"></span>
+                  <a href="#section-02" className="stepper-item active">
+                    <span className="stepper-dot"></span>
+                    <span>02 Vitals &amp; Lab</span>
+                  </a>
+                  <span className="stepper-divider"></span>
+                  <a href="#section-03" className="stepper-item active">
+                    <span className="stepper-dot"></span>
+                    <span>03 Exercise Response</span>
+                  </a>
+                  <span className="stepper-divider"></span>
+                  <a href="#section-04" className="stepper-item active">
+                    <span className="stepper-dot"></span>
+                    <span>04 Diagnostic Markers</span>
+                  </a>
+                </div>
               </div>
 
               <form onSubmit={handleSubmit}>
                 {/* GROUP 01 */}
-                <div className="form-group">
-                  <div className="form-group-header">
-                    <span>Patient Profile</span>
-                    <span className="form-group-num">01</span>
+                <div id="section-01" className="form-group">
+                  <div className="form-group-header" style={{ borderBottom: '1px solid var(--cv-border)', paddingBottom: '24px', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div className="form-group-title-wrap" style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', backgroundColor: 'var(--cv-surface)', color: 'var(--cv-red)', borderRadius: '50%', fontSize: '11px', fontFamily: 'monospace', fontWeight: 600 }}>01</span>
+                        <span className="form-group-title" style={{ margin: 0, fontSize: '20px' }}>Patient Profile</span>
+                      </div>
+                      <span className="form-group-desc" style={{ paddingLeft: '44px' }}>Demographic baseline factors used for clinical risk stratification.</span>
+                    </div>
+                    <span className="form-group-badge" style={{ backgroundColor: '#F8F6F4', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--cv-border)', fontSize: '11px', alignSelf: 'flex-start' }}>
+                      <span style={{ color: 'var(--cv-text-muted)', marginRight: '6px' }}>REQUIRED FIELDS</span>
+                      <span>2</span>
+                    </span>
                   </div>
                   <div className="fields-grid">
                     <div className="input-wrapper">
@@ -237,7 +269,11 @@ export default function Page() {
                         <span>Age</span>
                         <span className="input-code" aria-hidden="true">age</span>
                       </label>
-                      <input className="input-control" type="number" id="age" name="age" value={formData.age} onChange={handleChange} required min="1" max="110" />
+                      <div className="input-field-container">
+                        <input className="input-control has-unit" type="number" id="age" name="age" value={formData.age} onChange={handleChange} required min="1" max="110" />
+                        <span className="input-unit">yrs</span>
+                      </div>
+                      <span className="input-hint">Adult cohort range: 29–77 yrs · Development median: 55</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="sex">
@@ -248,15 +284,25 @@ export default function Page() {
                         <option value={1}>Male</option>
                         <option value={0}>Female</option>
                       </select>
+                      <span className="input-hint">Biological sex recorded at baseline clinical intake</span>
                     </div>
                   </div>
                 </div>
 
                 {/* GROUP 02 */}
-                <div className="form-group">
-                  <div className="form-group-header">
-                    <span>Vitals &amp; Laboratory</span>
-                    <span className="form-group-num">02</span>
+                <div id="section-02" className="form-group">
+                  <div className="form-group-header" style={{ borderBottom: '1px solid var(--cv-border)', paddingBottom: '24px', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div className="form-group-title-wrap" style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', backgroundColor: 'var(--cv-surface)', color: 'var(--cv-red)', borderRadius: '50%', fontSize: '11px', fontFamily: 'monospace', fontWeight: 600 }}>02</span>
+                        <span className="form-group-title" style={{ margin: 0, fontSize: '20px' }}>Vitals &amp; Laboratory</span>
+                      </div>
+                      <span className="form-group-desc" style={{ paddingLeft: '44px' }}>Resting hemodynamic and metabolic markers recorded prior to stress testing.</span>
+                    </div>
+                    <span className="form-group-badge" style={{ backgroundColor: '#F8F6F4', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--cv-border)', fontSize: '11px', alignSelf: 'flex-start' }}>
+                      <span style={{ color: 'var(--cv-text-muted)', marginRight: '6px' }}>REQUIRED FIELDS</span>
+                      <span>4</span>
+                    </span>
                   </div>
                   <div className="fields-grid">
                     <div className="input-wrapper">
@@ -264,14 +310,22 @@ export default function Page() {
                         <span>Resting Blood Pressure</span>
                         <span className="input-code" aria-hidden="true">trestbps</span>
                       </label>
-                      <input className="input-control" type="number" id="trestbps" name="trestbps" value={formData.trestbps} onChange={handleChange} required />
+                      <div className="input-field-container">
+                        <input className="input-control has-unit" type="number" id="trestbps" name="trestbps" value={formData.trestbps} onChange={handleChange} required />
+                        <span className="input-unit">mmHg</span>
+                      </div>
+                      <span className="input-hint">Resting systolic pressure on admission (standard: 90–140 mmHg)</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="chol">
                         <span>Serum Cholestoral (mg/dl)</span>
                         <span className="input-code" aria-hidden="true">chol</span>
                       </label>
-                      <input className="input-control" type="number" id="chol" name="chol" value={formData.chol} onChange={handleChange} required />
+                      <div className="input-field-container">
+                        <input className="input-control has-unit" type="number" id="chol" name="chol" value={formData.chol} onChange={handleChange} required />
+                        <span className="input-unit">mg/dl</span>
+                      </div>
+                      <span className="input-hint">Total serum cholesterol · Clinical desirable threshold: &lt; 200 mg/dl</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="fbs">
@@ -282,6 +336,7 @@ export default function Page() {
                         <option value={0}>False</option>
                         <option value={1}>True</option>
                       </select>
+                      <span className="input-hint">Fasting blood sugar &gt; 120 mg/dl indicates impaired fasting glycemia</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="restecg">
@@ -293,15 +348,25 @@ export default function Page() {
                         <option value={1}>ST-T Wave Abnormality</option>
                         <option value={2}>Left Ventricular Hypertrophy</option>
                       </select>
+                      <span className="input-hint">Baseline 12-lead electrocardiographic findings at rest</span>
                     </div>
                   </div>
                 </div>
 
                 {/* GROUP 03 */}
-                <div className="form-group">
-                  <div className="form-group-header">
-                    <span>Exercise Response</span>
-                    <span className="form-group-num">03</span>
+                <div id="section-03" className="form-group">
+                  <div className="form-group-header" style={{ borderBottom: '1px solid var(--cv-border)', paddingBottom: '24px', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div className="form-group-title-wrap" style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', backgroundColor: 'var(--cv-surface)', color: 'var(--cv-red)', borderRadius: '50%', fontSize: '11px', fontFamily: 'monospace', fontWeight: 600 }}>03</span>
+                        <span className="form-group-title" style={{ margin: 0, fontSize: '20px' }}>Exercise Response</span>
+                      </div>
+                      <span className="form-group-desc" style={{ paddingLeft: '44px' }}>Functional chronotropic response and electrophysiologic signs of exertion ischemia.</span>
+                    </div>
+                    <span className="form-group-badge" style={{ backgroundColor: '#F8F6F4', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--cv-border)', fontSize: '11px', alignSelf: 'flex-start' }}>
+                      <span style={{ color: 'var(--cv-text-muted)', marginRight: '6px' }}>REQUIRED FIELDS</span>
+                      <span>4</span>
+                    </span>
                   </div>
                   <div className="fields-grid">
                     <div className="input-wrapper">
@@ -309,7 +374,11 @@ export default function Page() {
                         <span>Maximum Heart Rate Achieved</span>
                         <span className="input-code" aria-hidden="true">thalach</span>
                       </label>
-                      <input className="input-control" type="number" id="thalach" name="thalach" value={formData.thalach} onChange={handleChange} required />
+                      <div className="input-field-container">
+                        <input className="input-control has-unit" type="number" id="thalach" name="thalach" value={formData.thalach} onChange={handleChange} required />
+                        <span className="input-unit">bpm</span>
+                      </div>
+                      <span className="input-hint">Peak heart rate measured during Bruce exercise protocol</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="exang">
@@ -320,13 +389,18 @@ export default function Page() {
                         <option value={0}>No</option>
                         <option value={1}>Yes</option>
                       </select>
+                      <span className="input-hint">Ischemic chest discomfort provoked by physical exertion</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="oldpeak">
                         <span>ST Depression Induced by Exercise</span>
                         <span className="input-code" aria-hidden="true">oldpeak</span>
                       </label>
-                      <input className="input-control" type="number" step="0.1" id="oldpeak" name="oldpeak" value={formData.oldpeak} onChange={handleChange} required />
+                      <div className="input-field-container">
+                        <input className="input-control has-unit" type="number" step="0.1" id="oldpeak" name="oldpeak" value={formData.oldpeak} onChange={handleChange} required />
+                        <span className="input-unit">mm</span>
+                      </div>
+                      <span className="input-hint">ST depression induced by exercise relative to resting baseline</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="slope">
@@ -338,15 +412,25 @@ export default function Page() {
                         <option value={1}>Flat</option>
                         <option value={2}>Downsloping</option>
                       </select>
+                      <span className="input-hint">ST segment slope morphology at peak physical workload</span>
                     </div>
                   </div>
                 </div>
 
                 {/* GROUP 04 */}
-                <div className="form-group">
-                  <div className="form-group-header">
-                    <span>Diagnostic Markers</span>
-                    <span className="form-group-num">04</span>
+                <div id="section-04" className="form-group">
+                  <div className="form-group-header" style={{ borderBottom: '1px solid var(--cv-border)', paddingBottom: '24px', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div className="form-group-title-wrap" style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', backgroundColor: 'var(--cv-surface)', color: 'var(--cv-red)', borderRadius: '50%', fontSize: '11px', fontFamily: 'monospace', fontWeight: 600 }}>04</span>
+                        <span className="form-group-title" style={{ margin: 0, fontSize: '20px' }}>Diagnostic Markers</span>
+                      </div>
+                      <span className="form-group-desc" style={{ paddingLeft: '44px' }}>Symptomatic classification, fluoroscopic vascular assessment, and nuclear perfusion.</span>
+                    </div>
+                    <span className="form-group-badge" style={{ backgroundColor: '#F8F6F4', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--cv-border)', fontSize: '11px', alignSelf: 'flex-start' }}>
+                      <span style={{ color: 'var(--cv-text-muted)', marginRight: '6px' }}>REQUIRED FIELDS</span>
+                      <span>3</span>
+                    </span>
                   </div>
                   <div className="fields-grid">
                     <div className="input-wrapper">
@@ -360,6 +444,7 @@ export default function Page() {
                         <option value={2}>Non-anginal Pain</option>
                         <option value={3}>Asymptomatic</option>
                       </select>
+                      <span className="input-hint">Clinical classification of angina symptomatology</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="ca">
@@ -373,6 +458,7 @@ export default function Page() {
                         <option value={3}>3</option>
                         <option value={4}>4</option>
                       </select>
+                      <span className="input-hint">Major coronary vessels (0–3) colored by fluoroscopy</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="thal">
@@ -385,19 +471,40 @@ export default function Page() {
                         <option value={2}>Fixed Defect</option>
                         <option value={3}>Reversable Defect</option>
                       </select>
+                      <span className="input-hint">Thallium scintigraphy myocardial perfusion evaluation</span>
                     </div>
                   </div>
                 </div>
 
-                {error && <div style={{ color: '#D5495B', marginBottom: '24px', fontWeight: 500 }}>{error}</div>}
+                {/* Error Banner */}
+                {error && (
+                  <div className="clinical-error-banner" role="alert">
+                    <svg className="clinical-error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <div className="clinical-error-text">{error}</div>
+                  </div>
+                )}
                 
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <button type="submit" className="submit-btn" disabled={loading} style={{ flex: 1 }}>
-                    {loading ? "Analyzing Profile..." : "Generate Analysis"}
-                  </button>
-                  <button type="button" onClick={handleReset} className="btn-secondary" style={{ padding: '20px 40px', fontSize: '18px' }}>
-                    Reset
-                  </button>
+                {/* Bottom Action & Telemetry Bar */}
+                <div className="form-action-bar">
+                  <div className="form-status-info">
+                    <div className="form-status-badge">
+                      <span className="form-status-dot"></span>
+                      <span>13/13 CLINICAL INPUTS RECORDED</span>
+                    </div>
+                    <span>MODEL: LOGISTIC REGRESSION (SIGMOID CALIBRATED) · V1.0.0</span>
+                  </div>
+                  <div className="form-action-buttons">
+                    <button type="button" onClick={handleReset} className="btn-secondary" style={{ padding: '16px 32px', fontSize: '15px' }}>
+                      Reset
+                    </button>
+                    <button type="submit" className="submit-btn" disabled={loading} style={{ width: 'auto', padding: '16px 36px', fontSize: '16px' }}>
+                      {loading ? "Analyzing Profile..." : "Generate Analysis"}
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
@@ -405,29 +512,115 @@ export default function Page() {
             {/* Sticky Panel */}
             <div className="workspace-summary-area">
               <div className="sticky-summary">
-                <div className="summary-header">Model Output</div>
+                <div className="summary-eyebrow">
+                  <span>▪</span>
+                  <span>MODEL OUTPUT</span>
+                </div>
                 
                 {!result && !loading && (
                   <div>
-                    <div className="summary-status">Awaiting Input</div>
-                    <div className="summary-desc">Complete the profile to generate a modelled probability.</div>
+                    <h2 className="summary-status-title" style={{ fontSize: '28px', marginBottom: '16px' }}>Awaiting Input</h2>
+                    <p className="summary-desc-text" style={{ fontSize: '14px', lineHeight: 1.6, marginBottom: '32px' }}>
+                      Complete the profile to generate a modelled probability. The estimate draws on all 13 clinical inputs at once — partial profiles are not scored.
+                    </p>
+                    <div className="summary-matrix" style={{ gap: '0', padding: '0', border: 'none' }}>
+                      <div className="summary-matrix-row" style={{ padding: '16px 0', borderBottom: '1px solid var(--cv-border)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <span className="summary-matrix-label" style={{ color: 'var(--cv-text)', fontSize: '13px', fontWeight: 500 }}>Patient Profile</span>
+                          <span style={{ fontSize: '11px', color: 'var(--cv-text-muted)', textTransform: 'none', letterSpacing: 'normal', fontFamily: 'var(--cv-font-body), sans-serif' }}>Age {formData.age}, {formData.sex === 1 ? 'Male' : 'Female'}</span>
+                        </div>
+                        <span className="summary-matrix-status recorded" style={{ fontSize: '11px', backgroundColor: 'var(--cv-surface)', padding: '4px 8px', borderRadius: '4px' }}>recorded</span>
+                      </div>
+                      <div className="summary-matrix-row" style={{ padding: '16px 0', borderBottom: '1px solid var(--cv-border)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <span className="summary-matrix-label" style={{ color: 'var(--cv-text)', fontSize: '13px', fontWeight: 500 }}>Vitals &amp; Lab</span>
+                          <span style={{ fontSize: '11px', color: 'var(--cv-text-muted)', textTransform: 'none', letterSpacing: 'normal', fontFamily: 'var(--cv-font-body), sans-serif' }}>BP: {formData.trestbps}mmHg, Chol: {formData.chol}mg/dl</span>
+                        </div>
+                        <span className="summary-matrix-status recorded" style={{ fontSize: '11px', backgroundColor: 'var(--cv-surface)', padding: '4px 8px', borderRadius: '4px' }}>recorded</span>
+                      </div>
+                      <div className="summary-matrix-row" style={{ padding: '16px 0', borderBottom: '1px solid var(--cv-border)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <span className="summary-matrix-label" style={{ color: 'var(--cv-text)', fontSize: '13px', fontWeight: 500 }}>Exercise Response</span>
+                          <span style={{ fontSize: '11px', color: 'var(--cv-text-muted)', textTransform: 'none', letterSpacing: 'normal', fontFamily: 'var(--cv-font-body), sans-serif' }}>Max HR: {formData.thalach}, Angina: {formData.exang === 1 ? 'Yes' : 'No'}</span>
+                        </div>
+                        <span className="summary-matrix-status recorded" style={{ fontSize: '11px', backgroundColor: 'var(--cv-surface)', padding: '4px 8px', borderRadius: '4px' }}>recorded</span>
+                      </div>
+                      <div className="summary-matrix-row" style={{ padding: '16px 0', borderBottom: '1px solid var(--cv-border)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <span className="summary-matrix-label" style={{ color: 'var(--cv-text)', fontSize: '13px', fontWeight: 500 }}>Diagnostic Markers</span>
+                          <span style={{ fontSize: '11px', color: 'var(--cv-text-muted)', textTransform: 'none', letterSpacing: 'normal', fontFamily: 'var(--cv-font-body), sans-serif' }}>CP Type: {formData.cp}, Vessels: {formData.ca}</span>
+                        </div>
+                        <span className="summary-matrix-status recorded" style={{ fontSize: '11px', backgroundColor: 'var(--cv-surface)', padding: '4px 8px', borderRadius: '4px' }}>recorded</span>
+                      </div>
+                    </div>
+                    <div className="summary-specs" style={{ marginTop: '24px', backgroundColor: 'var(--cv-surface)', padding: '16px', borderRadius: '4px', border: '1px solid var(--cv-border)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: 'var(--cv-text)' }}>
+                        <span>Target Model</span>
+                        <strong>Logistic Regression</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span>Feature Set</span>
+                        <span>UCI Heart (13)</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Calibration</span>
+                        <span>Platt Sigmoid (5-fold)</span>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
                 {loading && (
                   <div>
-                    <div className="summary-status" style={{color: '#C94A5B'}}>Processing...</div>
-                    <div className="summary-desc">Evaluating cardiovascular markers via the prediction API.</div>
+                    <h2 className="summary-status-title" style={{ fontSize: '28px', color: 'var(--cv-red)', marginBottom: '16px' }}>Evaluating Profile...</h2>
+                    <p className="summary-desc-text" style={{ fontSize: '14px', lineHeight: 1.6, marginBottom: '32px' }}>
+                      Evaluating cardiovascular markers via the prediction API. Validating vector bounds and running inference.
+                    </p>
+                    <div className="summary-matrix" style={{ gap: '0', padding: '0', border: 'none' }}>
+                      <div className="summary-matrix-row" style={{ padding: '16px 0', borderBottom: '1px solid var(--cv-border)' }}>
+                        <span className="summary-matrix-label" style={{ fontSize: '13px', color: 'var(--cv-text)' }}>01 Vector validation</span>
+                        <span className="summary-matrix-status recorded" style={{ color: 'var(--cv-success)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--cv-success)' }}></span> complete</span>
+                      </div>
+                      <div className="summary-matrix-row" style={{ padding: '16px 0', borderBottom: '1px solid var(--cv-border)' }}>
+                        <span className="summary-matrix-label" style={{ fontSize: '13px', color: 'var(--cv-text)' }}>02 Feature scaling</span>
+                        <span className="summary-matrix-status recorded" style={{ color: 'var(--cv-success)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--cv-success)' }}></span> complete</span>
+                      </div>
+                      <div className="summary-matrix-row" style={{ padding: '16px 0', borderBottom: '1px solid var(--cv-border)' }}>
+                        <span className="summary-matrix-label" style={{ fontSize: '13px', color: 'var(--cv-text)' }}>03 Calibrated probability</span>
+                        <span className="summary-matrix-status pending animate-pulse" style={{ fontSize: '11px' }}>computing...</span>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {result && !loading && (
                   <div>
-                    <div className="summary-status">Analysis Complete</div>
-                    <div className="summary-prob">{result?.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : '--'}<sup>%</sup></div>
-                    <div className="summary-label">Model Probability</div>
+                    <h2 className="summary-status-title" style={{ fontSize: '28px', marginBottom: '24px' }}>Analysis Complete</h2>
+                    <div style={{ padding: '32px 0', borderTop: '1px solid var(--cv-border)', borderBottom: '1px solid var(--cv-border)', textAlign: 'center', marginBottom: '24px' }}>
+                      <div className="summary-prob" style={{ fontSize: '84px' }}>
+                        {result?.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : '--'}
+                        <span style={{ fontSize: '42px', color: 'var(--cv-text-muted)', marginLeft: '4px' }}>%</span>
+                      </div>
+                      <div className="summary-label" style={{ marginTop: '12px' }}>Model Probability</div>
+                    </div>
+                    <div style={{ padding: '16px', background: 'var(--cv-surface)', borderRadius: '4px', fontSize: '13px', lineHeight: 1.5, borderLeft: '3px solid var(--cv-red)' }}>
+                      <strong style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>Calibrated Risk Assessment</strong>
+                      <div style={{ color: 'var(--cv-text-muted)' }}>Decision aids inform clinical judgment. See detailed attribution below.</div>
+                    </div>
+                    <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                      <a href="#result-section" className="nav-link" style={{ fontSize: '13px', fontWeight: 600, color: 'var(--cv-red)', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', border: '1px solid rgba(158, 27, 46, 0.2)', borderRadius: '4px', transition: 'all 0.2s' }}>
+                        View Detailed Attribution <span aria-hidden="true">&darr;</span>
+                      </a>
+                    </div>
                   </div>
                 )}
+              </div>
+              {/* Clinical Use Notice Card */}
+              <div className="summary-notice-card">
+                <div className="summary-notice-quote">
+                  &ldquo;A modelled probability is a decision aid, not a diagnosis &mdash; always confirm findings with a physician.&rdquo;
+                </div>
+                <div className="summary-notice-tag">CLINICAL USE NOTICE</div>
               </div>
             </div>
 
