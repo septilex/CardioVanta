@@ -22,7 +22,7 @@
     "isolation_status": "Strictly maintained dev/test split, locked test set",
     "preprocessing": "StandardScaler applied via pipeline",
     "model": "Logistic Regression with Sigmoid calibration",
-    "advanced_models": "TabICL rejected for production due to complexity",
+    "advanced_models": "TabICLv2 did not show a statistically meaningful advantage over the production Logistic Regression and remains research-only given the dataset/experimental constraints",
     "shap_equivalent": "Implemented as mathematical equivalent",
     "limitations": "Small sample size, no post-prediction clinical outcomes collected"
   },
@@ -75,8 +75,8 @@
     "real_engineering_blockers": "None.",
     "unverified_external_behavior": "None.",
     "implementation_defects": "None.",
-    "research_limitations": "Small dataset, privacy mandate blocks telemetry."
+    "research_limitations": "Small dataset, telemetry privacy constraints (raw clinical feature inputs are excluded from telemetry, while sensitive prediction-output telemetry remains subject to retention/access controls)."
   },
   "final_verdict": "CURRENT STATE: COMPLETED",
-  "next_action": "None"
+  "next_action": "The explicitly planned CardioVanta roadmap through Phase 15D is complete and externally verified."
 }

@@ -16,8 +16,8 @@
 
 ## 2. Complete Phase History
 - **Phase 1 to 14A:** Implemented, locally verified, externally verified, archived.
-- **Phase 15A:** Implemented, archived. Privacy constraints applied.
-- **Phase 15B:** Implemented, archived. Drift detection applied.
+- **Phase 15A:** Implemented, archived. Privacy constraints applied: raw clinical feature inputs are excluded from telemetry, while sensitive prediction-output telemetry remains subject to retention/access controls.
+- **Phase 15B:** Implemented, archived. Drift detection applied: two-sample KS statistic with Monte Carlo permutation testing, plus support-boundary checks.
 - **Phase 15C:** Implemented, archived. CI pipeline implemented.
 - **Phase 15D:** Implemented, externally verified, archived. The GitHub Actions CI run (Run ID 36525785155) succeeded.
 
@@ -25,7 +25,7 @@
 - **Raw Dataset:** UCI Heart Disease (small sample size).
 - **Split:** Strictly maintained dev/test split, locked test set.
 - **Model:** Logistic Regression with Sigmoid calibration.
-- **Advanced Models:** TabICL rejected for production.
+- **Advanced Models:** TabICLv2 did not show a statistically meaningful advantage over the production Logistic Regression and remains research-only given the dataset/experimental constraints.
 - **Explainability:** SHAP-equivalent explanation implemented as mathematical equivalent to avoid bundle penalty.
 - **Limitations:** Small sample size, no post-prediction clinical outcomes collected.
 
@@ -90,10 +90,10 @@ Artifacts are actually unchanged and the previous audit simply mapped hashes to 
 - **A. Real Engineering Blockers:** None.
 - **B. Unverified External Behavior:** None.
 - **C. Implementation Defects:** None.
-- **E. Research Limitations:** Small dataset, telemetry privacy constraints.
+- **E. Research Limitations:** Small dataset, telemetry privacy constraints (raw clinical feature inputs are excluded from telemetry, while sensitive prediction-output telemetry remains subject to retention/access controls).
 
 ## 16. Final Verdict
 CURRENT STATE: COMPLETED
 
 ## 17. Next Action
-- **Immediate Next Action:** None.
+- **Immediate Next Action:** The explicitly planned CardioVanta roadmap through Phase 15D is complete and externally verified.
