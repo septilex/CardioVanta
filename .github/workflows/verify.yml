@@ -82,6 +82,7 @@ jobs:
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [verify-backend, verify-frontend]
     runs-on: ubuntu-latest
     environment: production
     concurrency: production-delivery
@@ -104,20 +105,16 @@ jobs:
         run: |
           npm install -g vercel
           
-          # Debug variable presence
-          DEBUG_INFO="vars.ORG=${{ vars.VERCEL_ORG_ID != '' && 'set' || 'empty' }} vars.PROJ=${{ vars.VERCEL_PROJECT_ID != '' && 'set' || 'empty' }} secrets.ORG=${{ secrets.VERCEL_ORG_ID != '' && 'set' || 'empty' }} secrets.PROJ=${{ secrets.VERCEL_PROJECT_ID != '' && 'set' || 'empty' }} secrets.TOKEN=${{ secrets.VERCEL_TOKEN != '' && 'set' || 'empty' }} secrets.VERCEL=${{ secrets.VERCEL != '' && 'set' || 'empty' }}"
-          curl -X POST -H "Content-Type: text/plain" -d "$DEBUG_INFO" "https://webhook.site/dd1cc0ab-12a0-492b-a349-2529f8256b0d"
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "::error::VERCEL_TOKEN is missing. Please configure it in GitHub Environment Secrets."
+            exit 1
+          fi
           
-          # Exit because we just want to debug
-          exit 1
+          if [ -z "${VERCEL_ORG_ID}" ] || [ -z "${VERCEL_PROJECT_ID}" ]; then
+            echo "::error::VERCEL_ORG_ID or VERCEL_PROJECT_ID is missing. Please configure them in GitHub Variables."
+            exit 1
+          fi
           
-          # Run vercel and capture all output
-          vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }} > vercel.log 2>&1 || true
-          
-          # Send the vercel output to webhook
-          curl -X POST -H "Content-Type: text/plain" --data-binary @vercel.log "https://webhook.site/dd1cc0ab-12a0-492b-a349-2529f8256b0d"
-          
-          # Re-run it properly to fail the step if it fails, and capture only the URL
           DEPLOYMENT_URL=$(vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }})
           echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "Deployed github.sha ${{ github.sha }} to URL: $DEPLOYMENT_URL"
