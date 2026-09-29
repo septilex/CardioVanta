@@ -64,6 +64,7 @@ a {
 
 /* Buttons */
 .btn-primary {
+  font-family: var(--cv-font-body), sans-serif;
   background-color: var(--cv-red);
   color: var(--cv-white);
   padding: 16px 36px;
@@ -81,6 +82,7 @@ a {
   transform: translateY(-1px);
 }
 .btn-secondary {
+  font-family: var(--cv-font-body), sans-serif;
   background-color: transparent;
   color: var(--cv-text);
   border: 1px solid var(--cv-text);
@@ -183,6 +185,7 @@ a {
   align-items: center;
 }
 .btn-hero-sec {
+  font-family: var(--cv-font-body), sans-serif;
   color: var(--cv-white);
   border: 1px solid var(--cv-white);
   padding: 16px 36px;
