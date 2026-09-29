@@ -2,9 +2,10 @@ import time
 import requests
 import json
 import urllib3
+import os
 urllib3.disable_warnings()
 
-BASE_URL = "https://cardio-vanta-prod.vercel.app"
+BASE_URL = os.environ.get("CARDIO_VANTA_AUDIT_URL", "https://cardio-vanta-prod.vercel.app").rstrip("/")
 canonical_payload = {"age": 60.0,"sex": 1,"cp": 2,"trestbps": 130.0,"chol": 250.0,"fbs": 0,"restecg": 1,"thalach": 150.0,"exang": 0,"oldpeak": 1.5,"slope": 1,"ca": 0,"thal": 2}
 
 def print_header(title):

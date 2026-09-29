@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   verify-backend:
     runs-on: ubuntu-latest
@@ -76,3 +79,60 @@ jobs:
       - name: Run Security Audit (npm)
         run: |
           npm audit --audit-level=high
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [verify-backend, verify-frontend]
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency: production-delivery
+    outputs:
+      DEPLOYMENT_URL: ${{ steps.deploy_step.outputs.deployment_url }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Deploy to Vercel
+        id: deploy_step
+        env:
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+        run: |
+          # Vercel CLI outputs the deployment URL to stdout
+          DEPLOYMENT_URL=$(npx vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }})
+          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Deployed github.sha ${{ github.sha }} to URL: $DEPLOYMENT_URL"
+
+  verify-production:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+
+      - name: Install Minimal Dependencies
+        run: |
+          pip install requests urllib3
+
+      - name: Test Unique Deployment URL
+        env:
+          CARDIO_VANTA_AUDIT_URL: ${{ needs.deploy.outputs.DEPLOYMENT_URL }}
+        run: |
+          echo "Testing Deployment URL: $CARDIO_VANTA_AUDIT_URL"
+          python audit_tests.py
+
+      - name: Test Production Alias
+        run: |
+          echo "Testing Production Alias"
+          python audit_tests.py

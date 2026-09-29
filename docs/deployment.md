@@ -12,12 +12,15 @@ CardioVanta uses GitHub Actions for automated, secretless CI verification before
 - **PR & Main Verification:** Every pull request to `main` and push to `main` runs automated Linux (Ubuntu) workflows (`.github/workflows/verify.yml`). This parallelizes Python backend checks (`pytest`, artifact integrity, `pip-audit`) and Node frontend checks (`npm ci`, `tsc`, `jest`, `next build`, `npm audit`).
 - **Immutable Artifacts:** The CI workflow executes inference and offline validation solely using the pre-generated artifacts. It never retrains or updates ML models.
 
-## Deployment Strategy
-- **Vercel Deployment Boundary:** Vercel automatically deploys the Next.js and serverless FastAPI application upon a successful merge to `main`. Deployments are not triggered or executed by GitHub Actions.
-- **Live Production Smoke Testing:** The `audit_tests.py` script tests the live production environment (`https://cardio-vanta-prod.vercel.app`). It is strictly isolated from automated PR verification to prevent false negatives caused by testing existing production against unmerged PR code. It serves as a manual or post-deployment verification boundary.
+## Continuous Delivery (CD) & Smoke Testing
+- **Automatic Production Delivery:** Upon a successful push/merge to `main`, and only after CI verification passes, the workflow automatically deploys to Vercel using the `deploy` job. This requires the `VERCEL_TOKEN` GitHub Environment Secret (bound to `production`), alongside `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` repository variables.
+- **Deployment Provenance:** The deploy job explicitly maps the triggering `github.sha` to the newly provisioned Vercel deployment URL, outputting this association to the workflow logs.
+- **Post-Deployment Smoke Tests:** Immediately following deployment, the `verify-production` job runs `audit_tests.py`. It first targets the unique deployment URL to verify the application code, and then targets the production alias (`https://cardio-vanta-prod.vercel.app`) to ensure proper Vercel routing.
+- **Failure Handling:** There are no automatic rollbacks. If deployment fails, existing production is untouched. If deployment succeeds but the URL smoke fails, manual recovery (`vercel rollback`) is required. If the URL passes but the alias is stale, manual Dashboard intervention is required.
+- **Manual Fallback:** If GitHub Actions CD is unavailable, administrators can manually run `npx vercel --prod` locally.
 
 ## Security & Configuration
 - **CORS:** Highly restricted. The API strictly limits origins and disallows credentials.
-- **Credentials:** No secrets, keys, or credentials exist in the source or artifacts, nor are they used in the CI workflows.
+- **Credentials:** No secrets exist in the source. `VERCEL_TOKEN` is strictly isolated to the `production` environment and blocked from PR execution.
 - **Environment:** Defaults to `production` via Pydantic settings. OpenAPI docs (`/docs`) are disabled in production contexts.
 - **Reproducibility:** Seed (`42`) and dataset hashes are stored in `metadata.json` for full artifact rebuildability. Dependencies are rigidly bound via `requirements.txt` and `package-lock.json`.
