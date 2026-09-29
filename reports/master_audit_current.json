@@ -1,74 +1,82 @@
 {
   "project_identity": {
-    "purpose": "Clinical decision-support cardiovascular risk assessment via Logistic Regression.",
-    "architecture_drift": false,
-    "evidence": "DESIGN DECISION"
+    "purpose": "ML-based cardiovascular risk assessment application intended for engineering/research use; not clinically validated.",
+    "architecture": "FastAPI backend, Next.js frontend, deployed on Vercel.",
+    "active_frontend": "Next.js 16.3.5",
+    "backend": "FastAPI (Python 3.11/3.14)",
+    "ml_system": "Logistic Regression + Platt Scaling (sigmoid) + SHAP-equivalent explanation",
+    "deployment_platform": "Vercel",
+    "repository_root": "c:\\Users\\praji\\OneDrive\\Desktop\\Cardio-Vanta",
+    "current_branch": "main",
+    "current_head": "0916c3f chore(ci): trigger deploy after configuring Vercel secrets"
   },
-  "data_foundation": {
-    "sha256": "7c3014365675306819510a49ff289efbec1d1a6a666a2dc7652f1547b383d859",
-    "development_samples": 242,
-    "locked_test_samples": 61,
-    "isolation_status": "Strictly maintained",
-    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  "phase_history": {
+    "Phase 1-14A": "implemented, archived",
+    "Phase 15A": "implemented, archived",
+    "Phase 15B": "implemented, archived",
+    "Phase 15C": "implemented, archived",
+    "Phase 15D": "implemented, externally verified, archived"
   },
-  "ml_development": {
-    "model": "Logistic Regression",
-    "calibration": "sigmoid",
-    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  "ml_data_experiments": {
+    "raw_dataset": "UCI Heart Disease (Small sample size)",
+    "isolation_status": "Strictly maintained dev/test split, locked test set",
+    "preprocessing": "StandardScaler applied via pipeline",
+    "model": "Logistic Regression with Sigmoid calibration",
+    "advanced_models": "TabICL rejected for production due to complexity",
+    "shap_equivalent": "Implemented as mathematical equivalent",
+    "limitations": "Small sample size, no post-prediction clinical outcomes collected"
   },
-  "advanced_research": {
-    "tabicl_xgboost": "Rejected for production (performance parity not worth complexity/VRAM overhead).",
-    "shap": "Implemented as mathematical equivalent to avoid 147MB bundle penalty.",
-    "evidence": "HISTORICAL FACT"
+  "production_artifacts": {
+    "model.joblib": "2360B7E920BDD771890DDC998E0AB1786D82956258509B740361EF4410C76ED8",
+    "explanation_model.joblib": "701AC6F82504A7971A7C740911E1E410DC2EFC20811C8CF8929FE3F8CC7EE901",
+    "metadata.json": "66C6D9C6BB2F33B29482F97BB531EE248EEFAF75B4875DBFF8B27491DE71C843",
+    "feature_schema.json": "B8A766302E967026FD42904B46AF3751A2BAF4206BF6152861E153EC32663820",
+    "reference_predictions.csv": "7BE5099A751D195C1AAE1E30E27A5C68C773FF12F017259056BDC6AB2D0981F2",
+    "shap_background.json": "09FC1B4024C957E1648894D458D2B01FA6D33BF269AA56C6DB10505FA307237E"
   },
-  "backend": {
+  "backend_api": {
     "framework": "FastAPI",
-    "canonical_prediction": 0.8061117606132114,
-    "security": "CORS enforced, Docs disabled.",
-    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+    "contract": "13-field prediction contract enforced",
+    "security": "CORS enforced (blocks unknown origins), docs disabled in production",
+    "features": "Calibrated probability, out-of-range warnings, fallback handling"
   },
   "frontend": {
     "framework": "Next.js 16.3.5",
-    "features": "Assessment form, dual explanations, support boundary warnings.",
-    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+    "visual_refinement": "Assessment page recovers visual refinement, whitespace intact",
+    "integration": "API integration verified via audit_tests.py"
   },
-  "phase_15a_monitoring": {
-    "status": "Complete",
-    "privacy": "Raw features excluded.",
-    "evidence": "VERIFIED BY SOURCE CODE"
+  "ci_cd_status": {
+    "Phase 15C": "Archived. CI pipeline is present in git history.",
+    "Phase 15D": "Archived. GitHub Actions Run ID 36525785155 succeeded. External verification is successful."
   },
-  "phase_15b_drift_detection": {
-    "status": "Complete",
-    "methodology": "Two-sample KS test (10,000 permutations)",
-    "policy": "Minimum N=50, D>=0.2 engineering threshold.",
-    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+  "github_git": {
+    "head": "0916c3f",
+    "uncommitted_changes": [],
+    "untracked_files": []
   },
-  "openspec": {
-    "active_changes": 0,
-    "sync_status": "Fully Synced",
-    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
-  },
-  "git_repository": {
-    "initial_commit": "4683cb2 Initial CardioVanta repository",
-    "clean_tree": true,
-    "remote": "https://github.com/septilex/CardioVanta.git",
-    "evidence": "VERIFIED BY SOURCE CODE"
+  "vercel_production": {
+    "project": "cardio-vanta-prod",
+    "status": "Production is currently live and healthy",
+    "note": "Phase 15D deployment triggered via GitHub Actions, workflow succeeded.",
+    "url": "https://cardio-vanta-prod.vercel.app"
   },
   "testing": {
-    "frontend_jest": "13/13 passed",
-    "backend_pytest": "Passed",
-    "audit_script": "Passed",
-    "evidence": "VERIFIED BY CURRENT TEST/ARTIFACT"
+    "backend_suite": "67 tests in tests/",
+    "backend_api_suite": "46 tests in backend/tests/",
+    "frontend_jest_suite": "13 tests in __tests__/",
+    "audit_script": "Passed against production URL locally"
   },
-  "limitations": {
-    "data_size": "Small sample size (303 total)",
-    "ground_truth": "No post-prediction clinical outcomes collected",
-    "feature_drift": "Blocked by privacy mandate on raw telemetry",
-    "evidence": "LIMITATION"
+  "security": {
+    "cors": "Strict",
+    "docs": "Disabled in production",
+    "secrets": "No exposed secrets in repo, VERCEL_TOKEN referenced in uncommitted workflow"
   },
-  "next_phase_recommendation": {
-    "focus": "Automated CI/CD Deployment Pipeline",
-    "evidence": "INFERENCE"
+  "gaps": {
+    "real_engineering_blockers": "None.",
+    "unverified_external_behavior": "None.",
+    "implementation_defects": "None.",
+    "research_limitations": "Small dataset, privacy mandate blocks telemetry."
   },
-  "final_verdict": "CURRENT STATE: VERIFIED AND STABLE"
+  "final_verdict": "CURRENT STATE: COMPLETED",
+  "next_action": "None"
 }

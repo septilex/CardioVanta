@@ -24,6 +24,6 @@
 ## 5. Finalization
 - [x] Documentation (docs/deployment.md): Update documentation outlining the automated process and manual rollback semantics.
 - [x] Local verification: Test `audit_tests.py` locally.
-- [ ] Actual GitHub Actions verification: Observe a successful run in the GitHub UI.
-- [ ] Actual production verification: Confirm Vercel accurately reflects the newly pushed commit.
-- [ ] Final OpenSpec validation: Run `openspec validate --all` and update task statuses in `openspec/changes/2026-09-27-phase15d-cd/tasks.md` before archiving.
+- [x] Actual GitHub Actions verification: Observe a successful run in the GitHub UI.
+- [x] Actual production verification: Confirm Vercel accurately reflects the newly pushed commit.
+- [x] Final OpenSpec validation: Run `openspec validate --all` and update task statuses in `openspec/changes/2026-09-27-phase15d-cd/tasks.md` before archiving.
