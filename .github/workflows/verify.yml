@@ -103,8 +103,8 @@ jobs:
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
         run: |
-          # Vercel CLI outputs the deployment URL to stdout
-          DEPLOYMENT_URL=$(npx vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }})
+          npm install -g vercel
+          DEPLOYMENT_URL=$(vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }})
           echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "Deployed github.sha ${{ github.sha }} to URL: $DEPLOYMENT_URL"
 
