@@ -10,8 +10,8 @@ describe('CardioVanta Landing Page', () => {
     expect(screen.getByText(/A clearer way to understand the model/i)).toBeInTheDocument();
     expect(screen.getByText(/From measurements to modelled probability/i)).toBeInTheDocument();
     expect(screen.getByText(/Built around clarity/i)).toBeInTheDocument();
-    expect(screen.getByText(/Explore your cardiovascular profile/i)).toBeInTheDocument();
-    expect(screen.getByText(/A clearer read starts here/i)).toBeInTheDocument();
+    expect(screen.getByText(/Every prediction, explained/i)).toBeInTheDocument();
+    expect(screen.getByText(/Rigorous by design/i)).toBeInTheDocument();
   });
 
   it('contains links to the assessment page', () => {

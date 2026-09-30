@@ -1,1 +1,14 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
+
+if (typeof global !== 'undefined') {
+  class IntersectionObserver {
+    observe = jest.fn();
+    disconnect = jest.fn();
+    unobserve = jest.fn();
+  }
+  Object.defineProperty(global, 'IntersectionObserver', {
+    writable: true,
+    configurable: true,
+    value: IntersectionObserver,
+  });
+}
