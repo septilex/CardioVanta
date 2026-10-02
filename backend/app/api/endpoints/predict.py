@@ -109,7 +109,10 @@ def predict_endpoint(
             
         return response_obj
     except Exception as e:
-        logger.error(f"Inference failed: {e}")
+        import traceback
+        traceback.print_exc()
+        # Do not log the exception string 'e' directly to prevent leaking raw clinical values
+        logger.error(f"Inference failed with exception type: {type(e).__name__}")
         # Return 500 without leaking stack trace
         raise HTTPException(status_code=500, detail="Internal inference failure")
 

@@ -8,16 +8,16 @@ class PredictRequest(BaseModel):
         json_schema_serialization_defaults_required=True
     )
     
-    age: float
+    age: float = Field(allow_inf_nan=False)
     sex: Literal[0, 1]
     cp: Literal[0, 1, 2, 3]
-    trestbps: float
-    chol: float
+    trestbps: float = Field(allow_inf_nan=False)
+    chol: float = Field(allow_inf_nan=False)
     fbs: Literal[0, 1]
     restecg: Literal[0, 1, 2]
-    thalach: float
+    thalach: float = Field(allow_inf_nan=False)
     exang: Literal[0, 1]
-    oldpeak: float
+    oldpeak: float = Field(allow_inf_nan=False)
     slope: Literal[0, 1, 2]
     ca: Literal[0, 1, 2, 3, 4]
     thal: Literal[0, 1, 2, 3]

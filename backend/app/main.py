@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     try:
         loader = ModelLoader(model_dir=settings.MODEL_DIR)
         model_package = loader.load_and_validate()
-        
+
         # Instantiate InferenceEngine and bypass its disk loading
         engine = InferenceEngine(model_dir=settings.MODEL_DIR)
         engine.model = model_package.model
@@ -32,21 +32,21 @@ async def lifespan(app: FastAPI):
         engine.schema = model_package.feature_schema
         engine.metadata = model_package.metadata
         app.state.inference_engine = engine
-        
+
         logger.info("Startup validation complete. CardioVanta Core Runtime ready.")
     except Exception as e:
         logger.error(f"Startup validation failed: {e}")
         # Fail clearly on startup
         raise RuntimeError(f"Startup validation failed: {e}")
-    
+
     yield
-    
+
     logger.info("Shutting down CardioVanta API...")
     model_package = None
     app.state.inference_engine = None
 
 from fastapi.middleware.cors import CORSMiddleware
- 
+
 docs_url = "/docs" if settings.ENABLE_DOCS else None
 redoc_url = "/redoc" if settings.ENABLE_DOCS else None
 openapi_url = "/openapi.json" if settings.ENABLE_DOCS else None
@@ -71,15 +71,23 @@ app.add_middleware(MonitoringMiddleware)
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     req_id = getattr(request.state, "request_id", None)
+
+    # Strip sensitive raw input to avoid logging or returning clinical data
+    sanitized_errors = []
+    for err in exc.errors():
+        err_copy = err.copy()
+        err_copy.pop("input", None)
+        sanitized_errors.append(err_copy)
+
     logger.error("Validation error", extra={
         "request_id": req_id,
         "status_code": 422,
         "endpoint": request.url.path,
-        "errors": exc.errors()
+        "errors": sanitized_errors
     })
     return JSONResponse(
         status_code=422,
-        content={"detail": exc.errors()},
+        content={"detail": sanitized_errors},
     )
 
 @app.exception_handler(HTTPException)

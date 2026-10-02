@@ -26,10 +26,10 @@ class MonitoringMiddleware(BaseHTTPMiddleware):
             
         except Exception as e:
             process_time_ms = (time.time() - start_time) * 1000
-            logger.error("Unhandled exception in middleware", extra={
+            logger.error(f"Unhandled exception in middleware: {type(e).__name__}", extra={
                 "request_id": request_id,
                 "latency_ms": process_time_ms,
                 "status_code": 500,
                 "endpoint": request.url.path
-            }, exc_info=True)
+            })
             raise e
