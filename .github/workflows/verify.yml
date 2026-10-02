@@ -34,10 +34,15 @@ jobs:
           # Verify expected ML artifact files match approved baseline hashes
           python scripts/verify_artifact_integrity.py
 
-      - name: Run Backend Pytest Suite
+      - name: Run ML Framework Pytest Suite
         run: |
-          # Intrinsically validates backend, models, and drift logic
+          # Validates ML pipeline, model generation, and drift detection
           pytest tests/
+
+      - name: Run Backend API Pytest Suite
+        run: |
+          # Validates backend FastAPI application, request schema, and security rules
+          pytest backend/tests/
 
       - name: Run Security Audit (pip)
         run: |
