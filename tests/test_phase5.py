@@ -200,3 +200,32 @@ def test_no_network_dependency(engine, monkeypatch):
     raw = get_valid_input(engine)
     res = engine.predict(raw)
     assert res is not None
+
+import tempfile
+from src.experiment.phase5 import build_production_package, verify_sklearn_version
+
+def test_requirements_parsing_robustness():
+    req_version = verify_sklearn_version()
+    assert sklearn.__version__ == req_version
+
+def test_output_directory_isolation_and_provenance(artifacts_dir):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        build_production_package(output_dir=tmpdir)
+        tmp_path = Path(tmpdir)
+        
+        with open(tmp_path / "metadata.json", "r") as f:
+            metadata = json.load(f)
+            
+        prov = metadata["training_data_provenance"]
+        assert "git_commit" in prov
+        assert "python_version" in prov
+        assert "generated_artifact_hashes" in prov
+        
+        # Test reproduction deterministic equivalence
+        prod_ref = pd.read_csv(artifacts_dir / "reference_predictions.csv")
+        tmp_ref = pd.read_csv(tmp_path / "reference_predictions.csv")
+        pd.testing.assert_frame_equal(prod_ref, tmp_ref)
+
+    with pytest.raises(ValueError, match="Output dir cannot be the production"):
+        build_production_package(output_dir=str(artifacts_dir))
+

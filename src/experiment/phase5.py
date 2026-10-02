@@ -11,7 +11,9 @@ from sklearn.calibration import CalibratedClassifierCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedGroupKFold
 import re
-
+import argparse
+import subprocess
+import sys
 from src.config.config import RAW_DATA_PATH, SCHEMA_PATH, RANDOM_SEED, BASE_DIR
 from src.preprocessing.preprocessor import PreprocessingFactory
 
@@ -24,13 +26,15 @@ def get_file_hash(filepath):
 
 def verify_sklearn_version():
     req_path = BASE_DIR / "requirements.txt"
-    # requirements.txt is utf-16le encoded
+    with open(req_path, "rb") as f:
+        raw_bytes = f.read()
+    
     try:
-        with open(req_path, "r", encoding="utf-16le") as f:
-            content = f.read()
-    except Exception:
-        with open(req_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        content = raw_bytes.decode("utf-8")
+        if "scikit-learn==" not in content:
+            content = raw_bytes.decode("utf-16le")
+    except UnicodeDecodeError:
+        content = raw_bytes.decode("utf-16le")
     
     # Try finding scikit-learn version in requirements
     match = re.search(r'scikit-learn==([\d\.]+)', content)
@@ -46,7 +50,7 @@ def _build_calibration_splits(X, y, groups, cal_cv):
     sgkf = StratifiedGroupKFold(n_splits=cal_cv)
     return list(sgkf.split(X, y, groups=groups))
 
-def build_production_package():
+def build_production_package(output_dir=None):
     print("Starting Phase 5: Final Model Packaging...")
     
     req_version = verify_sklearn_version()
@@ -84,7 +88,14 @@ def build_production_package():
     cal_clf.fit(X_train, y_train)
     
     # Package Directory
-    artifacts_dir = BASE_DIR / "artifacts" / "model"
+    if output_dir:
+        artifacts_dir = Path(output_dir).resolve()
+        prod_dir = (BASE_DIR / "artifacts" / "model").resolve()
+        if artifacts_dir == prod_dir:
+            raise ValueError("Output dir cannot be the production artifacts/model directory")
+    else:
+        artifacts_dir = BASE_DIR / "artifacts" / "model"
+        
     artifacts_dir.mkdir(parents=True, exist_ok=True)
     
     # 1. Serialized Production Model
@@ -110,7 +121,29 @@ def build_production_package():
         with open(global_exp_path, "r") as f:
             global_exp = json.load(f)
             
-    # 3. Metadata
+    # 3. Reference Predictions
+    print("Generating reference predictions...")
+    preds = cal_clf.predict_proba(X_train)[:, 1]
+    ref_df = pd.DataFrame({
+        "dev_index": dev_idx,
+        "reference_probability": preds
+    })
+    ref_df.to_csv(artifacts_dir / "reference_predictions.csv", index=False)
+    
+    # Gather Provenance info
+    try:
+        git_commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
+    except Exception:
+        git_commit = "unknown"
+        
+    generated_hashes = {
+        "model.joblib": get_file_hash(artifacts_dir / "model.joblib"),
+        "explanation_model.joblib": get_file_hash(artifacts_dir / "explanation_model.joblib"),
+        "feature_schema.json": get_file_hash(artifacts_dir / "feature_schema.json"),
+        "reference_predictions.csv": get_file_hash(artifacts_dir / "reference_predictions.csv")
+    }
+
+    # 4. Metadata
     metadata = {
         "package_version": "1.0.0",
         "model_version": "Phase5-Final",
@@ -119,7 +152,10 @@ def build_production_package():
             "raw_dataset_sha256": get_file_hash(RAW_DATA_PATH),
             "development_indices_sha256": get_file_hash(dev_idx_path),
             "development_sample_count": len(dev_idx),
-            "locked_test_sample_count_provenance_only": len(df) - len(dev_idx)
+            "locked_test_sample_count_provenance_only": len(df) - len(dev_idx),
+            "git_commit": git_commit,
+            "python_version": sys.version.split()[0],
+            "generated_artifact_hashes": generated_hashes
         },
         "random_seed": RANDOM_SEED,
         "environment": {
@@ -154,16 +190,10 @@ def build_production_package():
     with open(artifacts_dir / "metadata.json", "w") as f:
         json.dump(metadata, f, indent=4)
         
-    # 4. Reference Predictions
-    print("Generating reference predictions...")
-    preds = cal_clf.predict_proba(X_train)[:, 1]
-    ref_df = pd.DataFrame({
-        "dev_index": dev_idx,
-        "reference_probability": preds
-    })
-    ref_df.to_csv(artifacts_dir / "reference_predictions.csv", index=False)
-    
     print("Phase 5 Packaging Complete.")
 
 if __name__ == "__main__":
-    build_production_package()
+    parser = argparse.ArgumentParser(description="Phase 5 Model Packaging")
+    parser.add_argument("--output-dir", type=str, help="Output directory for artifacts")
+    args = parser.parse_args()
+    build_production_package(output_dir=args.output_dir)
