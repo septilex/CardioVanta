@@ -36,7 +36,7 @@ describe('CardioVanta Page Skeleton', () => {
     expect(screen.getByLabelText(/ST Depression Induced/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Slope of Peak Exercise/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Number of Major Vessels/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Thalassemia/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Thallium Stress Test/i)).toBeInTheDocument();
   });
 
   it('allows valid inputs to be entered', () => {

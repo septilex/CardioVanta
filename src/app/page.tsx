@@ -157,7 +157,7 @@ function Counter({
 
 const contributions = [
   { name: "Chest Pain Type", value: 0.38, positive: true },
-  { name: "Thalassemia", value: 0.31, positive: true },
+  { name: "Thallium Stress Test", value: 0.31, positive: true },
   { name: "Major Vessels", value: 0.24, positive: true },
   { name: "Max Heart Rate", value: 0.18, positive: false },
   { name: "ST Depression", value: 0.15, positive: true },
@@ -395,7 +395,7 @@ export default function LandingPage() {
                 <div className="cv-sample-card-main">
                   <div className="cv-sample-score-wrap">
                     <div className="cv-sample-score">18.4%</div>
-                    <div className="cv-sample-score-sub">Calibrated 10-year risk</div>
+                    <div className="cv-sample-score-sub">Modelled Probability</div>
                   </div>
                   
                   <div className="cv-sample-scale">
@@ -431,7 +431,7 @@ export default function LandingPage() {
                   
                   <div className="cv-sample-feature">
                     <div className="cv-sample-feature-info">
-                      <span className="cv-sample-feature-label">LDL cholesterol</span>
+                      <span className="cv-sample-feature-label">Serum cholesterol</span>
                       <span className="cv-sample-feature-val">162 mg/dL</span>
                     </div>
                     <div className="cv-sample-feature-bar cv-sample-bar-red" style={{ width: '35%' }}></div>
@@ -439,16 +439,16 @@ export default function LandingPage() {
                   
                   <div className="cv-sample-feature">
                     <div className="cv-sample-feature-info">
-                      <span className="cv-sample-feature-label">Resting heart rate</span>
-                      <span className="cv-sample-feature-val">64 bpm</span>
+                      <span className="cv-sample-feature-label">Max heart rate</span>
+                      <span className="cv-sample-feature-val">135 bpm</span>
                     </div>
                     <div className="cv-sample-feature-bar cv-sample-bar-green" style={{ width: '25%' }}></div>
                   </div>
                   
                   <div className="cv-sample-feature">
                     <div className="cv-sample-feature-info">
-                      <span className="cv-sample-feature-label">Physical activity</span>
-                      <span className="cv-sample-feature-val">4 days / week</span>
+                      <span className="cv-sample-feature-label">Major vessels (CA)</span>
+                      <span className="cv-sample-feature-val">0 vessels</span>
                     </div>
                     <div className="cv-sample-feature-bar cv-sample-bar-green" style={{ width: '35%' }}></div>
                   </div>
@@ -768,12 +768,12 @@ export default function LandingPage() {
                 <svg className="lp-responsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
-                <h4>Not Clinically Validated</h4>
+                <h4>Not a Diagnostic Tool</h4>
                 <p>
                   CardioVanta is an ML-based cardiovascular risk assessment
                   application intended for engineering and research use. It is
-                  not a medical device and is not intended for clinical
-                  diagnosis, treatment, or medical advice.
+                  not a medical device and is not intended for diagnosis,
+                  treatment, or medical advice.
                 </p>
               </motion.div>
 
@@ -798,7 +798,7 @@ export default function LandingPage() {
                 </svg>
                 <h4>Privacy by Design</h4>
                 <p>
-                  Raw clinical feature inputs are excluded from telemetry.
+                  Raw physiological feature inputs are excluded from telemetry.
                   Sensitive prediction-output telemetry remains subject to
                   retention and access controls. No personally identifiable
                   information is collected or stored.
@@ -814,9 +814,9 @@ export default function LandingPage() {
                 <h4>Acknowledged Limitations</h4>
                 <p>
                   Trained on a small dataset (UCI Heart Disease). No
-                  post-prediction clinical outcomes are collected. The model
+                  post-prediction health outcomes are collected. The model
                   reflects observed associations in the development sample and
-                  does not imply clinical causality.
+                  does not imply medical causality.
                 </p>
               </motion.div>
             </StaggerWrap>
@@ -909,7 +909,7 @@ export default function LandingPage() {
           <div className="lp-footer-disclaimer">
             CardioVanta is a demonstration of machine learning techniques for
             educational and evaluation purposes. It is not a medical device and
-            is not intended for clinical diagnosis, treatment, or medical
+            is not intended for diagnosis, treatment, or medical
             advice.
           </div>
           <div className="lp-footer-copyright">

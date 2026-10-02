@@ -256,7 +256,7 @@ export default function Page() {
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', backgroundColor: 'var(--cv-surface)', color: 'var(--cv-red)', borderRadius: '50%', fontSize: '11px', fontFamily: 'monospace', fontWeight: 600 }}>01</span>
                         <span className="form-group-title" style={{ margin: 0, fontSize: '20px' }}>Patient Profile</span>
                       </div>
-                      <span className="form-group-desc" style={{ paddingLeft: '44px' }}>Demographic baseline factors used for clinical risk stratification.</span>
+                      <span className="form-group-desc" style={{ paddingLeft: '44px' }}>Demographic baseline factors used for cardiovascular disease probability.</span>
                     </div>
                     <span className="form-group-badge" style={{ backgroundColor: '#F8F6F4', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--cv-border)', fontSize: '11px', alignSelf: 'flex-start' }}>
                       <span style={{ color: 'var(--cv-text-muted)', marginRight: '6px' }}>REQUIRED FIELDS</span>
@@ -284,7 +284,7 @@ export default function Page() {
                         <option value={1}>Male</option>
                         <option value={0}>Female</option>
                       </select>
-                      <span className="input-hint">Biological sex recorded at baseline clinical intake</span>
+                      <span className="input-hint">Biological sex recorded at baseline intake</span>
                     </div>
                   </div>
                 </div>
@@ -444,7 +444,7 @@ export default function Page() {
                         <option value={2}>Non-anginal Pain</option>
                         <option value={3}>Asymptomatic</option>
                       </select>
-                      <span className="input-hint">Clinical classification of angina symptomatology</span>
+                      <span className="input-hint">Classification of angina symptomatology</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="ca">
@@ -462,7 +462,7 @@ export default function Page() {
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="thal">
-                        <span>Thalassemia</span>
+                        <span>Thallium Stress Test</span>
                         <span className="input-code" aria-hidden="true">thal</span>
                       </label>
                       <select className="input-control" id="thal" name="thal" value={formData.thal} onChange={handleChange}>
@@ -493,7 +493,7 @@ export default function Page() {
                   <div className="form-status-info">
                     <div className="form-status-badge">
                       <span className="form-status-dot"></span>
-                      <span>13/13 CLINICAL INPUTS RECORDED</span>
+                      <span>13/13 PHYSIOLOGICAL INPUTS RECORDED</span>
                     </div>
                     <span>MODEL: LOGISTIC REGRESSION (SIGMOID CALIBRATED) · V1.0.0</span>
                   </div>
@@ -521,7 +521,7 @@ export default function Page() {
                   <div>
                     <h2 className="summary-status-title" style={{ fontSize: '28px', marginBottom: '16px' }}>Awaiting Input</h2>
                     <p className="summary-desc-text" style={{ fontSize: '14px', lineHeight: 1.6, marginBottom: '32px' }}>
-                      Complete the profile to generate a modelled probability. The estimate draws on all 13 clinical inputs at once — partial profiles are not scored.
+                      Complete the profile to generate a modelled probability. The estimate draws on all 13 physiological inputs at once — partial profiles are not scored.
                     </p>
                     <div className="summary-matrix" style={{ gap: '0', padding: '0', border: 'none' }}>
                       <div className="summary-matrix-row" style={{ padding: '16px 0', borderBottom: '1px solid var(--cv-border)' }}>
@@ -605,7 +605,7 @@ export default function Page() {
                     </div>
                     <div style={{ padding: '16px', background: 'var(--cv-surface)', borderRadius: '4px', fontSize: '13px', lineHeight: 1.5, borderLeft: '3px solid var(--cv-red)' }}>
                       <strong style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>Calibrated Risk Assessment</strong>
-                      <div style={{ color: 'var(--cv-text-muted)' }}>Decision aids inform clinical judgment. See detailed attribution below.</div>
+                      <div style={{ color: 'var(--cv-text-muted)' }}>Decision aids inform judgment. See detailed attribution below.</div>
                     </div>
                     <div style={{ marginTop: '24px', textAlign: 'center' }}>
                       <a href="#result-section" className="nav-link" style={{ fontSize: '13px', fontWeight: 600, color: 'var(--cv-red)', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', border: '1px solid rgba(158, 27, 46, 0.2)', borderRadius: '4px', transition: 'all 0.2s' }}>
@@ -620,7 +620,7 @@ export default function Page() {
                 <div className="summary-notice-quote">
                   &ldquo;A modelled probability is a decision aid, not a diagnosis &mdash; always confirm findings with a physician.&rdquo;
                 </div>
-                <div className="summary-notice-tag">CLINICAL USE NOTICE</div>
+                <div className="summary-notice-tag">USE NOTICE</div>
               </div>
             </div>
 
@@ -683,7 +683,7 @@ export default function Page() {
             <div className="container">
               <div className="exp-header">
                 <h2>Technical Audit (Logistic Regression)</h2>
-                <p>{result.explanation.note || "These contributions describe how the standalone Logistic Regression explanation model moved the underlying log-odds for this prediction. They describe model behavior, not clinical causality."}</p>
+                <p>{result.explanation.note || "These contributions describe how the standalone Logistic Regression explanation model moved the underlying log-odds for this prediction. They describe model behavior, not medical causality."}</p>
               </div>
               {renderExplanation(result.explanation)}
             </div>
