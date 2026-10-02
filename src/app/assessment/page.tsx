@@ -256,7 +256,7 @@ export default function Page() {
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', backgroundColor: 'var(--cv-surface)', color: 'var(--cv-red)', borderRadius: '50%', fontSize: '11px', fontFamily: 'monospace', fontWeight: 600 }}>01</span>
                         <span className="form-group-title" style={{ margin: 0, fontSize: '20px' }}>Patient Profile</span>
                       </div>
-                      <span className="form-group-desc" style={{ paddingLeft: '44px' }}>Demographic baseline factors used for cardiovascular disease probability.</span>
+                      <span className="form-group-desc" style={{ paddingLeft: '44px' }}>Demographic baseline factors used for Model-estimated probability.</span>
                     </div>
                     <span className="form-group-badge" style={{ backgroundColor: '#F8F6F4', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--cv-border)', fontSize: '11px', alignSelf: 'flex-start' }}>
                       <span style={{ color: 'var(--cv-text-muted)', marginRight: '6px' }}>REQUIRED FIELDS</span>
@@ -458,7 +458,7 @@ export default function Page() {
                         <option value={3}>3</option>
                         <option value={4}>4</option>
                       </select>
-                      <span className="input-hint">Major coronary vessels (0–3) colored by fluoroscopy</span>
+                      <span className="input-hint">Major coronary vessels (0–4) colored by fluoroscopy</span>
                     </div>
                     <div className="input-wrapper">
                       <label className="input-label" htmlFor="thal">
@@ -493,7 +493,7 @@ export default function Page() {
                   <div className="form-status-info">
                     <div className="form-status-badge">
                       <span className="form-status-dot"></span>
-                      <span>13/13 PHYSIOLOGICAL INPUTS RECORDED</span>
+                      <span>13/13 MODEL INPUTS RECORDED</span>
                     </div>
                     <span>MODEL: LOGISTIC REGRESSION (SIGMOID CALIBRATED) · V1.0.0</span>
                   </div>
@@ -521,7 +521,7 @@ export default function Page() {
                   <div>
                     <h2 className="summary-status-title" style={{ fontSize: '28px', marginBottom: '16px' }}>Awaiting Input</h2>
                     <p className="summary-desc-text" style={{ fontSize: '14px', lineHeight: 1.6, marginBottom: '32px' }}>
-                      Complete the profile to generate a modelled probability. The estimate draws on all 13 physiological inputs at once — partial profiles are not scored.
+                      Complete the profile to generate a modelled probability. The estimate draws on all 13 model inputs at once — partial profiles are not scored.
                     </p>
                     <div className="summary-matrix" style={{ gap: '0', padding: '0', border: 'none' }}>
                       <div className="summary-matrix-row" style={{ padding: '16px 0', borderBottom: '1px solid var(--cv-border)' }}>
@@ -697,7 +697,7 @@ export default function Page() {
           <img src="/brand/cardiovanta-horizontal-transparent.png" alt="CardioVanta" className="footer-logo-img" style={{ filter: 'brightness(0) invert(1)' }} />
           <div className="footer-tagline" style={{ fontSize: '24px', fontFamily: 'var(--cv-font-display), serif', marginBottom: '24px' }}>Intelligent cardiovascular insight.</div>
           <p className="footer-disclaimer" style={{ fontSize: '14px', color: '#8C8279' }}>
-            CardioVanta is a demonstration of machine learning techniques for educational and evaluation purposes. It is not a medical device and is not intended for diagnosis, treatment, or medical advice.
+            CardioVanta is a demonstration of machine learning techniques for educational and evaluation purposes. It is not a medical device and is not been clinically validated, is not a medical device, and is not intended for diagnosis, treatment, or medical advice.
           </p>
           <div className="footer-copyright">
             &copy; 2026 CardioVanta

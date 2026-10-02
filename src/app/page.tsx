@@ -768,12 +768,12 @@ export default function LandingPage() {
                 <svg className="lp-responsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
-                <h4>Not a Diagnostic Tool</h4>
+                <h4>Not Clinically Validated</h4>
                 <p>
                   CardioVanta is an ML-based cardiovascular risk assessment
-                  application intended for engineering and research use. It is
-                  not a medical device and is not intended for diagnosis,
-                  treatment, or medical advice.
+                  application intended for engineering and research use. It has
+                  not been clinically validated, is not a medical device, and is
+                  not intended for diagnosis, treatment, or medical advice.
                 </p>
               </motion.div>
 
@@ -908,9 +908,9 @@ export default function LandingPage() {
 
           <div className="lp-footer-disclaimer">
             CardioVanta is a demonstration of machine learning techniques for
-            educational and evaluation purposes. It is not a medical device and
-            is not intended for diagnosis, treatment, or medical
-            advice.
+            educational and evaluation purposes. It has not been clinically validated,
+            is not a medical device, and is not intended for diagnosis, treatment,
+            or medical advice.
           </div>
           <div className="lp-footer-copyright">
             &copy; 2026 CardioVanta
