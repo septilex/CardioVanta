@@ -9,18 +9,21 @@ CardioVanta consists of:
 - **Frontend**: A Next.js App Router UI providing the assessment interface.
 
 ## Local Development & Testing
-- **Backend Tests**: Run `pytest backend/tests` (via `.venv311\Scripts\pytest` on Windows)
-- **Frontend Tests**: Run `npm run test` inside the `frontend/` directory.
-- For convenience, run all tests from the repository root using the provided `test.ps1` script (on Windows) or equivalent runner.
+- **Backend Tests**: Run `pytest tests/` and `pytest backend/tests/` (via `.venv311\Scripts\pytest` on Windows)
+- **Frontend Tests**: Run `npm run test` in the repository root.
+- **Typecheck**: Run `npm run typecheck`
+- **Linting**: Run `npx eslint .`
+- **OpenSpec Validation**: Run `npx openspec validate --all`
 
 ---
 
 ## Production Deployment
 
-CardioVanta is production-ready via Docker Compose. The architecture is a multi-container stack where the Next.js frontend interfaces with the FastAPI backend over HTTP.
+CardioVanta is deployed via Vercel serverless functions. The architecture is a monolithic repository where the Next.js App Router interfaces with the FastAPI backend mapped to `api/index.py`.
 
 ### Prerequisites
-- Docker Engine & Docker Compose (v2+)
+- Node.js (v24)
+- Python (v3.11)
 
 ### Environment Variables
 For production deployment, create a `.env` file at the repository root.
@@ -36,25 +39,12 @@ NEXT_PUBLIC_API_BASE_URL=https://api.your-backend-domain.com
 *Note: If testing locally, you can omit `NEXT_PUBLIC_API_BASE_URL` to let the frontend default to `http://localhost:8000`, and set `CORS_ORIGINS=["http://localhost:3000"]`.*
 
 ### Deployment Architecture
-- **Backend Container (`backend`)**: Port `8000`. Runs the FastAPI app via `uvicorn`. Includes health checks.
-- **Frontend Container (`frontend`)**: Port `3000`. Runs the built Next.js application.
+- **Backend**: FastAPI serverless function configured in `vercel.json`.
+- **Frontend**: Next.js App Router statically compiled and served via Vercel.
 
-### Start the Stack
-Build and start the services in detached mode:
-```bash
-docker compose build
-docker compose up -d
-```
-
-### Health Check
-Verify the backend is healthy:
-```bash
-curl http://localhost:8000/api/v1/health
-```
-*(Expected output: `{"status":"ok","service":"CardioVanta"}`)*
-
-### Shutdown
-To cleanly stop and remove the containers and default network:
-```bash
-docker compose down
-```
+### Continuous Integration (CI)
+Automated Linux (Ubuntu) workflows (`.github/workflows/verify.yml`) run on every push and pull request to `main`. The pipeline enforces:
+- `pip-audit` and `npm audit --audit-level=critical` for security dependency checks.
+- Comprehensive `pytest` (backend and ML) and `jest` (frontend) test suites.
+- Strict ML artifact integrity via `verify_artifact_integrity.py`.
+- Automated deployment to Vercel upon successful verification.

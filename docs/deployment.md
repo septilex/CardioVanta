@@ -9,7 +9,7 @@ The production model bundle is self-contained in the `artifacts/model/` director
 
 ## Continuous Integration (CI)
 CardioVanta uses GitHub Actions for automated, secretless CI verification before code reaches production.
-- **PR & Main Verification:** Every pull request to `main` and push to `main` runs automated Linux (Ubuntu) workflows (`.github/workflows/verify.yml`). This parallelizes Python backend checks (`pytest`, artifact integrity, `pip-audit`) and Node frontend checks (`npm ci`, `tsc`, `jest`, `next build`, `npm audit`).
+- **PR & Main Verification:** Every pull request to `main` and push to `main` runs automated Linux (Ubuntu) workflows (`.github/workflows/verify.yml`). This parallelizes Python backend checks (`pytest`, artifact integrity, `pip-audit`) and Node frontend checks (`npm ci`, `tsc`, `jest`, `next build`, `npm audit --audit-level=critical`). The critical audit level is explicitly set as the project's security policy to gracefully handle unfixable high-severity transitives (e.g. `braces`) without failing the CI, whilst strictly blocking critical vulnerabilities.
 - **Immutable Artifacts:** The CI workflow executes inference and offline validation solely using the pre-generated artifacts. It never retrains or updates ML models.
 
 ## Continuous Delivery (CD) & Smoke Testing

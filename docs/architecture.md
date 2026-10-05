@@ -4,8 +4,8 @@
 CardioVanta consists of a frontend interface and a backend prediction API.
 
 ### Frontend Architecture
-- **Framework:** Next.js 16.3.5 (React 19)
-- **Deployment:** Static build generation via `next build`
+- **Framework:** Next.js 16.3.8 (React 19)
+- **Deployment:** Vercel serverless deployment with frontend routing via `vercel.json`
 
 ### Backend Architecture
 - **Framework:** FastAPI

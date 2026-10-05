@@ -1,0 +1,5 @@
+- [ ] 1. Update `README.md` to remove Docker Compose, correct test paths, and accurately reflect Vercel architecture.
+- [ ] 2. Update `docs/architecture.md` to Next.js 16.3.8 and Vercel routing.
+- [ ] 3. Update `docs/deployment.md` to document the `npm audit --audit-level=critical` CI policy.
+- [ ] 4. Remove obsolete files (`docker-compose.yml`, `backend/Dockerfile`, `.dockerignore`, `backend/.dockerignore`).
+- [ ] 5. Run `npx openspec validate --all` to ensure documentation matches constraints.
