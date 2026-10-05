@@ -1,0 +1,2 @@
+artifacts/model/* text eol=lf
+configs/artifact_hashes.json text eol=lf
