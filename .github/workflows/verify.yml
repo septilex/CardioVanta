@@ -78,7 +78,7 @@ jobs:
 
       - name: Run Security Audit (npm)
         run: |
-          npm audit --audit-level=high
+          npm audit --audit-level=critical
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

@@ -24,13 +24,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "^14.2.35",
+    "eslint-config-next": "^16.3.8",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
     "typescript": "^5"
-  },
-  "overrides": {
-    "braces": "^3.0.3",
-    "glob": "^10.4.5"
   }
 }
