@@ -1,2 +1,4 @@
-artifacts/model/* text eol=lf
+artifacts/model/*.json text eol=lf
+artifacts/model/*.csv text eol=lf
+artifacts/model/*.joblib binary
 configs/artifact_hashes.json text eol=lf
