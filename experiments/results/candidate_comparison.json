@@ -1,0 +1,151 @@
+{
+  "experiment": "Advanced ML Performance Investigation (Global Nested CV Corrected)",
+  "random_seed": 42,
+  "dev_samples": 242,
+  "test_samples": 61,
+  "total_candidates": 97,
+  "baseline_label": "LR_production",
+  "best_candidate_selected": "LR_production (C=0.1, balanced)",
+  "baseline_test_metrics": {
+    "accuracy": 0.8688524590163934,
+    "roc_auc": 0.9047619047619048,
+    "avg_prec": 0.9225347628444848,
+    "precision": 0.8378378378378378,
+    "recall": 0.9393939393939394,
+    "specificity": 0.7857142857142857,
+    "f1": 0.8857142857142857,
+    "brier": 0.12801442303953625,
+    "log_loss": 0.3996788234577209
+  },
+  "best_test_metrics": {
+    "accuracy": 0.8688524590163934,
+    "roc_auc": 0.9047619047619048,
+    "avg_prec": 0.9225347628444848,
+    "precision": 0.8378378378378378,
+    "recall": 0.9393939393939394,
+    "specificity": 0.7857142857142857,
+    "f1": 0.8857142857142857,
+    "brier": 0.12801442303953625,
+    "log_loss": 0.3996788234577209
+  },
+  "decision": "C",
+  "decision_text": "Logistic Regression remains best",
+  "dependencies": {
+    "python": "3.11.9",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "pandas": "3.0.6",
+    "xgboost": "3.2.0",
+    "lightgbm": "4.7.0",
+    "catboost": "1.2.10"
+  },
+  "dataset_sha256": "7c3014365675306819510a49ff289efbec1d1a6a666a2dc7652f1547b383d859",
+  "global_nested_cv_results": {
+    "oof": {
+      "accuracy": 0.8429752066115702,
+      "roc_auc": 0.9088154269972452,
+      "avg_prec": 0.9076902626769443,
+      "precision": 0.8507462686567164,
+      "recall": 0.8636363636363636,
+      "specificity": 0.8181818181818182,
+      "f1": 0.8571428571428571,
+      "brier": 0.1189193881486716,
+      "log_loss": 0.3798338445091791
+    },
+    "selected_configs_per_fold": [
+      "LR (C=0.5, cw=balanced)",
+      "LR (C=0.5, cw=balanced)",
+      "LR (C=0.5, cw=None)",
+      "LR (C=1.0, cw=None)",
+      "LR_production (C=0.1, balanced)"
+    ],
+    "outer_fold_results": [
+      {
+        "fold": 1,
+        "selected_candidate": "LR (C=0.5, cw=balanced)",
+        "inner_auc": 0.9291125541125541,
+        "outer_metrics": {
+          "accuracy": 0.8367346938775511,
+          "roc_auc": 0.8838383838383839,
+          "avg_prec": 0.8737551053532295,
+          "precision": 0.8275862068965517,
+          "recall": 0.8888888888888888,
+          "specificity": 0.7727272727272727,
+          "f1": 0.8571428571428571,
+          "brier": 0.1324328710422328,
+          "log_loss": 0.4250116239231097
+        },
+        "elapsed_s": 97.09278583526611
+      },
+      {
+        "fold": 2,
+        "selected_candidate": "LR (C=0.5, cw=balanced)",
+        "inner_auc": 0.9218481989708405,
+        "outer_metrics": {
+          "accuracy": 0.8541666666666666,
+          "roc_auc": 0.9195804195804196,
+          "avg_prec": 0.9349177154992219,
+          "precision": 0.8275862068965517,
+          "recall": 0.9230769230769231,
+          "specificity": 0.7727272727272727,
+          "f1": 0.8727272727272727,
+          "brier": 0.11979336430502202,
+          "log_loss": 0.3612978272733387
+        },
+        "elapsed_s": 91.97121000289917
+      },
+      {
+        "fold": 3,
+        "selected_candidate": "LR (C=0.5, cw=None)",
+        "inner_auc": 0.9150943396226415,
+        "outer_metrics": {
+          "accuracy": 0.8541666666666666,
+          "roc_auc": 0.9283216783216783,
+          "avg_prec": 0.934200704323961,
+          "precision": 0.8275862068965517,
+          "recall": 0.9230769230769231,
+          "specificity": 0.7727272727272727,
+          "f1": 0.8727272727272727,
+          "brier": 0.10200536163386122,
+          "log_loss": 0.3577995923309416
+        },
+        "elapsed_s": 95.05539965629578
+      },
+      {
+        "fold": 4,
+        "selected_candidate": "LR (C=1.0, cw=None)",
+        "inner_auc": 0.9181818181818182,
+        "outer_metrics": {
+          "accuracy": 0.8367346938775511,
+          "roc_auc": 0.9175084175084175,
+          "avg_prec": 0.9200484293477171,
+          "precision": 0.9130434782608695,
+          "recall": 0.7777777777777778,
+          "specificity": 0.9090909090909091,
+          "f1": 0.84,
+          "brier": 0.1316618691862011,
+          "log_loss": 0.4049383433190243
+        },
+        "elapsed_s": 93.00643610954285
+      },
+      {
+        "fold": 5,
+        "selected_candidate": "LR_production (C=0.1, balanced)",
+        "inner_auc": 0.9114493996569468,
+        "outer_metrics": {
+          "accuracy": 0.8333333333333334,
+          "roc_auc": 0.9405594405594405,
+          "avg_prec": 0.9541200538441341,
+          "precision": 0.875,
+          "recall": 0.8076923076923077,
+          "specificity": 0.8636363636363636,
+          "f1": 0.84,
+          "brier": 0.1081564753274765,
+          "log_loss": 0.3486576215698194
+        },
+        "elapsed_s": 91.5717945098877
+      }
+    ]
+  }
+}
