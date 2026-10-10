@@ -1,19 +1,25 @@
-  <div align="center">
+<div align="center">
 
-# CardioVanta
+<img src="public/brand/cardiovanta-horizontal.png" alt="CardioVanta" width="720">
 
-**Interpretable machine learning for structured cardiovascular risk estimation.**
+### Interpretable machine learning for structured cardiovascular risk estimation.
 
 Explore how 13 structured measurements inform a modelled probability estimate — with a transparent view of the model's feature contributions.
 
-[**Live application**](https://cardio-vanta-prod.vercel.app/) · [**Open assessment**](https://cardio-vanta-prod.vercel.app/assessment) · [**GitHub repository**](https://github.com/septilex/CardioVanta)
+<br>
 
-[![Verify workflow](https://github.com/septilex/CardioVanta/actions/workflows/verify.yml/badge.svg)](https://github.com/septilex/CardioVanta/actions/workflows/verify.yml)
-![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
-![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
-![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?logo=vercel&logoColor=white)
+[![Live Application](https://img.shields.io/badge/LIVE%20APPLICATION-OPEN%20APP-DC143C?style=for-the-badge)](https://cardio-vanta-prod.vercel.app/)
+[![Open Assessment](https://img.shields.io/badge/OPEN%20ASSESSMENT-START-242424?style=for-the-badge)](https://cardio-vanta-prod.vercel.app/assessment)
+[![Source Code](https://img.shields.io/badge/SOURCE%20CODE-GITHUB-242424?style=for-the-badge&logo=github&logoColor=white)](https://github.com/septilex/CardioVanta)
+
+<br>
+
+[![Verify workflow](https://img.shields.io/github/actions/workflow/status/septilex/CardioVanta/verify.yml?style=for-the-badge&label=Verify)](https://github.com/septilex/CardioVanta/actions/workflows/verify.yml)
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19-149ECA?style=for-the-badge&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
 </div>
 
