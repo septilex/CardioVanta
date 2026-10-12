@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/brand/cardiovanta-horizontal-transparent.png" alt="CardioVanta" width="720">
+<img src="public/brand/CardioVanta%20Heartwave%20Logo%20(1).png" alt="CardioVanta" width="720">
 
 ### Interpretable machine learning for structured cardiovascular risk estimation.
 
@@ -26,10 +26,6 @@ Explore how 13 structured measurements inform a modelled probability estimate â€
 > [!IMPORTANT]
 > **Responsible use:** CardioVanta is an ML engineering and educational/research project. It is not a medical device and has not been clinically validated. Its outputs must not be used for diagnosis, treatment, or medical advice. Do not submit real patient data.
 
-<p align="center">
-  <img src="docs/assets/readme/01-landing-hero.png" alt="CardioVanta landing page introducing cardiovascular risk modelling" width="100%">
-</p>
-
 ## Contents
 
 - [Overview](#overview)
@@ -51,6 +47,10 @@ Explore how 13 structured measurements inform a modelled probability estimate â€
 - [Screenshot assets](#screenshot-assets)
 
 ---
+
+<p align="center">
+  <img src="docs/assets/readme/01-landing-hero.png" alt="CardioVanta landing page introducing cardiovascular risk modelling" width="100%">
+</p>
 
 ## Overview
 
