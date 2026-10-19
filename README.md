@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="public/brand/CardioVanta%20Heartwave%20Logo%20(1).png" alt="CardioVanta" width="720">
+<h1>
+  <img src="public/brand/CardioVanta%20Heartwave%20Logo%20(1).png" alt="CardioVanta" width="720">
+</h1>
 
 ### Interpretable machine learning for structured cardiovascular risk estimation.
 
