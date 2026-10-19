@@ -34,10 +34,6 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.calibration import CalibratedClassifierCV
 import xgboost
 from xgboost import XGBClassifier
-import lightgbm
-from lightgbm import LGBMClassifier
-import catboost
-from catboost import CatBoostClassifier
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -228,6 +224,14 @@ def get_all_candidates(factory):
                 ])
                 
     # 7. LightGBM
+    try:
+        from lightgbm import LGBMClassifier
+    except ImportError as e:
+        raise ImportError(
+            "LightGBM is required to build the LGBM candidate model suite, "
+            "but 'lightgbm' is not installed. Install it via 'pip install lightgbm'."
+        ) from e
+
     for n_est in [100, 200, 400]:
         for n_leaves in [15, 31, 63]:
             for lr in [0.05, 0.1]:
@@ -237,6 +241,14 @@ def get_all_candidates(factory):
                 ])
                 
     # 8. CatBoost
+    try:
+        from catboost import CatBoostClassifier
+    except ImportError as e:
+        raise ImportError(
+            "CatBoost is required to build the CatBoost candidate model suite, "
+            "but 'catboost' is not installed. Install it via 'pip install catboost'."
+        ) from e
+
     for n_est in [200, 400]:
         for depth in [3, 4, 6]:
             for lr in [0.05, 0.1]:
@@ -362,6 +374,18 @@ def main():
     print(f"  Test accuracy (baseline): {bl_metrics['accuracy']:.4f}")
     print(f"  Test accuracy (best):     {best_test_acc:.4f}")
     
+    try:
+        import lightgbm
+        lgbm_ver = lightgbm.__version__
+    except ImportError:
+        lgbm_ver = "not installed"
+
+    try:
+        import catboost
+        catboost_ver = catboost.__version__
+    except ImportError:
+        catboost_ver = "not installed"
+
     dependencies = {
         "python": sys.version.split(" ")[0],
         "scikit-learn": sklearn.__version__,
@@ -369,8 +393,8 @@ def main():
         "scipy": scipy.__version__,
         "pandas": pd.__version__,
         "xgboost": xgboost.__version__,
-        "lightgbm": lightgbm.__version__,
-        "catboost": catboost.__version__
+        "lightgbm": lgbm_ver,
+        "catboost": catboost_ver
     }
     
     with open(RESULTS_DIR / "candidate_comparison.json", "w") as f:

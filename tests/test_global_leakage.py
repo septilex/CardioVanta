@@ -37,6 +37,41 @@ def test_global_stratified_group_kfold_no_overlap():
             assert len(mapped_i_tr_idx.intersection(outer_val_indices)) == 0, "Inner train uses outer val data!"
             assert len(mapped_i_val_idx.intersection(outer_val_indices)) == 0, "Inner val uses outer val data!"
 
+
+def test_import_load_dev_data_without_optional_dependencies():
+    """Regression test: load_dev_data must work when lightgbm/catboost are absent."""
+    import importlib
+    from unittest.mock import patch
+
+    with patch.dict(sys.modules, {"lightgbm": None, "catboost": None}):
+        if "experiments.advanced_model_search" in sys.modules:
+            del sys.modules["experiments.advanced_model_search"]
+        mod = importlib.import_module("experiments.advanced_model_search")
+        X_dev, y_dev, dev_groups, df, X_full, y_full, dev_idx, schema, file_hash = mod.load_dev_data()
+        assert len(X_dev) == 242
+        assert len(dev_groups) == 242
+
+
+def test_get_all_candidates_raises_informative_error_without_dependencies():
+    """Verify that get_all_candidates raises clear ImportError if optional packages are missing."""
+    import pytest
+    from unittest.mock import patch, MagicMock
+    from experiments.advanced_model_search import get_all_candidates
+
+    mock_factory = MagicMock()
+    with patch.dict(sys.modules, {"lightgbm": None}):
+        with pytest.raises(ImportError, match="LightGBM is required"):
+            get_all_candidates(mock_factory)
+
+    # Provide a dummy lightgbm module so execution proceeds to the CatBoost check
+    fake_lgbm = MagicMock()
+    with patch.dict(sys.modules, {"lightgbm": fake_lgbm, "catboost": None}):
+        with pytest.raises(ImportError, match="CatBoost is required"):
+            get_all_candidates(mock_factory)
+
+
 if __name__ == "__main__":
     test_global_stratified_group_kfold_no_overlap()
+    test_import_load_dev_data_without_optional_dependencies()
+    test_get_all_candidates_raises_informative_error_without_dependencies()
     print("All global leakage tests passed successfully!")
