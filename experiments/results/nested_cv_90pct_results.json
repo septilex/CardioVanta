@@ -1,0 +1,848 @@
+{
+  "experiment_title": "CardioVanta 5x5 Nested Cross-Validation: High-Accuracy Investigation",
+  "timestamp": "2026-10-19 15:30:38",
+  "dataset_hash": "7c3014365675306819510a49ff289efbec1d1a6a666a2dc7652f1547b383d859",
+  "dev_samples": 242,
+  "locked_test_samples_used": 0,
+  "target_accuracy": 0.9,
+  "target_recall": 0.85,
+  "target_reached": false,
+  "nested_pooled_accuracy": 0.8388429752066116,
+  "nested_correct_samples": 203,
+  "nested_pooled_recall": 0.8636363636363636,
+  "baseline_pooled_accuracy": 0.8553719008264463,
+  "baseline_correct_samples": 207,
+  "baseline_pooled_recall": 0.8863636363636364,
+  "accuracy_gain_over_baseline": -0.016528925619834767,
+  "research_history_limitation": "The candidate shortlist was informed by previous exploratory experiments on this 242-patient development partition. Therefore, this nested cross-validation evaluates the generalization of the selection procedure across outer cross-validation folds, but does NOT constitute fully independent external confirmation.",
+  "diagnostics": {
+    "total_samples": 242,
+    "contradictory_categorical_samples": 34,
+    "contradictory_percentage": 14.05
+  },
+  "nested_evaluation": {
+    "nested_selection_procedure": {
+      "pooled_outer_metrics": {
+        "accuracy": 0.8388429752066116,
+        "correct_samples": 203,
+        "total_samples": 242,
+        "recall": 0.8636363636363636,
+        "specificity": 0.8090909090909091,
+        "precision": 0.8444444444444444,
+        "f1_score": 0.8539325842696629,
+        "roc_auc": 0.9090909090909092,
+        "brier_score": 0.12065067904985362,
+        "log_loss": 0.38342311561980297,
+        "confusion_matrix": {
+          "tn": 89,
+          "fp": 21,
+          "fn": 18,
+          "tp": 114
+        }
+      },
+      "fold_variability": {
+        "accuracy": {
+          "mean": 0.8389455782312926,
+          "std": 0.0350701138224665,
+          "min": 0.7959183673469388,
+          "max": 0.8958333333333334,
+          "fold_values": [
+            0.8571428571428571,
+            0.8333333333333334,
+            0.8958333333333334,
+            0.7959183673469388,
+            0.8125
+          ]
+        },
+        "recall": {
+          "mean": 0.8643874643874645,
+          "std": 0.09560686460435766,
+          "min": 0.7037037037037037,
+          "max": 0.9615384615384616,
+          "fold_values": [
+            0.9259259259259259,
+            0.9230769230769231,
+            0.9615384615384616,
+            0.7037037037037037,
+            0.8076923076923077
+          ]
+        },
+        "specificity": {
+          "mean": 0.8090909090909092,
+          "std": 0.060302268915552716,
+          "min": 0.7272727272727273,
+          "max": 0.9090909090909091,
+          "fold_values": [
+            0.7727272727272727,
+            0.7272727272727273,
+            0.8181818181818182,
+            0.9090909090909091,
+            0.8181818181818182
+          ]
+        },
+        "precision": {
+          "mean": 0.848032840722496,
+          "std": 0.034649546437062376,
+          "min": 0.8,
+          "max": 0.9047619047619048,
+          "fold_values": [
+            0.8333333333333334,
+            0.8,
+            0.8620689655172413,
+            0.9047619047619048,
+            0.84
+          ]
+        },
+        "f1_score": {
+          "mean": 0.8517245654242558,
+          "std": 0.040916533162038256,
+          "min": 0.7916666666666666,
+          "max": 0.9090909090909091,
+          "fold_values": [
+            0.8771929824561403,
+            0.8571428571428571,
+            0.9090909090909091,
+            0.7916666666666666,
+            0.8235294117647058
+          ]
+        },
+        "roc_auc": {
+          "mean": 0.9155400155400155,
+          "std": 0.015761426660042283,
+          "min": 0.8922558922558922,
+          "max": 0.9353146853146852,
+          "fold_values": [
+            0.8922558922558922,
+            0.9143356643356643,
+            0.9353146853146852,
+            0.9057239057239057,
+            0.93006993006993
+          ]
+        },
+        "brier_score": {
+          "mean": 0.12055146676429221,
+          "std": 0.012548815580618284,
+          "min": 0.09989681757014003,
+          "max": 0.13729840741987662,
+          "fold_values": [
+            0.12781389921456734,
+            0.1221846407446567,
+            0.09989681757014003,
+            0.13729840741987662,
+            0.11556356887222034
+          ]
+        },
+        "log_loss": {
+          "mean": 0.383174743939953,
+          "std": 0.02728929279292807,
+          "min": 0.3469542143325011,
+          "max": 0.41614499391167503,
+          "fold_values": [
+            0.41031044049193727,
+            0.3835397720620348,
+            0.3469542143325011,
+            0.41614499391167503,
+            0.3589242989016168
+          ]
+        }
+      },
+      "selected_candidates_distribution": {
+        "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)": 2,
+        "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)": 2,
+        "Candidate 3: B-Splines (Nonlinear Basis) + LR C=0.1": 1
+      },
+      "outer_folds": [
+        {
+          "fold": 1,
+          "test_samples": 49,
+          "selected_candidate": "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)",
+          "inner_selection_metrics": {
+            "name": "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)",
+            "inner_accuracy": 0.8549222797927462,
+            "inner_roc_auc": 0.929112554112554,
+            "inner_recall": 0.8857142857142857,
+            "inner_specificity": 0.8181818181818182,
+            "inner_brier": 0.10977403512726602,
+            "simplicity_rank": 2
+          },
+          "all_inner_candidates": [
+            {
+              "name": "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)",
+              "inner_accuracy": 0.8549222797927462,
+              "inner_roc_auc": 0.929112554112554,
+              "inner_recall": 0.8857142857142857,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.10977403512726602,
+              "simplicity_rank": 2
+            },
+            {
+              "name": "Candidate 3: B-Splines (Nonlinear Basis) + LR C=0.1",
+              "inner_accuracy": 0.8549222797927462,
+              "inner_roc_auc": 0.925865800865801,
+              "inner_recall": 0.8666666666666667,
+              "inner_specificity": 0.8409090909090909,
+              "inner_brier": 0.1084411756479081,
+              "simplicity_rank": 4
+            },
+            {
+              "name": "Candidate 1: Frozen Baseline (StandardScaler + LR C=0.1 balanced)",
+              "inner_accuracy": 0.8549222797927462,
+              "inner_roc_auc": 0.9257575757575757,
+              "inner_recall": 0.8857142857142857,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.1109022936105233,
+              "simplicity_rank": 1
+            },
+            {
+              "name": "Candidate 6: Tri-Model Soft Voting Ensemble (LR + ElasticNet + Linear SVM)",
+              "inner_accuracy": 0.8549222797927462,
+              "inner_roc_auc": 0.9237012987012987,
+              "inner_recall": 0.8857142857142857,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.11005710091588335,
+              "simplicity_rank": 6
+            },
+            {
+              "name": "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)",
+              "inner_accuracy": 0.8549222797927462,
+              "inner_roc_auc": 0.920995670995671,
+              "inner_recall": 0.8857142857142857,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.11378907612624505,
+              "simplicity_rank": 5
+            },
+            {
+              "name": "Candidate 2: Clinical Domain Features + Balanced LR",
+              "inner_accuracy": 0.8497409326424871,
+              "inner_roc_auc": 0.9239177489177489,
+              "inner_recall": 0.8857142857142857,
+              "inner_specificity": 0.8068181818181818,
+              "inner_brier": 0.1117581759027509,
+              "simplicity_rank": 3
+            }
+          ],
+          "outer_metrics": {
+            "accuracy": 0.8571428571428571,
+            "correct_samples": 42,
+            "total_samples": 49,
+            "recall": 0.9259259259259259,
+            "specificity": 0.7727272727272727,
+            "precision": 0.8333333333333334,
+            "f1_score": 0.8771929824561403,
+            "roc_auc": 0.8922558922558922,
+            "brier_score": 0.12781389921456734,
+            "log_loss": 0.41031044049193727,
+            "confusion_matrix": {
+              "tn": 17,
+              "fp": 5,
+              "fn": 2,
+              "tp": 25
+            }
+          },
+          "elapsed_seconds": 5.44
+        },
+        {
+          "fold": 2,
+          "test_samples": 48,
+          "selected_candidate": "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)",
+          "inner_selection_metrics": {
+            "name": "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)",
+            "inner_accuracy": 0.8762886597938144,
+            "inner_roc_auc": 0.9154159519725558,
+            "inner_recall": 0.9245283018867925,
+            "inner_specificity": 0.8181818181818182,
+            "inner_brier": 0.11433486922454317,
+            "simplicity_rank": 5
+          },
+          "all_inner_candidates": [
+            {
+              "name": "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)",
+              "inner_accuracy": 0.8762886597938144,
+              "inner_roc_auc": 0.9154159519725558,
+              "inner_recall": 0.9245283018867925,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.11433486922454317,
+              "simplicity_rank": 5
+            },
+            {
+              "name": "Candidate 1: Frozen Baseline (StandardScaler + LR C=0.1 balanced)",
+              "inner_accuracy": 0.865979381443299,
+              "inner_roc_auc": 0.9186320754716981,
+              "inner_recall": 0.8962264150943396,
+              "inner_specificity": 0.8295454545454546,
+              "inner_brier": 0.11430165245322334,
+              "simplicity_rank": 1
+            },
+            {
+              "name": "Candidate 2: Clinical Domain Features + Balanced LR",
+              "inner_accuracy": 0.865979381443299,
+              "inner_roc_auc": 0.9180960548885077,
+              "inner_recall": 0.9056603773584906,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.114663490569305,
+              "simplicity_rank": 3
+            },
+            {
+              "name": "Candidate 6: Tri-Model Soft Voting Ensemble (LR + ElasticNet + Linear SVM)",
+              "inner_accuracy": 0.865979381443299,
+              "inner_roc_auc": 0.917131217838765,
+              "inner_recall": 0.8962264150943396,
+              "inner_specificity": 0.8295454545454546,
+              "inner_brier": 0.11182509233998669,
+              "simplicity_rank": 6
+            },
+            {
+              "name": "Candidate 3: B-Splines (Nonlinear Basis) + LR C=0.1",
+              "inner_accuracy": 0.8608247422680413,
+              "inner_roc_auc": 0.9231346483704974,
+              "inner_recall": 0.8679245283018868,
+              "inner_specificity": 0.8522727272727273,
+              "inner_brier": 0.1073999538114678,
+              "simplicity_rank": 4
+            },
+            {
+              "name": "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)",
+              "inner_accuracy": 0.8556701030927835,
+              "inner_roc_auc": 0.9191680960548885,
+              "inner_recall": 0.8867924528301887,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.11449277802483007,
+              "simplicity_rank": 2
+            }
+          ],
+          "outer_metrics": {
+            "accuracy": 0.8333333333333334,
+            "correct_samples": 40,
+            "total_samples": 48,
+            "recall": 0.9230769230769231,
+            "specificity": 0.7272727272727273,
+            "precision": 0.8,
+            "f1_score": 0.8571428571428571,
+            "roc_auc": 0.9143356643356643,
+            "brier_score": 0.1221846407446567,
+            "log_loss": 0.3835397720620348,
+            "confusion_matrix": {
+              "tn": 16,
+              "fp": 6,
+              "fn": 2,
+              "tp": 24
+            }
+          },
+          "elapsed_seconds": 5.4
+        },
+        {
+          "fold": 3,
+          "test_samples": 48,
+          "selected_candidate": "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)",
+          "inner_selection_metrics": {
+            "name": "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)",
+            "inner_accuracy": 0.8556701030927835,
+            "inner_roc_auc": 0.9097341337907375,
+            "inner_recall": 0.8962264150943396,
+            "inner_specificity": 0.8068181818181818,
+            "inner_brier": 0.11818679192607594,
+            "simplicity_rank": 2
+          },
+          "all_inner_candidates": [
+            {
+              "name": "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)",
+              "inner_accuracy": 0.8556701030927835,
+              "inner_roc_auc": 0.9097341337907375,
+              "inner_recall": 0.8962264150943396,
+              "inner_specificity": 0.8068181818181818,
+              "inner_brier": 0.11818679192607594,
+              "simplicity_rank": 2
+            },
+            {
+              "name": "Candidate 3: B-Splines (Nonlinear Basis) + LR C=0.1",
+              "inner_accuracy": 0.8505154639175257,
+              "inner_roc_auc": 0.9208833619210977,
+              "inner_recall": 0.8584905660377359,
+              "inner_specificity": 0.8409090909090909,
+              "inner_brier": 0.11213549719408764,
+              "simplicity_rank": 4
+            },
+            {
+              "name": "Candidate 6: Tri-Model Soft Voting Ensemble (LR + ElasticNet + Linear SVM)",
+              "inner_accuracy": 0.845360824742268,
+              "inner_roc_auc": 0.9104845626072041,
+              "inner_recall": 0.8773584905660378,
+              "inner_specificity": 0.8068181818181818,
+              "inner_brier": 0.11854710370099683,
+              "simplicity_rank": 6
+            },
+            {
+              "name": "Candidate 2: Clinical Domain Features + Balanced LR",
+              "inner_accuracy": 0.845360824742268,
+              "inner_roc_auc": 0.9068396226415094,
+              "inner_recall": 0.8962264150943396,
+              "inner_specificity": 0.7840909090909091,
+              "inner_brier": 0.12084463390003482,
+              "simplicity_rank": 3
+            },
+            {
+              "name": "Candidate 1: Frozen Baseline (StandardScaler + LR C=0.1 balanced)",
+              "inner_accuracy": 0.8402061855670103,
+              "inner_roc_auc": 0.9106989708404803,
+              "inner_recall": 0.8867924528301887,
+              "inner_specificity": 0.7840909090909091,
+              "inner_brier": 0.11915825311341177,
+              "simplicity_rank": 1
+            },
+            {
+              "name": "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)",
+              "inner_accuracy": 0.8402061855670103,
+              "inner_roc_auc": 0.9093053173241852,
+              "inner_recall": 0.8773584905660378,
+              "inner_specificity": 0.7954545454545454,
+              "inner_brier": 0.1197859724175623,
+              "simplicity_rank": 5
+            }
+          ],
+          "outer_metrics": {
+            "accuracy": 0.8958333333333334,
+            "correct_samples": 43,
+            "total_samples": 48,
+            "recall": 0.9615384615384616,
+            "specificity": 0.8181818181818182,
+            "precision": 0.8620689655172413,
+            "f1_score": 0.9090909090909091,
+            "roc_auc": 0.9353146853146852,
+            "brier_score": 0.09989681757014003,
+            "log_loss": 0.3469542143325011,
+            "confusion_matrix": {
+              "tn": 18,
+              "fp": 4,
+              "fn": 1,
+              "tp": 25
+            }
+          },
+          "elapsed_seconds": 5.38
+        },
+        {
+          "fold": 4,
+          "test_samples": 49,
+          "selected_candidate": "Candidate 3: B-Splines (Nonlinear Basis) + LR C=0.1",
+          "inner_selection_metrics": {
+            "name": "Candidate 3: B-Splines (Nonlinear Basis) + LR C=0.1",
+            "inner_accuracy": 0.8601036269430051,
+            "inner_roc_auc": 0.9231601731601731,
+            "inner_recall": 0.8761904761904762,
+            "inner_specificity": 0.8409090909090909,
+            "inner_brier": 0.10601051860902454,
+            "simplicity_rank": 4
+          },
+          "all_inner_candidates": [
+            {
+              "name": "Candidate 3: B-Splines (Nonlinear Basis) + LR C=0.1",
+              "inner_accuracy": 0.8601036269430051,
+              "inner_roc_auc": 0.9231601731601731,
+              "inner_recall": 0.8761904761904762,
+              "inner_specificity": 0.8409090909090909,
+              "inner_brier": 0.10601051860902454,
+              "simplicity_rank": 4
+            },
+            {
+              "name": "Candidate 2: Clinical Domain Features + Balanced LR",
+              "inner_accuracy": 0.8601036269430051,
+              "inner_roc_auc": 0.9082251082251083,
+              "inner_recall": 0.9047619047619048,
+              "inner_specificity": 0.8068181818181818,
+              "inner_brier": 0.11559526962526505,
+              "simplicity_rank": 3
+            },
+            {
+              "name": "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)",
+              "inner_accuracy": 0.8549222797927462,
+              "inner_roc_auc": 0.9140692640692641,
+              "inner_recall": 0.8952380952380953,
+              "inner_specificity": 0.8068181818181818,
+              "inner_brier": 0.11263932579821662,
+              "simplicity_rank": 2
+            },
+            {
+              "name": "Candidate 1: Frozen Baseline (StandardScaler + LR C=0.1 balanced)",
+              "inner_accuracy": 0.8549222797927462,
+              "inner_roc_auc": 0.9102813852813852,
+              "inner_recall": 0.8857142857142857,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.11480714385883789,
+              "simplicity_rank": 1
+            },
+            {
+              "name": "Candidate 6: Tri-Model Soft Voting Ensemble (LR + ElasticNet + Linear SVM)",
+              "inner_accuracy": 0.8497409326424871,
+              "inner_roc_auc": 0.9098484848484848,
+              "inner_recall": 0.8761904761904762,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.11257314252108902,
+              "simplicity_rank": 6
+            },
+            {
+              "name": "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)",
+              "inner_accuracy": 0.844559585492228,
+              "inner_roc_auc": 0.9091991341991341,
+              "inner_recall": 0.8666666666666667,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.11623389946399337,
+              "simplicity_rank": 5
+            }
+          ],
+          "outer_metrics": {
+            "accuracy": 0.7959183673469388,
+            "correct_samples": 39,
+            "total_samples": 49,
+            "recall": 0.7037037037037037,
+            "specificity": 0.9090909090909091,
+            "precision": 0.9047619047619048,
+            "f1_score": 0.7916666666666666,
+            "roc_auc": 0.9057239057239057,
+            "brier_score": 0.13729840741987662,
+            "log_loss": 0.41614499391167503,
+            "confusion_matrix": {
+              "tn": 20,
+              "fp": 2,
+              "fn": 8,
+              "tp": 19
+            }
+          },
+          "elapsed_seconds": 5.33
+        },
+        {
+          "fold": 5,
+          "test_samples": 48,
+          "selected_candidate": "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)",
+          "inner_selection_metrics": {
+            "name": "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)",
+            "inner_accuracy": 0.8556701030927835,
+            "inner_roc_auc": 0.9020154373927959,
+            "inner_recall": 0.9056603773584906,
+            "inner_specificity": 0.7954545454545454,
+            "inner_brier": 0.12380230821425348,
+            "simplicity_rank": 5
+          },
+          "all_inner_candidates": [
+            {
+              "name": "Candidate 5: ElasticNet (L1/L2 Sparsity, SAGA)",
+              "inner_accuracy": 0.8556701030927835,
+              "inner_roc_auc": 0.9020154373927959,
+              "inner_recall": 0.9056603773584906,
+              "inner_specificity": 0.7954545454545454,
+              "inner_brier": 0.12380230821425348,
+              "simplicity_rank": 5
+            },
+            {
+              "name": "Candidate 4: Oldpeak Quadratic + Tuned Regularization (C=0.2)",
+              "inner_accuracy": 0.8505154639175257,
+              "inner_roc_auc": 0.9127358490566039,
+              "inner_recall": 0.8773584905660378,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.11774202477150947,
+              "simplicity_rank": 2
+            },
+            {
+              "name": "Candidate 2: Clinical Domain Features + Balanced LR",
+              "inner_accuracy": 0.8505154639175257,
+              "inner_roc_auc": 0.9063036020583191,
+              "inner_recall": 0.8962264150943396,
+              "inner_specificity": 0.7954545454545454,
+              "inner_brier": 0.12262131298802274,
+              "simplicity_rank": 3
+            },
+            {
+              "name": "Candidate 1: Frozen Baseline (StandardScaler + LR C=0.1 balanced)",
+              "inner_accuracy": 0.845360824742268,
+              "inner_roc_auc": 0.9094125214408233,
+              "inner_recall": 0.8679245283018868,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.12015175650756622,
+              "simplicity_rank": 1
+            },
+            {
+              "name": "Candidate 3: B-Splines (Nonlinear Basis) + LR C=0.1",
+              "inner_accuracy": 0.845360824742268,
+              "inner_roc_auc": 0.9081260720411665,
+              "inner_recall": 0.8679245283018868,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.1170756324326463,
+              "simplicity_rank": 4
+            },
+            {
+              "name": "Candidate 6: Tri-Model Soft Voting Ensemble (LR + ElasticNet + Linear SVM)",
+              "inner_accuracy": 0.8402061855670103,
+              "inner_roc_auc": 0.9090909090909091,
+              "inner_recall": 0.8584905660377359,
+              "inner_specificity": 0.8181818181818182,
+              "inner_brier": 0.11891511191609432,
+              "simplicity_rank": 6
+            }
+          ],
+          "outer_metrics": {
+            "accuracy": 0.8125,
+            "correct_samples": 39,
+            "total_samples": 48,
+            "recall": 0.8076923076923077,
+            "specificity": 0.8181818181818182,
+            "precision": 0.84,
+            "f1_score": 0.8235294117647058,
+            "roc_auc": 0.93006993006993,
+            "brier_score": 0.11556356887222034,
+            "log_loss": 0.3589242989016168,
+            "confusion_matrix": {
+              "tn": 18,
+              "fp": 4,
+              "fn": 5,
+              "tp": 21
+            }
+          },
+          "elapsed_seconds": 5.36
+        }
+      ]
+    },
+    "authoritative_baseline": {
+      "pooled_outer_metrics": {
+        "accuracy": 0.8553719008264463,
+        "correct_samples": 207,
+        "total_samples": 242,
+        "recall": 0.8863636363636364,
+        "specificity": 0.8181818181818182,
+        "precision": 0.8540145985401459,
+        "f1_score": 0.8698884758364313,
+        "roc_auc": 0.9162534435261709,
+        "brier_score": 0.11642826947011123,
+        "log_loss": 0.37321977349293056,
+        "confusion_matrix": {
+          "tn": 90,
+          "fp": 20,
+          "fn": 15,
+          "tp": 117
+        }
+      },
+      "fold_variability": {
+        "accuracy": {
+          "mean": 0.8554421768707483,
+          "std": 0.022247407231209406,
+          "min": 0.8333333333333334,
+          "max": 0.8958333333333334,
+          "fold_values": [
+            0.8367346938775511,
+            0.8333333333333334,
+            0.8958333333333334,
+            0.8571428571428571,
+            0.8541666666666666
+          ]
+        },
+        "recall": {
+          "mean": 0.8868945868945868,
+          "std": 0.05242165242165245,
+          "min": 0.8148148148148148,
+          "max": 0.9615384615384616,
+          "fold_values": [
+            0.8888888888888888,
+            0.9230769230769231,
+            0.9615384615384616,
+            0.8148148148148148,
+            0.8461538461538461
+          ]
+        },
+        "specificity": {
+          "mean": 0.8181818181818181,
+          "std": 0.06428243465332249,
+          "min": 0.7272727272727273,
+          "max": 0.9090909090909091,
+          "fold_values": [
+            0.7727272727272727,
+            0.7272727272727273,
+            0.8181818181818182,
+            0.9090909090909091,
+            0.8636363636363636
+          ]
+        },
+        "precision": {
+          "mean": 0.857264367816092,
+          "std": 0.040567541940688547,
+          "min": 0.8,
+          "max": 0.9166666666666666,
+          "fold_values": [
+            0.8275862068965517,
+            0.8,
+            0.8620689655172413,
+            0.9166666666666666,
+            0.88
+          ]
+        },
+        "f1_score": {
+          "mean": 0.8697733638910108,
+          "std": 0.019817778905535165,
+          "min": 0.8571428571428571,
+          "max": 0.9090909090909091,
+          "fold_values": [
+            0.8571428571428571,
+            0.8571428571428571,
+            0.9090909090909091,
+            0.8627450980392157,
+            0.8627450980392157
+          ]
+        },
+        "roc_auc": {
+          "mean": 0.9203962703962703,
+          "std": 0.01736970904342627,
+          "min": 0.8922558922558922,
+          "max": 0.9388111888111889,
+          "fold_values": [
+            0.8922558922558922,
+            0.923076923076923,
+            0.9388111888111889,
+            0.9107744107744107,
+            0.9370629370629371
+          ]
+        },
+        "brier_score": {
+          "mean": 0.1163316851764226,
+          "std": 0.012599829079745002,
+          "min": 0.09681682740231684,
+          "max": 0.12821181096474202,
+          "fold_values": [
+            0.12782495846074804,
+            0.12253481577892418,
+            0.09681682740231684,
+            0.12821181096474202,
+            0.10627001327538198
+          ]
+        },
+        "log_loss": {
+          "mean": 0.3729657923470539,
+          "std": 0.02938329240536493,
+          "min": 0.3373999345679924,
+          "max": 0.41015404359982416,
+          "fold_values": [
+            0.41015404359982416,
+            0.3793090491563979,
+            0.34072495601461883,
+            0.3972409783964363,
+            0.3373999345679924
+          ]
+        }
+      },
+      "outer_folds": [
+        {
+          "fold": 1,
+          "outer_metrics": {
+            "accuracy": 0.8367346938775511,
+            "correct_samples": 41,
+            "total_samples": 49,
+            "recall": 0.8888888888888888,
+            "specificity": 0.7727272727272727,
+            "precision": 0.8275862068965517,
+            "f1_score": 0.8571428571428571,
+            "roc_auc": 0.8922558922558922,
+            "brier_score": 0.12782495846074804,
+            "log_loss": 0.41015404359982416,
+            "confusion_matrix": {
+              "tn": 17,
+              "fp": 5,
+              "fn": 3,
+              "tp": 24
+            }
+          }
+        },
+        {
+          "fold": 2,
+          "outer_metrics": {
+            "accuracy": 0.8333333333333334,
+            "correct_samples": 40,
+            "total_samples": 48,
+            "recall": 0.9230769230769231,
+            "specificity": 0.7272727272727273,
+            "precision": 0.8,
+            "f1_score": 0.8571428571428571,
+            "roc_auc": 0.923076923076923,
+            "brier_score": 0.12253481577892418,
+            "log_loss": 0.3793090491563979,
+            "confusion_matrix": {
+              "tn": 16,
+              "fp": 6,
+              "fn": 2,
+              "tp": 24
+            }
+          }
+        },
+        {
+          "fold": 3,
+          "outer_metrics": {
+            "accuracy": 0.8958333333333334,
+            "correct_samples": 43,
+            "total_samples": 48,
+            "recall": 0.9615384615384616,
+            "specificity": 0.8181818181818182,
+            "precision": 0.8620689655172413,
+            "f1_score": 0.9090909090909091,
+            "roc_auc": 0.9388111888111889,
+            "brier_score": 0.09681682740231684,
+            "log_loss": 0.34072495601461883,
+            "confusion_matrix": {
+              "tn": 18,
+              "fp": 4,
+              "fn": 1,
+              "tp": 25
+            }
+          }
+        },
+        {
+          "fold": 4,
+          "outer_metrics": {
+            "accuracy": 0.8571428571428571,
+            "correct_samples": 42,
+            "total_samples": 49,
+            "recall": 0.8148148148148148,
+            "specificity": 0.9090909090909091,
+            "precision": 0.9166666666666666,
+            "f1_score": 0.8627450980392157,
+            "roc_auc": 0.9107744107744107,
+            "brier_score": 0.12821181096474202,
+            "log_loss": 0.3972409783964363,
+            "confusion_matrix": {
+              "tn": 20,
+              "fp": 2,
+              "fn": 5,
+              "tp": 22
+            }
+          }
+        },
+        {
+          "fold": 5,
+          "outer_metrics": {
+            "accuracy": 0.8541666666666666,
+            "correct_samples": 41,
+            "total_samples": 48,
+            "recall": 0.8461538461538461,
+            "specificity": 0.8636363636363636,
+            "precision": 0.88,
+            "f1_score": 0.8627450980392157,
+            "roc_auc": 0.9370629370629371,
+            "brier_score": 0.10627001327538198,
+            "log_loss": 0.3373999345679924,
+            "confusion_matrix": {
+              "tn": 19,
+              "fp": 3,
+              "fn": 4,
+              "tp": 22
+            }
+          }
+        }
+      ]
+    },
+    "comparison_vs_baseline": {
+      "accuracy_diff": -0.016528925619834767,
+      "correct_samples_diff": -4,
+      "recall_diff": -0.022727272727272707,
+      "specificity_diff": -0.00909090909090915,
+      "precision_diff": -0.0095701540957015,
+      "f1_score_diff": -0.015955891566768354,
+      "roc_auc_diff": -0.007162534435261714,
+      "brier_score_diff": 0.004222409579742389,
+      "log_loss_diff": 0.010203342126872406
+    },
+    "total_elapsed_seconds": 26.97
+  }
+}
