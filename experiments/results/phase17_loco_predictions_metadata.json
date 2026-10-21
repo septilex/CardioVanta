@@ -1,0 +1,151 @@
+{
+  "task": "Phase 17, Task 3.2: Execute the LOCO Prediction Pipeline",
+  "timestamp_utc": "2026-10-21T05:40:32.736982+00:00",
+  "random_state": 42,
+  "decision_threshold": 0.5,
+  "calibration": {
+    "method": "sigmoid",
+    "cv_scheme": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 42
+  },
+  "candidate_a": {
+    "name": "Candidate A: Missing-Aware 10-Clinical-Feature Pipeline (11 Model Inputs)",
+    "clinical_features_in": [
+      "age",
+      "sex",
+      "cp",
+      "trestbps",
+      "chol",
+      "fbs",
+      "restecg",
+      "thalach",
+      "exang",
+      "oldpeak"
+    ],
+    "model_inputs": [
+      "age",
+      "sex",
+      "cp",
+      "trestbps",
+      "chol",
+      "fbs",
+      "restecg",
+      "thalach",
+      "exang",
+      "oldpeak",
+      "chol_is_missing"
+    ],
+    "n_inputs": 11,
+    "estimator": "LogisticRegression(C=1.0, solver='lbfgs')",
+    "missingness_handling": "fold-local median on chol + chol_is_missing indicator"
+  },
+  "candidate_b": {
+    "name": "Candidate B: Non-Invasive 9-Clinical-Feature Pipeline (9 Model Inputs)",
+    "clinical_features_in": [
+      "age",
+      "sex",
+      "cp",
+      "trestbps",
+      "fbs",
+      "restecg",
+      "thalach",
+      "exang",
+      "oldpeak"
+    ],
+    "model_inputs": [
+      "age",
+      "sex",
+      "cp",
+      "trestbps",
+      "fbs",
+      "restecg",
+      "thalach",
+      "exang",
+      "oldpeak"
+    ],
+    "n_inputs": 9,
+    "estimator": "LogisticRegression(C=1.0, solver='lbfgs')",
+    "missingness_handling": "omits cholesterol systematically, fold-local median clinical"
+  },
+  "folds": [
+    {
+      "fold_id": 1,
+      "held_out_center": "hungary",
+      "held_out_status": "external_validation",
+      "n_held_out": 294,
+      "training_centers": [
+        "cleveland",
+        "long_beach"
+      ],
+      "n_train": 442,
+      "training_counts_by_center": {
+        "cleveland": 242,
+        "long_beach": 200
+      },
+      "total_samples": 736
+    },
+    {
+      "fold_id": 2,
+      "held_out_center": "long_beach",
+      "held_out_status": "external_validation",
+      "n_held_out": 200,
+      "training_centers": [
+        "cleveland",
+        "hungary"
+      ],
+      "n_train": 536,
+      "training_counts_by_center": {
+        "cleveland": 242,
+        "hungary": 294
+      },
+      "total_samples": 736
+    },
+    {
+      "fold_id": 3,
+      "held_out_center": "cleveland",
+      "held_out_status": "retrospective_development_baseline",
+      "n_held_out": 242,
+      "training_centers": [
+        "hungary",
+        "long_beach"
+      ],
+      "n_train": 494,
+      "training_counts_by_center": {
+        "hungary": 294,
+        "long_beach": 200
+      },
+      "total_samples": 736
+    }
+  ],
+  "total_predictions": 736,
+  "unique_patient_count": 736,
+  "per_fold_counts": {
+    "hungary": 294,
+    "long_beach": 200,
+    "cleveland": 242
+  },
+  "quarantined_test_set": {
+    "cohort": "cleveland",
+    "locked_sample_count": 61,
+    "quarantine_verified": true
+  },
+  "prediction_artifacts": {
+    "csv": "phase17_loco_predictions.csv",
+    "metadata": "phase17_loco_predictions_metadata.json"
+  },
+  "target_convention": {
+    "positive_class": 1,
+    "positive_class_label": "disease present (>50% diameter narrowing)",
+    "negative_class": 0,
+    "negative_class_label": "disease-free (<50% diameter narrowing)",
+    "harmonized": true,
+    "external_validation_cohorts": [
+      "hungary",
+      "long_beach"
+    ],
+    "retrospective_development_cohort": "cleveland",
+    "locked_cleveland_test_partition_excluded": true
+  }
+}

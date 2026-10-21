@@ -1,0 +1,253 @@
+{
+  "metadata": {
+    "license_name": "Creative Commons Attribution 4.0 International",
+    "license_spdx": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "doi": "10.24432/C56327",
+    "uci_id": "45",
+    "dataset_title": "UCI Heart Disease",
+    "curator": "David W. Aha, July 1988",
+    "regulatory_disclaimer": "Open-source licensing compliance governs copyright and distribution only. It does NOT constitute, imply, or substitute for clinical validation, ethical clearance, medical device certification, or regulatory approval (such as FDA 510(k), CE mark, or SaMD classification) for clinical, diagnostic, or therapeutic patient care."
+  },
+  "citations": {
+    "hungary": {
+      "institution": "Hungarian Institute of Cardiology, Budapest, Hungary",
+      "investigator": "Andras Janosi, M.D.",
+      "primary_file": "hungarian.data",
+      "expected_n": 294
+    },
+    "long_beach": {
+      "institution": "V.A. Medical Center, Long Beach, CA, USA",
+      "investigator": "Robert Detrano, M.D., Ph.D.",
+      "primary_file": "long-beach-va.data",
+      "expected_n": 200
+    },
+    "cleveland": {
+      "institution": "Cleveland Clinic Foundation, Cleveland, OH, USA",
+      "investigator": "Robert Detrano, M.D., Ph.D.",
+      "primary_file": "cleveland.data",
+      "expected_n": 303
+    },
+    "switzerland": {
+      "institution": "University Hospital, Zurich, Switzerland",
+      "investigator": "William Steinbrunn, M.D. & Matthias Pfisterer, M.D.",
+      "primary_file": "switzerland.data",
+      "expected_n": 123
+    }
+  },
+  "authoritative_sources": {
+    "zip_bundle": {
+      "url": "https://archive.ics.uci.edu/static/public/45/heart+disease.zip",
+      "filename": "heart+disease.zip",
+      "sha256": "b17cd273da9ce1caa4710fce80227ea454d4dbf9fcbc8e6a9121672751563adc",
+      "expected_size_bytes": 128894
+    },
+    "hungarian.data": {
+      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/hungarian.data",
+      "filename": "hungarian.data",
+      "sha256": "b8e4bbd06b9bf9ec831c992ba397639f22815e525c43b489e1a6e75b3be29a75",
+      "expected_size_bytes": 62192,
+      "cohort": "hungary"
+    },
+    "long-beach-va.data": {
+      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/long-beach-va.data",
+      "filename": "long-beach-va.data",
+      "sha256": "16d44b28ccb139d07509ee17f22c51fcd568caea8beb607d1503e4a679133353",
+      "expected_size_bytes": 39892,
+      "cohort": "long_beach"
+    },
+    "heart-disease.names": {
+      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/heart-disease.names",
+      "filename": "heart-disease.names",
+      "sha256": "ec7ed5aa4ed8321097808f47b836301c2a0c36f3bb09c40b8b43b622363e6b61",
+      "expected_size_bytes": 10060,
+      "cohort": "documentation"
+    }
+  },
+  "profiles": [
+    {
+      "cohort_name": "Hungarian Cohort (Budapest)",
+      "source_file": "hungarian.data",
+      "file_size_bytes": 62192,
+      "sha256_hash": "b8e4bbd06b9bf9ec831c992ba397639f22815e525c43b489e1a6e75b3be29a75",
+      "record_count": 294,
+      "lines_per_record": 10.0,
+      "is_canonical_76_format": true,
+      "cp_coding_counts": {
+        "1": 11,
+        "2": 106,
+        "3": 54,
+        "4": 123
+      },
+      "cp_is_canonical_1_to_4": true,
+      "candidate_sentinel_counts": {
+        "age": {},
+        "sex": {},
+        "cp": {},
+        "trestbps": {
+          "-9": 1
+        },
+        "chol": {
+          "-9": 23
+        },
+        "fbs": {
+          "-9": 8
+        },
+        "restecg": {
+          "-9": 1
+        },
+        "thalach": {
+          "-9": 1
+        },
+        "exang": {
+          "-9": 1
+        },
+        "oldpeak": {},
+        "slope": {
+          "-9": 190
+        },
+        "ca": {
+          "-9": 290
+        },
+        "thal": {
+          "-9": 266
+        },
+        "num": {}
+      },
+      "zero_counts": {
+        "age": 0,
+        "sex": 81,
+        "cp": 0,
+        "trestbps": 0,
+        "chol": 0,
+        "fbs": 266,
+        "restecg": 235,
+        "thalach": 0,
+        "exang": 204,
+        "oldpeak": 189,
+        "slope": 0,
+        "ca": 3,
+        "thal": 0,
+        "num": 188
+      },
+      "cholesterol_analysis": {
+        "exact_zero_count": 0,
+        "neg9_sentinel_count": 23,
+        "question_mark_count": 0,
+        "valid_positive_count": 271,
+        "total_evaluated": 294,
+        "provisional_literature_estimate": 23,
+        "empirical_status": "Confirmed 23 missing sentinels (-9) in Hungary; raw chol=0 count is 0.",
+        "min_positive": 85.0,
+        "median_positive": 243.0,
+        "max_positive": 603.0
+      },
+      "legitimate_zero_counts": {
+        "sex_0_female": 81,
+        "fbs_0_normal": 266,
+        "restecg_0_normal": 235,
+        "exang_0_no_angina": 204,
+        "oldpeak_0_isoelectric": 189,
+        "num_0_disease_free": 188
+      },
+      "detected_domain_violations": [],
+      "unresolved_questions": [
+        "Literature commonly cited '23 zero-cholesterol records' in Hungary; raw inspection proves these are stored as token '-9' (missing sentinel) rather than token '0'. In downstream processing, both require NaN normalization."
+      ]
+    },
+    {
+      "cohort_name": "Long Beach VA Cohort (California)",
+      "source_file": "long-beach-va.data",
+      "file_size_bytes": 39892,
+      "sha256_hash": "16d44b28ccb139d07509ee17f22c51fcd568caea8beb607d1503e4a679133353",
+      "record_count": 200,
+      "lines_per_record": 10.0,
+      "is_canonical_76_format": true,
+      "cp_coding_counts": {
+        "1": 8,
+        "2": 14,
+        "3": 47,
+        "4": 131
+      },
+      "cp_is_canonical_1_to_4": true,
+      "candidate_sentinel_counts": {
+        "age": {},
+        "sex": {},
+        "cp": {},
+        "trestbps": {
+          "-9": 56
+        },
+        "chol": {
+          "-9": 7
+        },
+        "fbs": {
+          "-9": 7
+        },
+        "restecg": {},
+        "thalach": {
+          "-9": 53
+        },
+        "exang": {
+          "-9": 53
+        },
+        "oldpeak": {
+          "-9": 56
+        },
+        "slope": {
+          "-9": 101
+        },
+        "ca": {
+          "-9": 198
+        },
+        "thal": {
+          "-9": 159
+        },
+        "num": {}
+      },
+      "zero_counts": {
+        "age": 0,
+        "sex": 6,
+        "cp": 0,
+        "trestbps": 1,
+        "chol": 49,
+        "fbs": 125,
+        "restecg": 80,
+        "thalach": 0,
+        "exang": 52,
+        "oldpeak": 40,
+        "slope": 1,
+        "ca": 2,
+        "thal": 0,
+        "num": 51
+      },
+      "cholesterol_analysis": {
+        "exact_zero_count": 49,
+        "neg9_sentinel_count": 7,
+        "question_mark_count": 0,
+        "valid_positive_count": 144,
+        "total_evaluated": 200,
+        "provisional_literature_estimate": 131,
+        "empirical_status": "Confirmed 49 exact zeros (chol=0) and 7 sentinels (-9) in Long Beach VA.",
+        "min_positive": 100.0,
+        "median_positive": 228.0,
+        "max_positive": 458.0
+      },
+      "legitimate_zero_counts": {
+        "sex_0_female": 6,
+        "fbs_0_normal": 125,
+        "restecg_0_normal": 80,
+        "exang_0_no_angina": 52,
+        "oldpeak_0_isoelectric": 40,
+        "num_0_disease_free": 51
+      },
+      "detected_domain_violations": [
+        "Physiologically unviable blood pressure: record #33 trestbps=0 mm Hg.",
+        "Documented negative ST depression: record #5 oldpeak=-0.5 mm (valid ST elevation/depression).",
+        "Out-of-domain slope value: record #100 slope=0 (canonical domain is 1, 2, 3)."
+      ],
+      "unresolved_questions": [
+        "Literature commonly cited '~131 zero-cholesterol records' in Long Beach VA; raw empirical count identifies exactly 49 records with token '0' and 7 with token '-9' (total 56 non-positive / missing). The remaining 144 records contain valid positive cholesterol measurements."
+      ]
+    }
+  ]
+}

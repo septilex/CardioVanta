@@ -1,0 +1,706 @@
+{
+  "task": "Phase 17, Task 3.3: Per-Centre Metrics and Bootstrap Confidence Intervals",
+  "timestamp_utc": "2026-10-21T05:40:57.392226+00:00",
+  "random_seed": 42,
+  "bootstrap_method": "stratified_percentile",
+  "n_bootstraps": 1000,
+  "confidence_level": 0.95,
+  "fixed_decision_threshold": 0.5,
+  "ece_binning": {
+    "n_bins": 10,
+    "strategy": "equal_width",
+    "range": [
+      0.0,
+      1.0
+    ],
+    "boundary_handling": "[b/10, (b+1)/10) for b<9, [0.9, 1.0] for b=9"
+  },
+  "provenance": {
+    "prediction_csv": "experiments/results/phase17_loco_predictions.csv",
+    "prediction_manifest": "experiments/results/phase17_loco_predictions_metadata.json",
+    "total_predictions": 736,
+    "unique_patients": 736,
+    "quarantined_locked_test_n": 61,
+    "quarantine_verified": true
+  },
+  "centers": {
+    "hungary": {
+      "held_out_center": "hungary",
+      "role": "external_validation",
+      "n_samples": 294,
+      "n_positives": 106,
+      "n_negatives": 188,
+      "prevalence": 0.36054421768707484,
+      "candidate_a": {
+        "candidate": "candidate_a",
+        "label": "Candidate A: Missing-Aware 10-Clinical-Feature Pipeline (11 Model Inputs)",
+        "metrics": {
+          "roc_auc": {
+            "metric": "roc_auc",
+            "display_name": "ROC-AUC",
+            "point_estimate": 0.8857888398233641,
+            "ci_lower": 0.8425795363307909,
+            "ci_upper": 0.9276018667201927,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "pr_auc": {
+            "metric": "pr_auc",
+            "display_name": "PR-AUC (Average Precision)",
+            "point_estimate": 0.8480616932356188,
+            "ci_lower": 0.7901687177082792,
+            "ci_upper": 0.9073014087985996,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "accuracy": {
+            "metric": "accuracy",
+            "display_name": "Accuracy (t=0.50)",
+            "point_estimate": 0.8197278911564626,
+            "ci_lower": 0.7755102040816326,
+            "ci_upper": 0.8639455782312925,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "sensitivity": {
+            "metric": "sensitivity",
+            "display_name": "Sensitivity / Recall (t=0.50)",
+            "point_estimate": 0.7641509433962265,
+            "ci_lower": 0.6792452830188679,
+            "ci_upper": 0.839622641509434,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "specificity": {
+            "metric": "specificity",
+            "display_name": "Specificity (t=0.50)",
+            "point_estimate": 0.851063829787234,
+            "ci_lower": 0.7977393617021277,
+            "ci_upper": 0.898936170212766,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "precision": {
+            "metric": "precision",
+            "display_name": "Precision / PPV (t=0.50)",
+            "point_estimate": 0.7431192660550459,
+            "ci_lower": 0.6776792855238603,
+            "ci_upper": 0.8141661344767813,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "f1_score": {
+            "metric": "f1_score",
+            "display_name": "F1-Score (t=0.50)",
+            "point_estimate": 0.7534883720930232,
+            "ci_lower": 0.6919431279620852,
+            "ci_upper": 0.8131273797161648,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "brier_score": {
+            "metric": "brier_score",
+            "display_name": "Brier Score",
+            "point_estimate": 0.1312185221874982,
+            "ci_lower": 0.10993936241320902,
+            "ci_upper": 0.15162498252085507,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "ece": {
+            "metric": "ece",
+            "display_name": "Expected Calibration Error (ECE, 10-bin)",
+            "point_estimate": 0.09360817449208543,
+            "ci_lower": 0.07539357152298061,
+            "ci_upper": 0.13270420643928535,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          }
+        }
+      },
+      "candidate_b": {
+        "candidate": "candidate_b",
+        "label": "Candidate B: Non-Invasive 9-Clinical-Feature Pipeline (9 Model Inputs)",
+        "metrics": {
+          "roc_auc": {
+            "metric": "roc_auc",
+            "display_name": "ROC-AUC",
+            "point_estimate": 0.8896527498996387,
+            "ci_lower": 0.8466429144921718,
+            "ci_upper": 0.930613960256925,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "pr_auc": {
+            "metric": "pr_auc",
+            "display_name": "PR-AUC (Average Precision)",
+            "point_estimate": 0.8503488970554773,
+            "ci_lower": 0.7944146172784142,
+            "ci_upper": 0.9085618032668145,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "accuracy": {
+            "metric": "accuracy",
+            "display_name": "Accuracy (t=0.50)",
+            "point_estimate": 0.826530612244898,
+            "ci_lower": 0.782312925170068,
+            "ci_upper": 0.8673469387755102,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "sensitivity": {
+            "metric": "sensitivity",
+            "display_name": "Sensitivity / Recall (t=0.50)",
+            "point_estimate": 0.7547169811320755,
+            "ci_lower": 0.6698113207547169,
+            "ci_upper": 0.8301886792452831,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "specificity": {
+            "metric": "specificity",
+            "display_name": "Specificity (t=0.50)",
+            "point_estimate": 0.8670212765957447,
+            "ci_lower": 0.8138297872340425,
+            "ci_upper": 0.9148936170212766,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "precision": {
+            "metric": "precision",
+            "display_name": "Precision / PPV (t=0.50)",
+            "point_estimate": 0.7619047619047619,
+            "ci_lower": 0.6929655870445345,
+            "ci_upper": 0.8333333333333334,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "f1_score": {
+            "metric": "f1_score",
+            "display_name": "F1-Score (t=0.50)",
+            "point_estimate": 0.7582938388625593,
+            "ci_lower": 0.6930596474281574,
+            "ci_upper": 0.8186157253599115,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "brier_score": {
+            "metric": "brier_score",
+            "display_name": "Brier Score",
+            "point_estimate": 0.12701382771421874,
+            "ci_lower": 0.10602553368864456,
+            "ci_upper": 0.14783322433915777,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "ece": {
+            "metric": "ece",
+            "display_name": "Expected Calibration Error (ECE, 10-bin)",
+            "point_estimate": 0.07670510888531601,
+            "ci_lower": 0.062315208573286804,
+            "ci_upper": 0.11700951840679367,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          }
+        }
+      }
+    },
+    "long_beach": {
+      "held_out_center": "long_beach",
+      "role": "external_validation",
+      "n_samples": 200,
+      "n_positives": 149,
+      "n_negatives": 51,
+      "prevalence": 0.745,
+      "candidate_a": {
+        "candidate": "candidate_a",
+        "label": "Candidate A: Missing-Aware 10-Clinical-Feature Pipeline (11 Model Inputs)",
+        "metrics": {
+          "roc_auc": {
+            "metric": "roc_auc",
+            "display_name": "ROC-AUC",
+            "point_estimate": 0.752335833662324,
+            "ci_lower": 0.6610080273720227,
+            "ci_upper": 0.826434399263061,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "pr_auc": {
+            "metric": "pr_auc",
+            "display_name": "PR-AUC (Average Precision)",
+            "point_estimate": 0.8800034175199598,
+            "ci_lower": 0.824108250344566,
+            "ci_upper": 0.9252220155772226,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "accuracy": {
+            "metric": "accuracy",
+            "display_name": "Accuracy (t=0.50)",
+            "point_estimate": 0.67,
+            "ci_lower": 0.6,
+            "ci_upper": 0.7301249999999999,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "sensitivity": {
+            "metric": "sensitivity",
+            "display_name": "Sensitivity / Recall (t=0.50)",
+            "point_estimate": 0.6375838926174496,
+            "ci_lower": 0.5570469798657718,
+            "ci_upper": 0.7114093959731543,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "specificity": {
+            "metric": "specificity",
+            "display_name": "Specificity (t=0.50)",
+            "point_estimate": 0.7647058823529411,
+            "ci_lower": 0.6470588235294118,
+            "ci_upper": 0.8823529411764706,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "precision": {
+            "metric": "precision",
+            "display_name": "Precision / PPV (t=0.50)",
+            "point_estimate": 0.8878504672897196,
+            "ci_lower": 0.8347463768115941,
+            "ci_upper": 0.9368585526315789,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "f1_score": {
+            "metric": "f1_score",
+            "display_name": "F1-Score (t=0.50)",
+            "point_estimate": 0.7421875000000001,
+            "ci_lower": 0.6799999999999999,
+            "ci_upper": 0.795539033457249,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "brier_score": {
+            "metric": "brier_score",
+            "display_name": "Brier Score",
+            "point_estimate": 0.2158001970456705,
+            "ci_lower": 0.18501171482688353,
+            "ci_upper": 0.24877723239884714,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "ece": {
+            "metric": "ece",
+            "display_name": "Expected Calibration Error (ECE, 10-bin)",
+            "point_estimate": 0.2085754938499502,
+            "ci_lower": 0.17759518941600438,
+            "ci_upper": 0.26262360518188593,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          }
+        }
+      },
+      "candidate_b": {
+        "candidate": "candidate_b",
+        "label": "Candidate B: Non-Invasive 9-Clinical-Feature Pipeline (9 Model Inputs)",
+        "metrics": {
+          "roc_auc": {
+            "metric": "roc_auc",
+            "display_name": "ROC-AUC",
+            "point_estimate": 0.7596394262402948,
+            "ci_lower": 0.6726362021318595,
+            "ci_upper": 0.8316357415449401,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "pr_auc": {
+            "metric": "pr_auc",
+            "display_name": "PR-AUC (Average Precision)",
+            "point_estimate": 0.8871496475276524,
+            "ci_lower": 0.837820894938633,
+            "ci_upper": 0.9286638480419909,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "accuracy": {
+            "metric": "accuracy",
+            "display_name": "Accuracy (t=0.50)",
+            "point_estimate": 0.705,
+            "ci_lower": 0.64,
+            "ci_upper": 0.77,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "sensitivity": {
+            "metric": "sensitivity",
+            "display_name": "Sensitivity / Recall (t=0.50)",
+            "point_estimate": 0.7046979865771812,
+            "ci_lower": 0.6308724832214765,
+            "ci_upper": 0.7785234899328859,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "specificity": {
+            "metric": "specificity",
+            "display_name": "Specificity (t=0.50)",
+            "point_estimate": 0.7058823529411765,
+            "ci_lower": 0.5686274509803921,
+            "ci_upper": 0.8240196078431368,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "precision": {
+            "metric": "precision",
+            "display_name": "Precision / PPV (t=0.50)",
+            "point_estimate": 0.875,
+            "ci_lower": 0.8230673758865248,
+            "ci_upper": 0.923109243697479,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "f1_score": {
+            "metric": "f1_score",
+            "display_name": "F1-Score (t=0.50)",
+            "point_estimate": 0.7806691449814126,
+            "ci_lower": 0.7244602071215775,
+            "ci_upper": 0.8315556078800722,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "brier_score": {
+            "metric": "brier_score",
+            "display_name": "Brier Score",
+            "point_estimate": 0.19019036593619623,
+            "ci_lower": 0.1612208615766561,
+            "ci_upper": 0.22102383445324003,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "ece": {
+            "metric": "ece",
+            "display_name": "Expected Calibration Error (ECE, 10-bin)",
+            "point_estimate": 0.156563044294234,
+            "ci_lower": 0.12728303273363797,
+            "ci_upper": 0.208568177771112,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          }
+        }
+      }
+    },
+    "cleveland": {
+      "held_out_center": "cleveland",
+      "role": "retrospective_development_baseline",
+      "n_samples": 242,
+      "n_positives": 110,
+      "n_negatives": 132,
+      "prevalence": 0.45454545454545453,
+      "candidate_a": {
+        "candidate": "candidate_a",
+        "label": "Candidate A: Missing-Aware 10-Clinical-Feature Pipeline (11 Model Inputs)",
+        "metrics": {
+          "roc_auc": {
+            "metric": "roc_auc",
+            "display_name": "ROC-AUC",
+            "point_estimate": 0.8703168044077135,
+            "ci_lower": 0.825685261707989,
+            "ci_upper": 0.9123312672176309,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "pr_auc": {
+            "metric": "pr_auc",
+            "display_name": "PR-AUC (Average Precision)",
+            "point_estimate": 0.8614501365655785,
+            "ci_lower": 0.8116818056577318,
+            "ci_upper": 0.9079745197478093,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "accuracy": {
+            "metric": "accuracy",
+            "display_name": "Accuracy (t=0.50)",
+            "point_estimate": 0.768595041322314,
+            "ci_lower": 0.7148760330578512,
+            "ci_upper": 0.8181818181818182,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "sensitivity": {
+            "metric": "sensitivity",
+            "display_name": "Sensitivity / Recall (t=0.50)",
+            "point_estimate": 0.8,
+            "ci_lower": 0.7272727272727273,
+            "ci_upper": 0.8727272727272727,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "specificity": {
+            "metric": "specificity",
+            "display_name": "Specificity (t=0.50)",
+            "point_estimate": 0.7424242424242424,
+            "ci_lower": 0.6666666666666666,
+            "ci_upper": 0.8106060606060606,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "precision": {
+            "metric": "precision",
+            "display_name": "Precision / PPV (t=0.50)",
+            "point_estimate": 0.7213114754098361,
+            "ci_lower": 0.6641190839694656,
+            "ci_upper": 0.7837891891891892,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "f1_score": {
+            "metric": "f1_score",
+            "display_name": "F1-Score (t=0.50)",
+            "point_estimate": 0.7586206896551724,
+            "ci_lower": 0.7043478260869566,
+            "ci_upper": 0.8070214774604674,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "brier_score": {
+            "metric": "brier_score",
+            "display_name": "Brier Score",
+            "point_estimate": 0.1484189616114249,
+            "ci_lower": 0.12556521643914553,
+            "ci_upper": 0.17239930591708916,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "ece": {
+            "metric": "ece",
+            "display_name": "Expected Calibration Error (ECE, 10-bin)",
+            "point_estimate": 0.06363737474747863,
+            "ci_lower": 0.05317441248868379,
+            "ci_upper": 0.11585997375337748,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          }
+        }
+      },
+      "candidate_b": {
+        "candidate": "candidate_b",
+        "label": "Candidate B: Non-Invasive 9-Clinical-Feature Pipeline (9 Model Inputs)",
+        "metrics": {
+          "roc_auc": {
+            "metric": "roc_auc",
+            "display_name": "ROC-AUC",
+            "point_estimate": 0.8690771349862259,
+            "ci_lower": 0.8249948347107438,
+            "ci_upper": 0.9110210055096419,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "pr_auc": {
+            "metric": "pr_auc",
+            "display_name": "PR-AUC (Average Precision)",
+            "point_estimate": 0.8602431374968462,
+            "ci_lower": 0.8109095962869602,
+            "ci_upper": 0.9082620929686929,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "accuracy": {
+            "metric": "accuracy",
+            "display_name": "Accuracy (t=0.50)",
+            "point_estimate": 0.7644628099173554,
+            "ci_lower": 0.7148760330578512,
+            "ci_upper": 0.8140495867768595,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "sensitivity": {
+            "metric": "sensitivity",
+            "display_name": "Sensitivity / Recall (t=0.50)",
+            "point_estimate": 0.7818181818181819,
+            "ci_lower": 0.7090909090909091,
+            "ci_upper": 0.8545454545454545,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "specificity": {
+            "metric": "specificity",
+            "display_name": "Specificity (t=0.50)",
+            "point_estimate": 0.75,
+            "ci_lower": 0.6742424242424242,
+            "ci_upper": 0.8181818181818182,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "precision": {
+            "metric": "precision",
+            "display_name": "Precision / PPV (t=0.50)",
+            "point_estimate": 0.7226890756302521,
+            "ci_lower": 0.6666666666666666,
+            "ci_upper": 0.7884615384615384,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "f1_score": {
+            "metric": "f1_score",
+            "display_name": "F1-Score (t=0.50)",
+            "point_estimate": 0.7510917030567685,
+            "ci_lower": 0.6974732094672732,
+            "ci_upper": 0.8035714285714286,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "brier_score": {
+            "metric": "brier_score",
+            "display_name": "Brier Score",
+            "point_estimate": 0.14821623913754708,
+            "ci_lower": 0.12489519951736648,
+            "ci_upper": 0.17243003351820585,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          },
+          "ece": {
+            "metric": "ece",
+            "display_name": "Expected Calibration Error (ECE, 10-bin)",
+            "point_estimate": 0.06321734565675026,
+            "ci_lower": 0.05153677388702829,
+            "ci_upper": 0.12020806702109349,
+            "ci_level": 0.95,
+            "replicates_requested": 1000,
+            "replicates_computed": 1000,
+            "undefined_reason": null
+          }
+        }
+      }
+    }
+  },
+  "scientific_disclosures": {
+    "external_centres": [
+      "hungary",
+      "long_beach"
+    ],
+    "retrospective_development_centre": "cleveland",
+    "retrospective_baseline_note": "Cleveland development results reflect retrospective performance on familiar training distribution, not independent external confirmation.",
+    "bootstrap_scope_note": "95% bootstrap confidence intervals quantify within-cohort sampling variability conditional on observed case mix; they do NOT quantify variance across future unobserved hospitals or healthcare systems.",
+    "pr_auc_note": "PR-AUC computed as Average Precision per project specification, not trapezoidal Riemann integration.",
+    "clinical_disclaimer": "Metrics and confidence intervals represent statistical research outputs only and do not constitute clinical validation or medical device clearance."
+  },
+  "target_convention": {
+    "positive_class": 1,
+    "positive_class_label": "disease present (>50% diameter narrowing)",
+    "negative_class": 0,
+    "negative_class_label": "disease-free (<50% diameter narrowing)",
+    "harmonized": true,
+    "external_validation_cohorts": [
+      "hungary",
+      "long_beach"
+    ],
+    "retrospective_development_cohort": "cleveland",
+    "locked_cleveland_test_partition_excluded": true
+  }
+}

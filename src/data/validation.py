@@ -77,3 +77,17 @@ class DatasetValidator:
                 max_val = self.df[name].max()
                 if min_val < feature["min"] or max_val > feature["max"]:
                     self.warnings.append(f"Feature '{name}' out of expected range ({feature['min']} - {feature['max']}). Got {min_val} - {max_val}.")
+
+
+# Re-export Phase 17 Five-Step Validation Contract
+from src.cardiovanta.data.validation import (
+    CLINICAL_DOMAINS,
+    KAGGLE_CP_TO_CANONICAL,
+    CANONICAL_CP_TO_KAGGLE,
+    ValidationViolation,
+    DocumentedAnomaly,
+    ValidationContractResult,
+    adapt_cleveland_cp,
+    FiveStepValidationContract,
+)
+
