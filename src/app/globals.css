@@ -895,6 +895,8 @@ select.input-control {
 }
 /* UI SYNE OVERRIDES */
 .nav-link,
+.lp-header-link,
+.lp-header-cta,
 .btn-primary,
 .btn-secondary,
 .btn-hero-sec,

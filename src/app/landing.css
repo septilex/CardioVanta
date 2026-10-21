@@ -63,7 +63,7 @@
 }
 
 .lp-header-link {
-  font-family: var(--cv-font-body), sans-serif;
+  font-family: var(--cv-font-syne), sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: rgba(239, 233, 224, 0.55);
@@ -76,7 +76,7 @@
 }
 
 .lp-header-cta {
-  font-family: var(--cv-font-body), sans-serif;
+  font-family: var(--cv-font-syne), sans-serif;
   background-color: var(--cv-red);
   color: var(--cv-white) !important;
   padding: 10px 22px;
