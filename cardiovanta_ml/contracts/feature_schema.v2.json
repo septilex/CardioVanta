@@ -1,0 +1,252 @@
+{
+  "contract": "cardiovanta.clinical_feature_and_outcome_contract",
+  "contract_version": "2.0.0",
+  "description": "Single source of truth for CardioVanta's production clinical input schema and outcome semantics. Generated code: backend/app/schemas/generated_features.py and src/types/generated-features.ts (python contracts/codegen/generate.py). Do not hand-edit generated files.",
+  "compatible_model_input_schema": {
+    "path": "artifacts/model/feature_schema.json",
+    "feature_schema_version": "1.0",
+    "note": "The frozen production model's input schema. This contract must stay consistent with it (same 13 features, order, types, accepted codes and development ranges)."
+  },
+  "evidence_sources": {
+    "uci_codebook": "data/external/raw/heart-disease.names (UCI Heart Disease attribute documentation)",
+    "project_domain_contract": "src/cardiovanta/data/validation.py CLINICAL_DOMAINS (Phase 17)",
+    "cp_patient_matching": "src/cardiovanta/data/validation.py KAGGLE_CP_TO_CANONICAL (Phase 17, 1-to-1 patient-matched evidence)",
+    "target_harmonisation": "reports/phase17_multicenter_validation.md section 3 and src/cardiovanta/data/external_loader.py parse_cleveland_dev_cohort",
+    "model_input_schema": "artifacts/model/feature_schema.json",
+    "backend_request_schema": "backend/app/schemas/predict.py PredictRequest (pre-R1 handwritten definition)",
+    "legacy_ui": "src/app/assessment/page.tsx (pre-R1 display labels)"
+  },
+  "verification_levels": {
+    "verified_patient_matched": "Code meaning established by 1-to-1 patient matching between the training encoding and the canonical UCI records.",
+    "codebook_and_project_contract": "Code meaning stated by the UCI codebook using the same code values, and adopted by the project domain contract. Not independently patient-matched.",
+    "unverified": "Code is an accepted model input, but its correspondence to a canonical clinical category has not been established. The display label is a legacy UI label and must not be presented as verified.",
+    "undefined_in_codebook": "Code is an accepted model input, but the UCI codebook does not define it. No clinical meaning is asserted (not assumed to mean 'missing')."
+  },
+  "outcome": {
+    "id": "significant_obstructive_cad_present",
+    "label": "Significant obstructive coronary artery disease",
+    "clinical_definition": "Angiographic coronary artery disease: greater than 50% diameter stenosis in at least one major coronary vessel (UCI 'num' > 0).",
+    "positive": {
+      "value": 1,
+      "meaning": "disease_present",
+      "label": "Significant obstructive CAD present"
+    },
+    "negative": {
+      "value": 0,
+      "meaning": "disease_absent",
+      "label": "Significant obstructive CAD absent"
+    },
+    "output_probability": "P(disease present)",
+    "probability_definition": "Calibrated model-estimated probability that significant obstructive coronary artery disease is present (angiographic >50% diameter narrowing; UCI 'num' > 0). Research estimate only; not a diagnosis and not clinically validated.",
+    "evidence": [
+      "uci_codebook: attribute 58 'num' (diagnosis of heart disease, angiographic disease status): value 0 = < 50% diameter narrowing; value 1 = > 50% diameter narrowing in any major vessel",
+      "target_harmonisation"
+    ]
+  },
+  "model_label_mappings": {
+    "description": "Artifact-specific mapping from a trained model's class labels to the clinical outcome above. This is model metadata, NOT the definition of the clinical outcome. Future packages must declare outcome_semantics.disease_present_label in their own metadata.",
+    "packages": [
+      {
+        "model_id": "cardiovanta-lr13",
+        "package_version": "1.0.0",
+        "artifact": "artifacts/model/model.joblib",
+        "disease_present_label": 0,
+        "status": "interim_legacy",
+        "reason": "Trained by src/experiment/phase5.py on the raw target column of data/raw/heart.csv, whose encoding is inverted relative to UCI num (target 1 = num == 0, healthy; target 0 = num > 0, disease).",
+        "evidence": [
+          "target_harmonisation",
+          "R0.3 coefficient-sign and synthetic-profile verification (backend/tests/test_r0_outcome_semantics.py)"
+        ]
+      }
+    ]
+  },
+  "features": [
+    {
+      "id": "age",
+      "label": "Age",
+      "type": "continuous",
+      "description": "Patient age.",
+      "unit": "years",
+      "unit_evidence": "uci_codebook: 'age: age in years'",
+      "required": true,
+      "missing_value_policy": "rejected",
+      "accepted": {"finite_only": true, "min": null, "max": null},
+      "development_range": {"min": 29.0, "max": 77.0, "source": "model_input_schema", "behaviour": "values outside are accepted and flagged with a development-range warning"},
+      "evidence": ["uci_codebook", "model_input_schema", "backend_request_schema"]
+    },
+    {
+      "id": "sex",
+      "label": "Sex",
+      "type": "binary",
+      "description": "Biological sex recorded at baseline.",
+      "unit": null,
+      "required": true,
+      "missing_value_policy": "rejected",
+      "options": [
+        {"code": 0, "display_label": "Female", "clinical_meaning": "female", "verification": "codebook_and_project_contract"},
+        {"code": 1, "display_label": "Male", "clinical_meaning": "male", "verification": "codebook_and_project_contract"}
+      ],
+      "evidence": ["uci_codebook: 'sex (1 = male; 0 = female)'", "project_domain_contract", "model_input_schema"]
+    },
+    {
+      "id": "cp",
+      "label": "Chest Pain Type",
+      "type": "categorical",
+      "description": "Chest pain type, in the training data's (Kaggle) encoding. Canonical UCI codes differ: 1 typical, 2 atypical, 3 non-anginal, 4 asymptomatic.",
+      "unit": null,
+      "required": true,
+      "missing_value_policy": "rejected",
+      "options": [
+        {"code": 0, "display_label": "Asymptomatic", "clinical_meaning": "asymptomatic", "canonical_uci_code": 4, "verification": "verified_patient_matched"},
+        {"code": 1, "display_label": "Atypical Angina", "clinical_meaning": "atypical angina", "canonical_uci_code": 2, "verification": "verified_patient_matched"},
+        {"code": 2, "display_label": "Non-anginal Pain", "clinical_meaning": "non-anginal pain", "canonical_uci_code": 3, "verification": "verified_patient_matched"},
+        {"code": 3, "display_label": "Typical Angina", "clinical_meaning": "typical angina", "canonical_uci_code": 1, "verification": "verified_patient_matched"}
+      ],
+      "evidence": ["cp_patient_matching", "uci_codebook: attribute 9 'cp'"]
+    },
+    {
+      "id": "trestbps",
+      "label": "Resting Blood Pressure",
+      "type": "continuous",
+      "description": "Resting blood pressure on admission to the hospital.",
+      "unit": "mm Hg",
+      "unit_evidence": "uci_codebook: 'trestbps: resting blood pressure (in mm Hg on admission to the hospital)'",
+      "required": true,
+      "missing_value_policy": "rejected",
+      "accepted": {"finite_only": true, "min": null, "max": null},
+      "development_range": {"min": 94.0, "max": 200.0, "source": "model_input_schema", "behaviour": "values outside are accepted and flagged with a development-range warning"},
+      "evidence": ["uci_codebook", "model_input_schema", "backend_request_schema"]
+    },
+    {
+      "id": "chol",
+      "label": "Serum Cholesterol",
+      "type": "continuous",
+      "description": "Serum cholesterol.",
+      "unit": "mg/dl",
+      "unit_evidence": "uci_codebook: 'chol: serum cholestoral in mg/dl'",
+      "required": true,
+      "missing_value_policy": "rejected",
+      "accepted": {"finite_only": true, "min": null, "max": null},
+      "development_range": {"min": 126.0, "max": 564.0, "source": "model_input_schema", "behaviour": "values outside are accepted and flagged with a development-range warning"},
+      "evidence": ["uci_codebook", "model_input_schema", "backend_request_schema"]
+    },
+    {
+      "id": "fbs",
+      "label": "Fasting Blood Sugar > 120 mg/dl",
+      "type": "binary",
+      "description": "Whether fasting blood sugar exceeds 120 mg/dl.",
+      "unit": null,
+      "required": true,
+      "missing_value_policy": "rejected",
+      "options": [
+        {"code": 0, "display_label": "False", "clinical_meaning": "fasting blood sugar <= 120 mg/dl", "verification": "codebook_and_project_contract"},
+        {"code": 1, "display_label": "True", "clinical_meaning": "fasting blood sugar > 120 mg/dl", "verification": "codebook_and_project_contract"}
+      ],
+      "evidence": ["uci_codebook: 'fbs: (fasting blood sugar > 120 mg/dl) (1 = true; 0 = false)'", "project_domain_contract", "model_input_schema"]
+    },
+    {
+      "id": "restecg",
+      "label": "Resting ECG Results",
+      "type": "categorical",
+      "description": "Resting electrocardiographic results.",
+      "unit": null,
+      "required": true,
+      "missing_value_policy": "rejected",
+      "options": [
+        {"code": 0, "display_label": "Normal", "clinical_meaning": "normal", "verification": "codebook_and_project_contract"},
+        {"code": 1, "display_label": "ST-T Wave Abnormality", "clinical_meaning": "ST-T wave abnormality", "verification": "codebook_and_project_contract"},
+        {"code": 2, "display_label": "Left Ventricular Hypertrophy", "clinical_meaning": "probable or definite left ventricular hypertrophy (Estes' criteria)", "verification": "codebook_and_project_contract"}
+      ],
+      "evidence": ["uci_codebook: attribute 19 'restecg' (0 normal, 1 ST-T wave abnormality, 2 LVH)", "project_domain_contract: 'Resting ECG: 0 = normal, 1 = ST-T wave abnormality, 2 = LVH'", "model_input_schema"]
+    },
+    {
+      "id": "thalach",
+      "label": "Maximum Heart Rate Achieved",
+      "type": "continuous",
+      "description": "Maximum heart rate achieved during exercise testing.",
+      "unit": "bpm",
+      "unit_evidence": "uci_codebook: 'thalach: maximum heart rate achieved' (unit not stated; heart rate is conventionally beats per minute)",
+      "required": true,
+      "missing_value_policy": "rejected",
+      "accepted": {"finite_only": true, "min": null, "max": null},
+      "development_range": {"min": 71.0, "max": 202.0, "source": "model_input_schema", "behaviour": "values outside are accepted and flagged with a development-range warning"},
+      "evidence": ["uci_codebook", "model_input_schema", "backend_request_schema"]
+    },
+    {
+      "id": "exang",
+      "label": "Exercise Induced Angina",
+      "type": "binary",
+      "description": "Angina induced by exercise.",
+      "unit": null,
+      "required": true,
+      "missing_value_policy": "rejected",
+      "options": [
+        {"code": 0, "display_label": "No", "clinical_meaning": "no exercise-induced angina", "verification": "codebook_and_project_contract"},
+        {"code": 1, "display_label": "Yes", "clinical_meaning": "exercise-induced angina", "verification": "codebook_and_project_contract"}
+      ],
+      "evidence": ["uci_codebook: 'exang: exercise induced angina (1 = yes; 0 = no)'", "project_domain_contract", "model_input_schema"]
+    },
+    {
+      "id": "oldpeak",
+      "label": "ST Depression Induced by Exercise",
+      "type": "continuous",
+      "description": "ST depression induced by exercise relative to rest.",
+      "unit": "mm",
+      "unit_evidence": "uci_codebook does not state a unit; 'mm' is the pre-R1 UI display convention (unverified)",
+      "required": true,
+      "missing_value_policy": "rejected",
+      "accepted": {"finite_only": true, "min": null, "max": null},
+      "development_range": {"min": 0.0, "max": 6.2, "source": "model_input_schema", "behaviour": "values outside are accepted and flagged with a development-range warning"},
+      "evidence": ["uci_codebook: 'oldpeak = ST depression induced by exercise relative to rest'", "model_input_schema", "backend_request_schema"]
+    },
+    {
+      "id": "slope",
+      "label": "Slope of Peak Exercise ST Segment",
+      "type": "categorical",
+      "description": "Slope of the peak exercise ST segment, in the training data's encoding (0-2). The UCI codebook uses 1 upsloping, 2 flat, 3 downsloping; no project mapping between the two encodings has been established.",
+      "unit": null,
+      "required": true,
+      "missing_value_policy": "rejected",
+      "options": [
+        {"code": 0, "display_label": "Upsloping", "clinical_meaning": null, "verification": "unverified"},
+        {"code": 1, "display_label": "Flat", "clinical_meaning": null, "verification": "unverified"},
+        {"code": 2, "display_label": "Downsloping", "clinical_meaning": null, "verification": "unverified"}
+      ],
+      "evidence": ["uci_codebook: attribute 41 'slope' (canonical codes 1-3)", "project_domain_contract: cleveland_allowed_values {0, 1, 2} without code meanings", "legacy_ui (display labels)"]
+    },
+    {
+      "id": "ca",
+      "label": "Number of Major Vessels",
+      "type": "categorical",
+      "description": "Number of major vessels (0-3) colored by fluoroscopy. The training encoding additionally contains code 4, which the UCI codebook does not define.",
+      "unit": null,
+      "required": true,
+      "missing_value_policy": "rejected",
+      "options": [
+        {"code": 0, "display_label": "0", "clinical_meaning": "0 major vessels", "verification": "codebook_and_project_contract"},
+        {"code": 1, "display_label": "1", "clinical_meaning": "1 major vessel", "verification": "codebook_and_project_contract"},
+        {"code": 2, "display_label": "2", "clinical_meaning": "2 major vessels", "verification": "codebook_and_project_contract"},
+        {"code": 3, "display_label": "3", "clinical_meaning": "3 major vessels", "verification": "codebook_and_project_contract"},
+        {"code": 4, "display_label": "Code 4 (not in UCI codebook)", "clinical_meaning": null, "verification": "undefined_in_codebook"}
+      ],
+      "evidence": ["uci_codebook: attribute 44 'ca: number of major vessels (0-3) colored by flourosopy'", "project_domain_contract: canonical {0-3}, cleveland_allowed_values {0-4}", "model_input_schema"]
+    },
+    {
+      "id": "thal",
+      "label": "Thallium Stress Test",
+      "type": "categorical",
+      "description": "Thallium scintigraphy result, in the training data's encoding (0-3). The UCI codebook uses 3 normal, 6 fixed defect, 7 reversable defect; no project mapping between the two encodings has been established.",
+      "unit": null,
+      "required": true,
+      "missing_value_policy": "rejected",
+      "options": [
+        {"code": 0, "display_label": "Code 0 (not in UCI codebook)", "clinical_meaning": null, "verification": "undefined_in_codebook"},
+        {"code": 1, "display_label": "Normal", "clinical_meaning": null, "verification": "unverified"},
+        {"code": 2, "display_label": "Fixed Defect", "clinical_meaning": null, "verification": "unverified"},
+        {"code": 3, "display_label": "Reversable Defect", "clinical_meaning": null, "verification": "unverified"}
+      ],
+      "evidence": ["uci_codebook: attribute 51 'thal: 3 = normal; 6 = fixed defect; 7 = reversable defect'", "project_domain_contract: cleveland_allowed_values {0, 1, 2, 3} without code meanings", "legacy_ui (display labels)"]
+    }
+  ],
+  "feature_order": ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal"]
+}

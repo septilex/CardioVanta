@@ -16,6 +16,13 @@ class Settings(BaseSettings):
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent.parent
     MODEL_DIR: Path = BASE_DIR / "artifacts" / "model"
 
+    # Versioned model registry (R2). The served model is selected EXPLICITLY by ID and
+    # exact version; the registry never picks a "latest" version. Override via env vars
+    # MODEL_ID / MODEL_VERSION / MODEL_REGISTRY_ROOT (absolute path).
+    MODEL_REGISTRY_ROOT: Path = BASE_DIR / "artifacts"
+    MODEL_ID: str = "cardiovanta-lr13"
+    MODEL_VERSION: str = "1.0.0"
+
     CORS_ORIGINS: List[str] = []
     ENABLE_DOCS: bool = False
 

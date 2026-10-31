@@ -5,7 +5,8 @@ from backend.app.schemas.predict import (
     PredictRequest, PredictResponse, PredictionResult,
     DevelopmentRangeWarning, ExplanationResult, MetadataResult
 )
-from src.inference.predict import InferenceEngine
+# ML logic lives in the cardiovanta_ml package; this module only translates HTTP <-> package results.
+from cardiovanta_ml.inference.predict import InferenceEngine
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,8 @@ def predict_endpoint(
             
         prediction = PredictionResult(
             probability=pred_res["probability"],
+            outcome=pred_res["outcome"],
+            probability_definition=pred_res["probability_definition"],
             threshold_applied=pred_res["threshold_applied"],
             class_=pred_res["class"],
             threshold_status=t_status
@@ -73,7 +76,8 @@ def predict_endpoint(
         metadata = MetadataResult(
             package_version=engine.metadata.get("package_version", "unknown"),
             model_type=engine.metadata.get("model_configuration", {}).get("algorithm", "Logistic Regression"),
-            calibration_method=engine.metadata.get("calibration_configuration", {}).get("method", "sigmoid")
+            calibration_method=engine.metadata.get("calibration_configuration", {}).get("method", "sigmoid"),
+            outcome_mapping=engine.outcome_mapping_source,
         )
         
         response_obj = PredictResponse(
@@ -100,6 +104,7 @@ def predict_endpoint(
                 "status_code": 200,
                 "latency_ms": latency_ms,
                 "prediction_probability": prediction.probability,
+                "prediction_outcome": prediction.outcome,
                 "threshold_status": prediction.threshold_status,
                 "outside_development_range": development_range_warning.outside_development_range,
                 "out_of_range_features": development_range_warning.features,
@@ -109,9 +114,8 @@ def predict_endpoint(
             
         return response_obj
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        # Do not log the exception string 'e' directly to prevent leaking raw clinical values
+        # Do not log or print the exception string/traceback: engine error messages can
+        # embed raw clinical input values (R0.3 log-privacy hardening).
         logger.error(f"Inference failed with exception type: {type(e).__name__}")
         # Return 500 without leaking stack trace
         raise HTTPException(status_code=500, detail="Internal inference failure")

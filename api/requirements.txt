@@ -4,3 +4,8 @@ pydantic-settings==2.7.1
 joblib==1.6.0
 scikit-learn==1.9.1
 pandas==3.0.6
+# Transitive runtime dependencies of the pickled scikit-learn model, pinned (R3) to the
+# versions the full test suite and golden snapshots were validated with (same as requirements.txt).
+numpy==2.4.6
+scipy==1.17.1
+threadpoolctl==3.7.0
