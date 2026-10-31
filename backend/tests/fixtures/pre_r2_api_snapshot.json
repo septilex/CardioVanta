@@ -1,0 +1,526 @@
+{
+ "frontend_default|0.5": {
+  "body": {
+   "development_range_warning": {
+    "features": [],
+    "note": null,
+    "outside_development_range": false
+   },
+   "explanation": {
+    "contributions": {
+     "age": -0.00933435997372377,
+     "ca": -0.5548763195902331,
+     "chol": -0.2549352576228653,
+     "cp": 0.6724032469891478,
+     "exang": -0.0,
+     "fbs": -0.0,
+     "oldpeak": -0.02449271656729888,
+     "restecg": -0.1372065904740402,
+     "sex": 0.4333298834226183,
+     "slope": 0.2526313247622314,
+     "thal": -0.5713488844541204,
+     "thalach": 0.0016605528151274118,
+     "trestbps": -0.07302435530242007
+    },
+    "decision_function_log_odds": -0.6266584326548851,
+    "intercept": -0.3614649566593082,
+    "note": "These feature contributions explain the underlying uncalibrated Logistic Regression explanation model's log-odds of significant obstructive CAD being present (positive = toward disease presence). That model is related to, but not identical to, the calibrated ensemble that produces the displayed probability; the contributions do not decompose that calibrated ensemble probability and do not imply clinical causality."
+   },
+   "metadata": {
+    "calibration_method": "sigmoid",
+    "model_type": "Logistic Regression",
+    "outcome_mapping": "interim_legacy_inverted_target_mapping",
+    "package_version": "1.0.0"
+   },
+   "prediction": {
+    "class": 0,
+    "outcome": "significant_obstructive_cad_present",
+    "probability": 0.29840199845246873,
+    "probability_definition": "Calibrated model-estimated probability that significant obstructive coronary artery disease is present (angiographic >50% diameter narrowing; UCI 'num' > 0). Research estimate only; not a diagnosis and not clinically validated.",
+    "threshold_applied": 0.5,
+    "threshold_status": "mathematical_model_operating_point"
+   },
+   "shap_equivalent_explanation": {
+    "contributions": {
+     "age": -0.010520836850455016,
+     "ca": -0.343852038368189,
+     "chol": -0.2960328302161208,
+     "cp": 0.45397600428939583,
+     "exang": -0.16003640252624063,
+     "fbs": -0.0026863506487278866,
+     "oldpeak": -0.01771358306223504,
+     "restecg": -0.12168940639202526,
+     "sex": 0.13866556269523783,
+     "slope": 0.26914085792811226,
+     "thal": -0.5436485849410622,
+     "thalach": -0.021298250406822677,
+     "trestbps": -0.08190327144342668
+    },
+    "decision_function_log_odds": -0.6266584326548851,
+    "expected_value": 0.11094069728767425,
+    "note": "SHAP-equivalent linear attribution of the uncalibrated explanation model's log-odds of significant obstructive CAD being present, relative to the frozen development background (positive = toward disease presence). These contributions do not decompose the calibrated probability and do not imply clinical causality."
+   }
+  },
+  "status": 200
+ },
+ "frontend_default|None": {
+  "body": {
+   "development_range_warning": {
+    "features": [],
+    "note": null,
+    "outside_development_range": false
+   },
+   "explanation": {
+    "contributions": {
+     "age": -0.00933435997372377,
+     "ca": -0.5548763195902331,
+     "chol": -0.2549352576228653,
+     "cp": 0.6724032469891478,
+     "exang": -0.0,
+     "fbs": -0.0,
+     "oldpeak": -0.02449271656729888,
+     "restecg": -0.1372065904740402,
+     "sex": 0.4333298834226183,
+     "slope": 0.2526313247622314,
+     "thal": -0.5713488844541204,
+     "thalach": 0.0016605528151274118,
+     "trestbps": -0.07302435530242007
+    },
+    "decision_function_log_odds": -0.6266584326548851,
+    "intercept": -0.3614649566593082,
+    "note": "These feature contributions explain the underlying uncalibrated Logistic Regression explanation model's log-odds of significant obstructive CAD being present (positive = toward disease presence). That model is related to, but not identical to, the calibrated ensemble that produces the displayed probability; the contributions do not decompose that calibrated ensemble probability and do not imply clinical causality."
+   },
+   "metadata": {
+    "calibration_method": "sigmoid",
+    "model_type": "Logistic Regression",
+    "outcome_mapping": "interim_legacy_inverted_target_mapping",
+    "package_version": "1.0.0"
+   },
+   "prediction": {
+    "class": null,
+    "outcome": "significant_obstructive_cad_present",
+    "probability": 0.29840199845246873,
+    "probability_definition": "Calibrated model-estimated probability that significant obstructive coronary artery disease is present (angiographic >50% diameter narrowing; UCI 'num' > 0). Research estimate only; not a diagnosis and not clinically validated.",
+    "threshold_applied": null,
+    "threshold_status": "no_validated_production_threshold_configured"
+   },
+   "shap_equivalent_explanation": {
+    "contributions": {
+     "age": -0.010520836850455016,
+     "ca": -0.343852038368189,
+     "chol": -0.2960328302161208,
+     "cp": 0.45397600428939583,
+     "exang": -0.16003640252624063,
+     "fbs": -0.0026863506487278866,
+     "oldpeak": -0.01771358306223504,
+     "restecg": -0.12168940639202526,
+     "sex": 0.13866556269523783,
+     "slope": 0.26914085792811226,
+     "thal": -0.5436485849410622,
+     "thalach": -0.021298250406822677,
+     "trestbps": -0.08190327144342668
+    },
+    "decision_function_log_odds": -0.6266584326548851,
+    "expected_value": 0.11094069728767425,
+    "note": "SHAP-equivalent linear attribution of the uncalibrated explanation model's log-odds of significant obstructive CAD being present, relative to the frozen development background (positive = toward disease presence). These contributions do not decompose the calibrated probability and do not imply clinical causality."
+   }
+  },
+  "status": 200
+ },
+ "high_risk|0.5": {
+  "body": {
+   "development_range_warning": {
+    "features": [],
+    "note": null,
+    "outside_development_range": false
+   },
+   "explanation": {
+    "contributions": {
+     "age": 0.012772460533440541,
+     "ca": 0.09769949908863221,
+     "chol": 0.23353027189721126,
+     "cp": 0.6724032469891478,
+     "exang": 0.4325308176384882,
+     "fbs": -0.0,
+     "oldpeak": 0.6567989396725106,
+     "restecg": 0.12067752556611538,
+     "sex": 0.4333298834226183,
+     "slope": 0.2526313247622314,
+     "thal": 0.5451106904517985,
+     "thalach": 0.564255846580255,
+     "trestbps": 0.17649056150923775
+    },
+    "decision_function_log_odds": 3.836766111452379,
+    "intercept": -0.3614649566593082,
+    "note": "These feature contributions explain the underlying uncalibrated Logistic Regression explanation model's log-odds of significant obstructive CAD being present (positive = toward disease presence). That model is related to, but not identical to, the calibrated ensemble that produces the displayed probability; the contributions do not decompose that calibrated ensemble probability and do not imply clinical causality."
+   },
+   "metadata": {
+    "calibration_method": "sigmoid",
+    "model_type": "Logistic Regression",
+    "outcome_mapping": "interim_legacy_inverted_target_mapping",
+    "package_version": "1.0.0"
+   },
+   "prediction": {
+    "class": 1,
+    "outcome": "significant_obstructive_cad_present",
+    "probability": 0.9857909290965174,
+    "probability_definition": "Calibrated model-estimated probability that significant obstructive coronary artery disease is present (angiographic >50% diameter narrowing; UCI 'num' > 0). Research estimate only; not a diagnosis and not clinically validated.",
+    "threshold_applied": 0.5,
+    "threshold_status": "mathematical_model_operating_point"
+   },
+   "shap_equivalent_explanation": {
+    "contributions": {
+     "age": 0.011585983656709294,
+     "ca": 0.30872378031067627,
+     "chol": 0.19243269930395573,
+     "cp": 0.45397600428939583,
+     "exang": 0.2724944151122476,
+     "fbs": -0.0026863506487278866,
+     "oldpeak": 0.6635780731775744,
+     "restecg": 0.13619470964813032,
+     "sex": 0.13866556269523783,
+     "slope": 0.26914085792811226,
+     "thal": 0.5728109899648566,
+     "thalach": 0.541297043358305,
+     "trestbps": 0.16761164536823114
+    },
+    "decision_function_log_odds": 3.836766111452379,
+    "expected_value": 0.11094069728767425,
+    "note": "SHAP-equivalent linear attribution of the uncalibrated explanation model's log-odds of significant obstructive CAD being present, relative to the frozen development background (positive = toward disease presence). These contributions do not decompose the calibrated probability and do not imply clinical causality."
+   }
+  },
+  "status": 200
+ },
+ "high_risk|None": {
+  "body": {
+   "development_range_warning": {
+    "features": [],
+    "note": null,
+    "outside_development_range": false
+   },
+   "explanation": {
+    "contributions": {
+     "age": 0.012772460533440541,
+     "ca": 0.09769949908863221,
+     "chol": 0.23353027189721126,
+     "cp": 0.6724032469891478,
+     "exang": 0.4325308176384882,
+     "fbs": -0.0,
+     "oldpeak": 0.6567989396725106,
+     "restecg": 0.12067752556611538,
+     "sex": 0.4333298834226183,
+     "slope": 0.2526313247622314,
+     "thal": 0.5451106904517985,
+     "thalach": 0.564255846580255,
+     "trestbps": 0.17649056150923775
+    },
+    "decision_function_log_odds": 3.836766111452379,
+    "intercept": -0.3614649566593082,
+    "note": "These feature contributions explain the underlying uncalibrated Logistic Regression explanation model's log-odds of significant obstructive CAD being present (positive = toward disease presence). That model is related to, but not identical to, the calibrated ensemble that produces the displayed probability; the contributions do not decompose that calibrated ensemble probability and do not imply clinical causality."
+   },
+   "metadata": {
+    "calibration_method": "sigmoid",
+    "model_type": "Logistic Regression",
+    "outcome_mapping": "interim_legacy_inverted_target_mapping",
+    "package_version": "1.0.0"
+   },
+   "prediction": {
+    "class": null,
+    "outcome": "significant_obstructive_cad_present",
+    "probability": 0.9857909290965174,
+    "probability_definition": "Calibrated model-estimated probability that significant obstructive coronary artery disease is present (angiographic >50% diameter narrowing; UCI 'num' > 0). Research estimate only; not a diagnosis and not clinically validated.",
+    "threshold_applied": null,
+    "threshold_status": "no_validated_production_threshold_configured"
+   },
+   "shap_equivalent_explanation": {
+    "contributions": {
+     "age": 0.011585983656709294,
+     "ca": 0.30872378031067627,
+     "chol": 0.19243269930395573,
+     "cp": 0.45397600428939583,
+     "exang": 0.2724944151122476,
+     "fbs": -0.0026863506487278866,
+     "oldpeak": 0.6635780731775744,
+     "restecg": 0.13619470964813032,
+     "sex": 0.13866556269523783,
+     "slope": 0.26914085792811226,
+     "thal": 0.5728109899648566,
+     "thalach": 0.541297043358305,
+     "trestbps": 0.16761164536823114
+    },
+    "decision_function_log_odds": 3.836766111452379,
+    "expected_value": 0.11094069728767425,
+    "note": "SHAP-equivalent linear attribution of the uncalibrated explanation model's log-odds of significant obstructive CAD being present, relative to the frozen development background (positive = toward disease presence). These contributions do not decompose the calibrated probability and do not imply clinical causality."
+   }
+  },
+  "status": 200
+ },
+ "low_risk|0.5": {
+  "body": {
+   "development_range_warning": {
+    "features": [],
+    "note": null,
+    "outside_development_range": false
+   },
+   "explanation": {
+    "contributions": {
+     "age": -0.01737320379451079,
+     "ca": -0.5548763195902331,
+     "chol": -0.2549352576228653,
+     "cp": -0.3999108136598803,
+     "exang": -0.0,
+     "fbs": -0.0,
+     "oldpeak": -0.36513854468720364,
+     "restecg": -0.1372065904740402,
+     "sex": -0.0,
+     "slope": -0.2560304121562286,
+     "thal": -0.5713488844541204,
+     "thalach": -0.493959110739866,
+     "trestbps": -0.07302435530242007
+    },
+    "decision_function_log_odds": -3.4852684491406762,
+    "intercept": -0.3614649566593082,
+    "note": "These feature contributions explain the underlying uncalibrated Logistic Regression explanation model's log-odds of significant obstructive CAD being present (positive = toward disease presence). That model is related to, but not identical to, the calibrated ensemble that produces the displayed probability; the contributions do not decompose that calibrated ensemble probability and do not imply clinical causality."
+   },
+   "metadata": {
+    "calibration_method": "sigmoid",
+    "model_type": "Logistic Regression",
+    "outcome_mapping": "interim_legacy_inverted_target_mapping",
+    "package_version": "1.0.0"
+   },
+   "prediction": {
+    "class": 0,
+    "outcome": "significant_obstructive_cad_present",
+    "probability": 0.01606590589363559,
+    "probability_definition": "Calibrated model-estimated probability that significant obstructive coronary artery disease is present (angiographic >50% diameter narrowing; UCI 'num' > 0). Research estimate only; not a diagnosis and not clinically validated.",
+    "threshold_applied": 0.5,
+    "threshold_status": "mathematical_model_operating_point"
+   },
+   "shap_equivalent_explanation": {
+    "contributions": {
+     "age": -0.018559680671242036,
+     "ca": -0.343852038368189,
+     "chol": -0.2960328302161208,
+     "cp": -0.6183380563596322,
+     "exang": -0.16003640252624063,
+     "fbs": -0.0026863506487278866,
+     "oldpeak": -0.3583594111821398,
+     "restecg": -0.12168940639202526,
+     "sex": -0.29466432072738047,
+     "slope": -0.23952087899034777,
+     "thal": -0.5436485849410622,
+     "thalach": -0.5169179139618161,
+     "trestbps": -0.08190327144342668
+    },
+    "decision_function_log_odds": -3.4852684491406762,
+    "expected_value": 0.11094069728767425,
+    "note": "SHAP-equivalent linear attribution of the uncalibrated explanation model's log-odds of significant obstructive CAD being present, relative to the frozen development background (positive = toward disease presence). These contributions do not decompose the calibrated probability and do not imply clinical causality."
+   }
+  },
+  "status": 200
+ },
+ "low_risk|None": {
+  "body": {
+   "development_range_warning": {
+    "features": [],
+    "note": null,
+    "outside_development_range": false
+   },
+   "explanation": {
+    "contributions": {
+     "age": -0.01737320379451079,
+     "ca": -0.5548763195902331,
+     "chol": -0.2549352576228653,
+     "cp": -0.3999108136598803,
+     "exang": -0.0,
+     "fbs": -0.0,
+     "oldpeak": -0.36513854468720364,
+     "restecg": -0.1372065904740402,
+     "sex": -0.0,
+     "slope": -0.2560304121562286,
+     "thal": -0.5713488844541204,
+     "thalach": -0.493959110739866,
+     "trestbps": -0.07302435530242007
+    },
+    "decision_function_log_odds": -3.4852684491406762,
+    "intercept": -0.3614649566593082,
+    "note": "These feature contributions explain the underlying uncalibrated Logistic Regression explanation model's log-odds of significant obstructive CAD being present (positive = toward disease presence). That model is related to, but not identical to, the calibrated ensemble that produces the displayed probability; the contributions do not decompose that calibrated ensemble probability and do not imply clinical causality."
+   },
+   "metadata": {
+    "calibration_method": "sigmoid",
+    "model_type": "Logistic Regression",
+    "outcome_mapping": "interim_legacy_inverted_target_mapping",
+    "package_version": "1.0.0"
+   },
+   "prediction": {
+    "class": null,
+    "outcome": "significant_obstructive_cad_present",
+    "probability": 0.01606590589363559,
+    "probability_definition": "Calibrated model-estimated probability that significant obstructive coronary artery disease is present (angiographic >50% diameter narrowing; UCI 'num' > 0). Research estimate only; not a diagnosis and not clinically validated.",
+    "threshold_applied": null,
+    "threshold_status": "no_validated_production_threshold_configured"
+   },
+   "shap_equivalent_explanation": {
+    "contributions": {
+     "age": -0.018559680671242036,
+     "ca": -0.343852038368189,
+     "chol": -0.2960328302161208,
+     "cp": -0.6183380563596322,
+     "exang": -0.16003640252624063,
+     "fbs": -0.0026863506487278866,
+     "oldpeak": -0.3583594111821398,
+     "restecg": -0.12168940639202526,
+     "sex": -0.29466432072738047,
+     "slope": -0.23952087899034777,
+     "thal": -0.5436485849410622,
+     "thalach": -0.5169179139618161,
+     "trestbps": -0.08190327144342668
+    },
+    "decision_function_log_odds": -3.4852684491406762,
+    "expected_value": 0.11094069728767425,
+    "note": "SHAP-equivalent linear attribution of the uncalibrated explanation model's log-odds of significant obstructive CAD being present, relative to the frozen development background (positive = toward disease presence). These contributions do not decompose the calibrated probability and do not imply clinical causality."
+   }
+  },
+  "status": 200
+ },
+ "out_of_range|0.5": {
+  "body": {
+   "development_range_warning": {
+    "features": [
+     "age",
+     "trestbps",
+     "chol",
+     "thalach",
+     "oldpeak"
+    ],
+    "note": "Development-data ranges are dataset guardrails, not clinical validity limits.",
+    "outside_development_range": true
+   },
+   "explanation": {
+    "contributions": {
+     "age": 0.04090841390619512,
+     "ca": -0.06413435138287453,
+     "chol": 2.0169974378193514,
+     "cp": -0.1858933094448216,
+     "exang": 0.4325308176384882,
+     "fbs": 0.014138687624883614,
+     "oldpeak": 2.0193822521521296,
+     "restecg": 0.015929060203644808,
+     "sex": -0.0,
+     "slope": 0.002799082689717046,
+     "thal": -0.016140289657062407,
+     "thalach": 1.2072218965975439,
+     "trestbps": 0.48838420752381007
+    },
+    "decision_function_log_odds": 5.610658949011696,
+    "intercept": -0.3614649566593082,
+    "note": "These feature contributions explain the underlying uncalibrated Logistic Regression explanation model's log-odds of significant obstructive CAD being present (positive = toward disease presence). That model is related to, but not identical to, the calibrated ensemble that produces the displayed probability; the contributions do not decompose that calibrated ensemble probability and do not imply clinical causality."
+   },
+   "metadata": {
+    "calibration_method": "sigmoid",
+    "model_type": "Logistic Regression",
+    "outcome_mapping": "interim_legacy_inverted_target_mapping",
+    "package_version": "1.0.0"
+   },
+   "prediction": {
+    "class": 1,
+    "outcome": "significant_obstructive_cad_present",
+    "probability": 0.9983341045508567,
+    "probability_definition": "Calibrated model-estimated probability that significant obstructive coronary artery disease is present (angiographic >50% diameter narrowing; UCI 'num' > 0). Research estimate only; not a diagnosis and not clinically validated.",
+    "threshold_applied": 0.5,
+    "threshold_status": "mathematical_model_operating_point"
+   },
+   "shap_equivalent_explanation": {
+    "contributions": {
+     "age": 0.039721937029463875,
+     "ca": 0.14688992983916954,
+     "chol": 1.9758998652260955,
+     "cp": -0.4043205521445735,
+     "exang": 0.2724944151122476,
+     "fbs": 0.011452336976155728,
+     "oldpeak": 2.026161385657194,
+     "restecg": 0.03144624428565976,
+     "sex": -0.29466432072738047,
+     "slope": 0.0193086158555979,
+     "thal": 0.011560009855995701,
+     "thalach": 1.1842630933755938,
+     "trestbps": 0.47950529138280346
+    },
+    "decision_function_log_odds": 5.610658949011696,
+    "expected_value": 0.11094069728767425,
+    "note": "SHAP-equivalent linear attribution of the uncalibrated explanation model's log-odds of significant obstructive CAD being present, relative to the frozen development background (positive = toward disease presence). These contributions do not decompose the calibrated probability and do not imply clinical causality."
+   }
+  },
+  "status": 200
+ },
+ "out_of_range|None": {
+  "body": {
+   "development_range_warning": {
+    "features": [
+     "age",
+     "trestbps",
+     "chol",
+     "thalach",
+     "oldpeak"
+    ],
+    "note": "Development-data ranges are dataset guardrails, not clinical validity limits.",
+    "outside_development_range": true
+   },
+   "explanation": {
+    "contributions": {
+     "age": 0.04090841390619512,
+     "ca": -0.06413435138287453,
+     "chol": 2.0169974378193514,
+     "cp": -0.1858933094448216,
+     "exang": 0.4325308176384882,
+     "fbs": 0.014138687624883614,
+     "oldpeak": 2.0193822521521296,
+     "restecg": 0.015929060203644808,
+     "sex": -0.0,
+     "slope": 0.002799082689717046,
+     "thal": -0.016140289657062407,
+     "thalach": 1.2072218965975439,
+     "trestbps": 0.48838420752381007
+    },
+    "decision_function_log_odds": 5.610658949011696,
+    "intercept": -0.3614649566593082,
+    "note": "These feature contributions explain the underlying uncalibrated Logistic Regression explanation model's log-odds of significant obstructive CAD being present (positive = toward disease presence). That model is related to, but not identical to, the calibrated ensemble that produces the displayed probability; the contributions do not decompose that calibrated ensemble probability and do not imply clinical causality."
+   },
+   "metadata": {
+    "calibration_method": "sigmoid",
+    "model_type": "Logistic Regression",
+    "outcome_mapping": "interim_legacy_inverted_target_mapping",
+    "package_version": "1.0.0"
+   },
+   "prediction": {
+    "class": null,
+    "outcome": "significant_obstructive_cad_present",
+    "probability": 0.9983341045508567,
+    "probability_definition": "Calibrated model-estimated probability that significant obstructive coronary artery disease is present (angiographic >50% diameter narrowing; UCI 'num' > 0). Research estimate only; not a diagnosis and not clinically validated.",
+    "threshold_applied": null,
+    "threshold_status": "no_validated_production_threshold_configured"
+   },
+   "shap_equivalent_explanation": {
+    "contributions": {
+     "age": 0.039721937029463875,
+     "ca": 0.14688992983916954,
+     "chol": 1.9758998652260955,
+     "cp": -0.4043205521445735,
+     "exang": 0.2724944151122476,
+     "fbs": 0.011452336976155728,
+     "oldpeak": 2.026161385657194,
+     "restecg": 0.03144624428565976,
+     "sex": -0.29466432072738047,
+     "slope": 0.0193086158555979,
+     "thal": 0.011560009855995701,
+     "thalach": 1.1842630933755938,
+     "trestbps": 0.47950529138280346
+    },
+    "decision_function_log_odds": 5.610658949011696,
+    "expected_value": 0.11094069728767425,
+    "note": "SHAP-equivalent linear attribution of the uncalibrated explanation model's log-odds of significant obstructive CAD being present, relative to the frozen development background (positive = toward disease presence). These contributions do not decompose the calibrated probability and do not imply clinical causality."
+   }
+  },
+  "status": 200
+ }
+}

@@ -7,7 +7,7 @@
   ],
   "functions": {
     "api/**/*.py": {
-      "includeFiles": "{artifacts/**,src/**,backend/**,configs/**}"
+      "includeFiles": "{artifacts/**,src/**,backend/**,configs/**,cardiovanta_ml/**}"
     }
   }
 }

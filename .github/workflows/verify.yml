@@ -12,7 +12,69 @@ permissions:
   contents: read
 
 jobs:
+  # Production runtime: the Python version Vercel deploys with (root .python-version).
+  # Synthetic inputs only; no step in this job reads data/raw/heart.csv.
   verify-backend:
+    name: Backend, ML package & contracts (production Python)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python (from .python-version)
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+          cache: 'pip'
+          cache-dependency-path: |
+            api/requirements.txt
+            backend/requirements.txt
+            cardiovanta_ml/pyproject.toml
+
+      - name: Install Backend and ML Package (documented path)
+        run: |
+          python -m pip install -r backend/requirements.txt -r api/requirements.txt
+          python -m pip install "./cardiovanta_ml[test]"
+          python -m pip install pip-audit
+
+      - name: Verify Generated Contract Files Are Current
+        run: python contracts/codegen/generate.py --check
+
+      - name: Verify Artifact Integrity
+        run: |
+          # Verify expected ML artifact files match approved baseline hashes
+          python scripts/verify_artifact_integrity.py
+
+      - name: Build ML Package Wheel
+        run: python -m pip wheel ./cardiovanta_ml --no-deps -w dist/
+
+      - name: Install Wheel in Clean Venv and Verify Outside the Repository
+        run: |
+          python -m venv "$RUNNER_TEMP/wheel-venv"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -m pip install dist/cardiovanta_ml-*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -I "$GITHUB_WORKSPACE/scripts/ci/verify_wheel_install.py" \
+            --registry-root "$GITHUB_WORKSPACE/artifacts" \
+            --model-id cardiovanta-lr13 --model-version 1.0.0 \
+            --repo-root "$GITHUB_WORKSPACE"
+
+      - name: Run Synthetic Backend, Registry, Contract and Deployment Tests
+        env:
+          CARDIOVANTA_RUN_INSTALL_TESTS: "1"
+        run: |
+          # FastAPI app, request schema, security, R0.3 semantics, R1 contract, R2 registry,
+          # R3 deployment checks, monitoring and artifact-integrity tests
+          python -m pytest backend/tests/ tests/test_monitoring.py tests/test_artifact_integrity.py
+
+      - name: Run Security Audit (pip, production dependencies)
+        run: |
+          pip-audit -r api/requirements.txt -r backend/requirements.txt
+
+  # Research suites READ data/raw/heart.csv (including its locked rows when they rebuild
+  # splits) and some retrain models in temporary directories. Kept separate from the
+  # synthetic production checks; still a required gate, as before R3.
+  research-data-tests:
+    name: Data-dependent research suites (Python 3.11)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -24,29 +86,22 @@ jobs:
           python-version: "3.11"
           cache: 'pip'
 
-      - name: Install Backend Dependencies
+      - name: Install Research Dependencies
         run: |
           pip install -r requirements.txt -r backend/requirements.txt -r api/requirements.txt
-          pip install pytest pip-audit
+          pip install pytest==9.1.1 pip-audit
 
-      - name: Verify Artifact Integrity
+      - name: Run Research Pytest Suites (data-dependent)
         run: |
-          # Verify expected ML artifact files match approved baseline hashes
-          python scripts/verify_artifact_integrity.py
+          pytest tests/ --ignore=tests/test_monitoring.py --ignore=tests/test_artifact_integrity.py
 
-      - name: Run ML Framework Pytest Suite
+      - name: Run Synthetic Backend Suite on Python 3.11 (local-dev runtime)
         run: |
-          # Validates ML pipeline, model generation, and drift detection
-          pytest tests/
-
-      - name: Run Backend API Pytest Suite
-        run: |
-          # Validates backend FastAPI application, request schema, and security rules
           pytest backend/tests/
 
-      - name: Run Security Audit (pip)
+      - name: Run Security Audit (pip, research dependencies)
         run: |
-          pip-audit -r requirements.txt -r backend/requirements.txt -r api/requirements.txt
+          pip-audit -r requirements.txt
 
   verify-frontend:
     runs-on: ubuntu-latest
@@ -82,7 +137,7 @@ jobs:
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [verify-backend, verify-frontend]
+    needs: [verify-backend, research-data-tests, verify-frontend]
     runs-on: ubuntu-latest
     environment: production
     concurrency: production-delivery

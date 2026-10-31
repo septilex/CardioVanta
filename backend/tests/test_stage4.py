@@ -77,12 +77,13 @@ def test_explanation_wording_and_semantics():
         note = response.json()["explanation"]["note"]
         
         # Exact wording check
-        expected_note = "These feature contributions explain the underlying uncalibrated Logistic Regression decision function (log-odds). They do not decompose the final calibrated ensemble probability and do not imply clinical causality."
+        # R0.3: wording updated to state disease-present orientation explicitly.
+        expected_note = "These feature contributions explain the underlying uncalibrated Logistic Regression explanation model's log-odds of significant obstructive CAD being present (positive = toward disease presence). That model is related to, but not identical to, the calibrated ensemble that produces the displayed probability; the contributions do not decompose that calibrated ensemble probability and do not imply clinical causality."
         assert note == expected_note
-        
+
         # G, H, I: Indirectly tested by verifying exact wording and schema field description
         assert "clinical causality" in note
-        assert "decompose" in note
+        assert "do not decompose" in note
         
         # Inspect openapi schema for Field description on contributions
         openapi = app.openapi()

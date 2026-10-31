@@ -1,0 +1,71 @@
+{
+  "registry_schema_version": "1.0",
+  "model_id": "cardiovanta-lr13",
+  "model_version": "1.0.0",
+  "model_package_name": "CardioVanta production package 1.0.0 (Phase5-Final): sigmoid-calibrated 13-feature Logistic Regression",
+  "artifact_directory": "model",
+  "artifacts": {
+    "model": "model.joblib",
+    "explanation_model": "explanation_model.joblib",
+    "package_metadata": "metadata.json",
+    "input_schema": "feature_schema.json",
+    "shap_background": "shap_background.json",
+    "reference_predictions": "reference_predictions.csv"
+  },
+  "checksum_manifest": "checksums.sha256",
+  "checksum_manifest_sha256": "2e385c3588256dea2a82ad2e29260323fad5ea570f2103504effa6ec4940fb6a",
+  "model_card": "model_card.md",
+  "feature_contract": {
+    "name": "cardiovanta.clinical_feature_and_outcome_contract",
+    "version": "2.0.0",
+    "sha256": "ec8918e717a892c1c14a820b4df03cd64fb8bf8810e55a7a73b9823065c5431b"
+  },
+  "feature_order": ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal"],
+  "model_classes": [0, 1],
+  "class_label_semantics": {
+    "0": "disease_present",
+    "1": "disease_absent"
+  },
+  "outcome_semantics": {
+    "outcome": "significant_obstructive_cad_present",
+    "contract_version": "2.0.0",
+    "disease_present_label": 0,
+    "mapping_status": "interim_legacy",
+    "evidence": [
+      "Trained by src/experiment/phase5.py on the raw target column of data/raw/heart.csv, which is inverted relative to UCI num (target 1 = num == 0; target 0 = num > 0): reports/phase17_multicenter_validation.md section 3; src/cardiovanta/data/external_loader.py parse_cleveland_dev_cohort.",
+      "R0.3 coefficient-sign and synthetic-profile verification: backend/tests/test_r0_outcome_semantics.py.",
+      "Recorded in the clinical contract: cardiovanta_ml/contracts/feature_schema.v2.json model_label_mappings (cardiovanta-lr13 1.0.0, disease_present_label 0, interim_legacy)."
+    ]
+  },
+  "calibration": {
+    "estimator": "sklearn.calibration.CalibratedClassifierCV",
+    "method": "sigmoid",
+    "cv": "5 StratifiedGroupKFold splits on duplicate-row groups of the 242 development rows",
+    "ensemble": true,
+    "n_calibrated_members": 5,
+    "base_estimator": "Pipeline(ColumnTransformer[StandardScaler(5 continuous), passthrough(3 binary), OneHotEncoder(handle_unknown='ignore', 5 categorical)] -> LogisticRegression(C=0.1, class_weight='balanced', solver='lbfgs', random_state=42))",
+    "probability_semantics": "predict_proba[:, index of label 0] = P(disease present) = 1 - P(label 1); exact for a binary sigmoid-calibrated classifier"
+  },
+  "explanation": {
+    "artifact_role": "explanation_model",
+    "background_role": "shap_background",
+    "associated_model": "cardiovanta-lr13@1.0.0",
+    "description": "Separate uncalibrated LogisticRegression (same preprocessing and hyperparameters) fitted on the same 242 development rows by src/experiment/phase5.py. It explains its own log-odds exactly; it is not the calibrated ensemble and does not decompose the reported probability."
+  },
+  "runtime": {
+    "sklearn_version": "1.9.1",
+    "python_version_at_training": "3.11.9"
+  },
+  "provenance": {
+    "training_script": "src/experiment/phase5.py",
+    "package_metadata_model_version": "Phase5-Final",
+    "source_dataset_name": "heart.csv",
+    "raw_dataset_sha256": "7c3014365675306819510a49ff289efbec1d1a6a666a2dc7652f1547b383d859",
+    "development_indices_sha256": "382f0f524cca62b2222338809d1acaa7f629f116ca804e42f0d225ee76e885e6",
+    "development_sample_count": 242,
+    "locked_test_sample_count_provenance_only": 61,
+    "git_commit_recorded_in_package_metadata": "43859481ad4c4ba78a8d9aa9bf5a672e31ec4041",
+    "random_seed": 42,
+    "registered": "2026-10-31 (R2). Artifacts registered in place at artifacts/model/ without modification."
+  }
+}

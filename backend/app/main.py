@@ -2,8 +2,7 @@ from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 import logging
 from backend.app.core.config import settings
-from backend.app.core.model_loader import ModelLoader
-from src.inference.predict import InferenceEngine
+from cardiovanta_ml import InferenceEngine, load_model
 from backend.app.api.endpoints import predict
 from backend.app.core.logging import setup_logging
 from backend.app.api.middleware import MonitoringMiddleware
@@ -22,20 +21,23 @@ async def lifespan(app: FastAPI):
     global model_package
     logger.info("Starting up CardioVanta API...")
     try:
-        loader = ModelLoader(model_dir=settings.MODEL_DIR)
-        model_package = loader.load_and_validate()
+        # Single load path (R2): the versioned registry selects the model by explicit
+        # ID/version, verifies SHA-256 checksums BEFORE deserializing, validates the
+        # metadata, contract compatibility and outcome mapping, and caches the result
+        # (one load per process and model version).
+        model_package = load_model(
+            settings.MODEL_ID,
+            settings.MODEL_VERSION,
+            registry_root=settings.MODEL_REGISTRY_ROOT,
+        )
+        app.state.inference_engine = InferenceEngine(model_package)
 
-        # Instantiate InferenceEngine and bypass its disk loading
-        engine = InferenceEngine(model_dir=settings.MODEL_DIR)
-        engine.model = model_package.model
-        engine.explanation_model = model_package.explanation_model
-        engine.schema = model_package.feature_schema
-        engine.metadata = model_package.metadata
-        app.state.inference_engine = engine
-
-        logger.info("Startup validation complete. CardioVanta Core Runtime ready.")
+        logger.info(
+            "Startup validation complete. CardioVanta Core Runtime ready.",
+            extra={"model_id": model_package.model_id, "model_version": model_package.model_version},
+        )
     except Exception as e:
-        logger.error(f"Startup validation failed: {e}")
+        logger.error(f"Startup validation failed: {type(e).__name__}: {e}")
         # Fail clearly on startup
         raise RuntimeError(f"Startup validation failed: {e}")
 

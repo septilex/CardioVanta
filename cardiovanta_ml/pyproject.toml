@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cardiovanta-ml"
+version = "0.2.0"
+description = "CardioVanta research ML core: clinical feature/outcome contract, inference, explanations and a SHA-256-verified versioned model registry. Not clinically validated."
+readme = "README.md"
+# Production runtime: Python 3.12 (Vercel; root .python-version). 3.11 is kept for local
+# development and the data-dependent research CI job; both are tested.
+requires-python = ">=3.11,<3.13"
+license = { text = "Proprietary research code" }
+# Runtime pins mirror api/requirements.txt (the deployed Vercel function).
+# scikit-learn must match the version recorded in each registered model's
+# metadata exactly; the registry refuses to deserialize otherwise.
+dependencies = [
+    "numpy==2.4.6",
+    "scipy==1.17.1",
+    "pandas==3.0.6",
+    "scikit-learn==1.9.1",
+    "joblib==1.6.0",
+    "pydantic==2.10.4",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==9.1.1",
+]
+
+[tool.setuptools]
+# This pyproject lives inside the package directory, so the package is mapped to ".".
+package-dir = { "cardiovanta_ml" = "." }
+packages = [
+    "cardiovanta_ml",
+    "cardiovanta_ml.contracts",
+    "cardiovanta_ml.inference",
+    "cardiovanta_ml.registry",
+]
+
+[tool.setuptools.package-data]
+cardiovanta_ml = ["py.typed"]
+"cardiovanta_ml.contracts" = ["feature_schema.v2.json"]

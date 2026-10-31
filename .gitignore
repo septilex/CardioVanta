@@ -40,3 +40,11 @@ docker-compose.yml
 # Scratch / local-only scripts
 local_predict.py
 make_transparent.py
+
+# Python package build output (cardiovanta_ml)
+*.egg-info/
+cardiovanta_ml/build/
+cardiovanta_ml/dist/
+
+# Local `vercel build` side effects (R3): Linux uv binary and generated build state
+_uv/

@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { predict, ApiError } from "../../lib/api";
 import { PredictRequest, PredictResponse } from "../../types";
+import { CATEGORICAL_LABELS, CATEGORICAL_OPTIONS, type CategoricalFeatureId } from "../../types/generated-features";
 import "./assessment.css";
 import CoronaryArteryVisual from "./CoronaryArteryVisual";
 
@@ -83,13 +84,39 @@ const STAGES: StageConfig[] = [
    HUMAN-READABLE ENCODING LABELS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const CP_LABELS: Record<number, string> = { 0: "Typical Angina", 1: "Atypical Angina", 2: "Non-anginal Pain", 3: "Asymptomatic" };
-const SEX_LABELS: Record<number, string> = { 0: "Female", 1: "Male" };
-const FBS_LABELS: Record<number, string> = { 0: "False", 1: "True" };
-const RESTECG_LABELS: Record<number, string> = { 0: "Normal", 1: "ST-T Wave Abnormality", 2: "LV Hypertrophy" };
-const EXANG_LABELS: Record<number, string> = { 0: "No", 1: "Yes" };
-const SLOPE_LABELS: Record<number, string> = { 0: "Upsloping", 1: "Flat", 2: "Downsloping" };
-const THAL_LABELS: Record<number, string> = { 0: "Unknown", 1: "Normal", 2: "Fixed Defect", 3: "Reversable Defect" };
+// Categorical options and labels come from the generated contract
+// (contracts/feature_schema.v2.json -> src/types/generated-features.ts). Do not hand-copy them.
+// The contract records each code's verification status: cp is patient-matched (Phase 17);
+// sex/fbs/restecg/exang/ca 0-3 follow the UCI codebook and project contract; slope and thal
+// labels are legacy and unverified; ca=4 and thal=0 are undefined in the UCI codebook.
+const CP_LABELS = CATEGORICAL_LABELS.cp;
+const SEX_LABELS = CATEGORICAL_LABELS.sex;
+const EXANG_LABELS = CATEGORICAL_LABELS.exang;
+const CA_LABELS = CATEGORICAL_LABELS.ca;
+
+function renderOptions(feature: CategoricalFeatureId) {
+  return CATEGORICAL_OPTIONS[feature].map((o) => (
+    <option key={o.code} value={o.code}>{o.display_label}</option>
+  ));
+}
+
+// Human-readable threshold status. The API's class is disease-positive:
+// class 1 = P(CAD present) >= threshold, class 0 = below it. Unknown statuses fall back to the raw text.
+function describeThreshold(prediction: PredictResponse["prediction"] | undefined): string {
+  if (!prediction || !prediction.threshold_status) {
+    return "No validated decision threshold is configured. Probability only.";
+  }
+  if (prediction.threshold_status === "no_validated_production_threshold_configured") {
+    return "No validated decision threshold is configured. Probability only.";
+  }
+  if (prediction.threshold_status === "mathematical_model_operating_point" && prediction.threshold_applied != null) {
+    const pct = (prediction.threshold_applied * 100).toFixed(0);
+    return prediction.class === 1
+      ? `At or above the ${pct}% operating point: classified as CAD present (mathematical operating point, not a diagnosis).`
+      : `Below the ${pct}% operating point: classified as CAD absent (mathematical operating point, not a diagnosis).`;
+  }
+  return prediction.threshold_status;
+}
 
 export default function Page() {
   const [formData, setFormData] = useState<PredictRequest>(initialData);
@@ -200,7 +227,7 @@ export default function Page() {
     `Age ${formData.age}, ${SEX_LABELS[formData.sex]}`,
     `BP ${formData.trestbps}, Chol ${formData.chol}`,
     `HR ${formData.thalach}, Angina ${EXANG_LABELS[formData.exang]}`,
-    `${CP_LABELS[formData.cp]}, Vessels ${formData.ca}`,
+    `${CP_LABELS[formData.cp]}, Vessels ${CA_LABELS[formData.ca]}`,
   ], [formData]);
 
   // Overall recorded inputs count based on stages reached
@@ -249,14 +276,14 @@ export default function Page() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
         <div style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", border: "1px solid #EAE2D8" }}>
           <h3 style={{ color: "#9E1B2E", marginBottom: "18px", fontSize: "16px", display: "flex", alignItems: "center", gap: "6px" }}>
-            <span aria-hidden="true">↑</span> Factors increasing model output
+            <span aria-hidden="true">↑</span> Factors pushing the model toward CAD present
           </h3>
           {increasing.map(([f, val]) => renderBar(f, val, true))}
           {increasing.length === 0 && <div style={{ color: "var(--ax-text-subtle)", fontSize: "13px" }}>No increasing factors</div>}
         </div>
         <div style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", border: "1px solid #EAE2D8" }}>
           <h3 style={{ color: "#4A72C8", marginBottom: "18px", fontSize: "16px", display: "flex", alignItems: "center", gap: "6px" }}>
-            <span aria-hidden="true">↓</span> Factors decreasing model output
+            <span aria-hidden="true">↓</span> Factors pushing the model toward CAD absent
           </h3>
           {decreasing.map(([f, val]) => renderBar(f, val, false))}
           {decreasing.length === 0 && <div style={{ color: "var(--ax-text-subtle)", fontSize: "13px" }}>No decreasing factors</div>}
@@ -576,8 +603,8 @@ export default function Page() {
                   </div>
                   <div className="ax-select-wrap">
                     <select className="ax-select-control" id="sex" name="sex" value={formData.sex} onChange={handleChange}>
-                      <option value={1}>Male</option>
-                      <option value={0}>Female</option>
+                      <option value={1}>{SEX_LABELS[1]}</option>
+                      <option value={0}>{SEX_LABELS[0]}</option>
                     </select>
                     <svg className="ax-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9" />
@@ -702,8 +729,7 @@ export default function Page() {
                   </div>
                   <div className="ax-select-wrap">
                     <select className="ax-select-control" id="fbs" name="fbs" value={formData.fbs} onChange={handleChange}>
-                      <option value={0}>False</option>
-                      <option value={1}>True</option>
+                      {renderOptions("fbs")}
                     </select>
                     <svg className="ax-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9" />
@@ -725,9 +751,7 @@ export default function Page() {
                   </div>
                   <div className="ax-select-wrap">
                     <select className="ax-select-control" id="restecg" name="restecg" value={formData.restecg} onChange={handleChange}>
-                      <option value={0}>Normal</option>
-                      <option value={1}>ST-T Wave Abnormality</option>
-                      <option value={2}>Left Ventricular Hypertrophy</option>
+                      {renderOptions("restecg")}
                     </select>
                     <svg className="ax-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9" />
@@ -800,8 +824,7 @@ export default function Page() {
                   </div>
                   <div className="ax-select-wrap">
                     <select className="ax-select-control" id="exang" name="exang" value={formData.exang} onChange={handleChange}>
-                      <option value={0}>No</option>
-                      <option value={1}>Yes</option>
+                      {renderOptions("exang")}
                     </select>
                     <svg className="ax-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9" />
@@ -872,15 +895,13 @@ export default function Page() {
                   </div>
                   <div className="ax-select-wrap">
                     <select className="ax-select-control" id="slope" name="slope" value={formData.slope} onChange={handleChange}>
-                      <option value={0}>Upsloping</option>
-                      <option value={1}>Flat</option>
-                      <option value={2}>Downsloping</option>
+                      {renderOptions("slope")}
                     </select>
                     <svg className="ax-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9" />
                     </svg>
                   </div>
-                  <div className="ax-field-helper">ST segment slope morphology at peak physical workload</div>
+                  <div className="ax-field-helper">ST segment slope morphology at peak physical workload. Category labels for this field are not yet verified against the training encoding.</div>
                 </div>
               </div>
 
@@ -903,10 +924,7 @@ export default function Page() {
                   </div>
                   <div className="ax-select-wrap">
                     <select className="ax-select-control" id="cp" name="cp" value={formData.cp} onChange={handleChange}>
-                      <option value={0}>Typical Angina</option>
-                      <option value={1}>Atypical Angina</option>
-                      <option value={2}>Non-anginal Pain</option>
-                      <option value={3}>Asymptomatic</option>
+                      {renderOptions("cp")}
                     </select>
                     <svg className="ax-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9" />
@@ -931,17 +949,13 @@ export default function Page() {
                   </div>
                   <div className="ax-select-wrap">
                     <select className="ax-select-control" id="ca" name="ca" value={formData.ca} onChange={handleChange}>
-                      <option value={0}>0</option>
-                      <option value={1}>1</option>
-                      <option value={2}>2</option>
-                      <option value={3}>3</option>
-                      <option value={4}>4</option>
+                      {renderOptions("ca")}
                     </select>
                     <svg className="ax-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9" />
                     </svg>
                   </div>
-                  <div className="ax-field-helper">Major coronary vessels (0–4) colored by fluoroscopy</div>
+                  <div className="ax-field-helper">Major coronary vessels (0–3) colored by fluoroscopy. Code 4 is outside the UCI codebook; its meaning is unverified.</div>
                 </div>
 
                 {/* Thallium Stress Test */}
@@ -962,16 +976,13 @@ export default function Page() {
                   </div>
                   <div className="ax-select-wrap">
                     <select className="ax-select-control" id="thal" name="thal" value={formData.thal} onChange={handleChange}>
-                      <option value={0}>Unknown</option>
-                      <option value={1}>Normal</option>
-                      <option value={2}>Fixed Defect</option>
-                      <option value={3}>Reversable Defect</option>
+                      {renderOptions("thal")}
                     </select>
                     <svg className="ax-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9" />
                     </svg>
                   </div>
-                  <div className="ax-field-helper">Thallium scintigraphy myocardial perfusion evaluation</div>
+                  <div className="ax-field-helper">Thallium scintigraphy myocardial perfusion evaluation. Category labels for this field are not yet verified against the training encoding.</div>
                 </div>
               </div>
 
@@ -1019,19 +1030,15 @@ export default function Page() {
                       {result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}
                       <span>%</span>
                     </div>
-                    <div className="ax-result-label">Model Probability</div>
+                    <div className="ax-result-label">Modelled probability of significant obstructive CAD</div>
                   </div>
                   <div>
                     <div className="ax-result-info">
-                      Based on the provided cardiovascular profile, CardioVanta generated a{" "}
-                      <strong>{result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}%</strong> modelled probability estimate from the production inference pipeline.
+                      Based on the provided profile, the research model estimates a{" "}
+                      <strong>{result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}%</strong> probability that significant obstructive coronary artery disease is present. This is a research estimate, not a diagnosis, and the model is not clinically validated.
                     </div>
                     <div className="ax-result-threshold">
-                      {result.prediction?.threshold_status ? (
-                        <strong>{result.prediction.threshold_status}</strong>
-                      ) : (
-                        "No validated production decision threshold is configured."
-                      )}
+                      <strong>{describeThreshold(result.prediction)}</strong>
                     </div>
                     {result.development_range_warning?.outside_development_range && (
                       <div className="ax-warning">
@@ -1049,7 +1056,7 @@ export default function Page() {
                 <div className="ax-shap-header">
                   <h2>Why the model responded this way</h2>
                   <p className="ax-shap-notice">
-                    <strong>Important Notice:</strong> These are model-attribution signals, not medical causes or a diagnosis. They reflect how the mathematical model weighted each input relative to its baseline.
+                    <strong>Important Notice:</strong> These are model-attribution signals, not medical causes or a diagnosis. They show how the uncalibrated explanation model weighted each input toward or away from CAD presence, relative to its baseline (log-odds). They are directional signals: they do not exactly decompose the calibrated probability shown above.
                   </p>
                 </div>
                 {renderShapExplanation(result.shap_equivalent_explanation, result.prediction.probability)}
@@ -1250,7 +1257,7 @@ export default function Page() {
                         </svg>
                         <span>Vessels</span>
                       </div>
-                      <span className="ax-input-item-val">{formData.ca}</span>
+                      <span className="ax-input-item-val">{CA_LABELS[formData.ca]}</span>
                     </div>
                   </>
                 )}
