@@ -105,8 +105,16 @@ Whether `ca = 4` and `thal = 0` are valid categories, missing-value sentinels or
 | Finding | Detail | Action |
 |---|---|---|
 | Cleveland healthy count | The codebook class distribution gives `Cleveland: 164 55 36 35 13 303`, so num = 0 for **164** patients. Phase 17 reports **165** with num = 0 and 138 with num > 0 | Recorded as unresolved. Not investigated, because that would need Cleveland patient rows. The total of 303 agrees |
-| Raw row in a report | `reports/cardio_vanta_master_audit.md` reproduces a raw `heart.csv` row (including `ca = 4`) | Not used as evidence; its partition was not checked. Recommend redacting raw rows from reports |
+| Raw row in a report | At the time of R6, `reports/cardio_vanta_master_audit.md` reproduced a raw `heart.csv` row (including `ca = 4`) | Not used as evidence; its partition was not checked. Recommended redacting raw rows from reports. **Done after R6** (see the update below) |
 | Kaggle provenance | No URL, version or download date of `heart.csv` is recorded in the project, and the commonly cited source page is gone | Recommend recording dataset provenance at acquisition |
+
+> **Update (2026-11-01, after R6):** the raw-row finding has since been resolved.
+> - Commit `f60c101` redacted the row and its row indices from `reports/cardio_vanta_master_audit.md`. The report's duplicate-group finding was kept.
+> - Regression tests in `tests/test_data_quarantine.py` now check two things: the readable reports and docs contain no patient-level rows, and the audit report stays redacted.
+> - The row still exists in published Git history from commit `cb80d11`; that history was intentionally not rewritten.
+> - The audit report remains on the CI quarantine's locked-derived list, because it also contains summary results from the locked test set.
+>
+> The R6 evidence record (`experiments/results/r6_codebook_evidence.json`) is unchanged and still lists this finding as observed during R6. All other R6 findings, evidence levels and code statuses are unaffected.
 
 ## 8. Recommended resolution paths
 
