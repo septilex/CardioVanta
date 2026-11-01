@@ -81,7 +81,12 @@ LOCKED_DERIVED = (
     "reports/phase2c_model_selection.json",
     "reports/model_baseline_results.csv",
     "reports/model_baseline_results.json",
-    "reports/cardio_vanta_master_audit.md",      # embeds a raw heart.csv row (R6 hygiene finding)
+    # Locked-derived because it contains summary results from the locked test set. The raw heart.csv row
+    # it once reproduced (R6 hygiene finding) was redacted in f60c101. The regression test
+    # test_master_audit_report_raw_row_is_redacted (tests/test_data_quarantine.py) checks that it stays
+    # redacted on a full checkout; CI skips it, because the report is absent from the sparse checkout.
+    # The row still exists in Git history from cb80d11, which is not rewritten.
+    "reports/cardio_vanta_master_audit.md",
 )
 RESEARCH_DATA_GLOBS = ("data/*",)                 # fnmatch '*' also matches '/', so this covers data/**
 ALLOWED_DATA_DOCS = (
