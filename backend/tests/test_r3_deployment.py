@@ -100,6 +100,17 @@ def _ignored(rel: Path, patterns) -> bool:
     return any(fnmatch.fnmatch(part, pat) for part in rel.parts for pat in patterns)
 
 
+def test_vercelignore_excludes_locked_derived_results():
+    """Locked-derived research outputs are never uploaded by the Vercel CLI: each one is either under an
+    ignored directory (e.g. reports/) or listed by its exact, root-anchored path."""
+    spec = importlib.util.spec_from_file_location("dq_policy", ROOT / "scripts" / "ci" / "data_quarantine.py")
+    dq = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(dq)
+    patterns = _ignore_patterns()
+    for rel in dq.LOCKED_DERIVED + dq.LOCKED_SOURCES:
+        assert _ignored(Path(rel), patterns) or "/" + rel in patterns, f".vercelignore would upload {rel}"
+
+
 def test_vercel_config_includes_runtime_resources():
     vercel = json.loads((ROOT / "vercel.json").read_text())
     include = vercel["functions"]["api/**/*.py"]["includeFiles"].strip("{}").split(",")
