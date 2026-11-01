@@ -305,6 +305,12 @@ def test_workflow_runs_only_classified_safe_tests_under_quarantine():
     assert "cardiovanta_ml/contracts" in dq.WRITE_PROTECTED_DIRS
     assert dq.decide("open", (str(ROOT / "cardiovanta_ml" / "contracts" / "__pycache__" / "x.pyc.1"), "wb", 0))["reason"] == "write_protected"
     assert "sparse-checkout-cone-mode: false" in jobs["verify-frontend"]
+    # every job that checks out the repository, including deploy and verify-production, uses the
+    # quarantine sparse checkout, so protected files are never present on any runner
+    for job, block in jobs.items():
+        if "actions/checkout@" in block:
+            assert "sparse-checkout-cone-mode: false" in block, job
+            assert all(p in block for p in dq.sparse_checkout_patterns()), job
     deploy_needs = re.search(r"needs: \[([^\]]*)\]", jobs["deploy"]).group(1)
     assert "research-data-tests" not in deploy_needs and "quarantined-research-tests" in deploy_needs
 

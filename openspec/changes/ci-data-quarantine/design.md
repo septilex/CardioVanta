@@ -25,5 +25,6 @@ Each module was run in a scratch copy containing no quarantined files, with the 
 ## Known limitations
 - Audit hooks do not see opens made directly by C libraries or non-Python processes. Layer 1 covers these in CI.
 - Interpreters started with `-I` or `-E` (for example the clean-venv wheel verification) do not load `sitecustomize`. That step reads only artifacts.
-- `deploy`, `verify-production` and `vercel-linux-build.yml` keep a full checkout. They run no tests, and `.vercelignore` already excludes `data/` and `reports/`.
+- `deploy` and `verify-production` use the same 17-pattern sparse checkout as the verification jobs (2026-11-01), so the 18 protected files are absent from the deployment runners too. A regression test requires this for every job in `verify.yml` that checks out the repository.
+- `vercel-linux-build.yml` (manual, never deploys) still uses a full checkout and runs no tests. The Vercel CLI uploads nothing that `.vercelignore` excludes: `data/`, `reports/`, and the seven locked-derived `experiments/` outputs, which are listed by exact path (regression-tested).
 - Locked-derived classification relies on reading the producing code. A newly produced locked-derived file must be added to the policy; new Python references to it are caught by the static guard.
