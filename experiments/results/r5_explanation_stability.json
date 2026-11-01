@@ -1,0 +1,1991 @@
+{
+  "experiment": "R5: explanation stability under one-feature perturbations (research only)",
+  "design": {
+    "path": "openspec/changes/r5-explanation-stability/design.md",
+    "sha256": "79ef11839c1c78a61aa16c051e789f41af2c7babde352310265be085038a1906"
+  },
+  "protocol": {
+    "profiles": 100,
+    "seed": 20261031,
+    "continuous_shift_fractions_of_dev_range": [
+      -0.1,
+      -0.05,
+      0.05,
+      0.1
+    ],
+    "categorical": "every other accepted code",
+    "data_loaded": "none (synthetic only)"
+  },
+  "continuous": {
+    "n_perturbations": 1862,
+    "abs_dp": {
+      "n": 1862,
+      "mean": 0.015279789703730486,
+      "median": 0.009469641008938934,
+      "p5": 0.0005866107371021723,
+      "p95": 0.05117722175312647,
+      "min": 3.210543523823883e-05,
+      "max": 0.0674630744813296
+    },
+    "linear": {
+      "rank_corr": {
+        "n": 1862,
+        "mean": 0.9915191165093519,
+        "median": 0.9999999999999999,
+        "p5": 0.9666666666666667,
+        "p95": 1.0,
+        "min": 0.8457300275482094,
+        "max": 1.0
+      },
+      "top3_overlap": {
+        "n": 1862,
+        "mean": 0.9715359828141783,
+        "median": 1.0,
+        "p5": 0.6666666666666666,
+        "p95": 1.0,
+        "min": 0.6666666666666666,
+        "max": 1.0
+      },
+      "top5_overlap": {
+        "n": 1862,
+        "mean": 0.9810955961331902,
+        "median": 1.0,
+        "p5": 0.8,
+        "p95": 1.0,
+        "min": 0.8,
+        "max": 1.0
+      },
+      "top3_identical_rate": 0.9146079484425349,
+      "own_sign_flip_rate": 0.0719656283566058,
+      "other_sign_flips_total": 0,
+      "max_other_contribution_change": 0.0,
+      "max_additivity_error": 1.7763568394002505e-15,
+      "direction_agreement": {
+        "n": 1862,
+        "rate": 1.0
+      }
+    },
+    "shap_equivalent": {
+      "rank_corr": {
+        "n": 1862,
+        "mean": 0.9894565692095231,
+        "median": 1.0,
+        "p5": 0.945054945054945,
+        "p95": 1.0,
+        "min": 0.8461538461538461,
+        "max": 1.0
+      },
+      "top3_overlap": {
+        "n": 1862,
+        "mean": 0.9717150017901899,
+        "median": 1.0,
+        "p5": 0.6666666666666666,
+        "p95": 1.0,
+        "min": 0.6666666666666666,
+        "max": 1.0
+      },
+      "top5_overlap": {
+        "n": 1862,
+        "mean": 0.9802363050483351,
+        "median": 1.0,
+        "p5": 0.8,
+        "p95": 1.0,
+        "min": 0.8,
+        "max": 1.0
+      },
+      "top3_identical_rate": 0.9151450053705693,
+      "own_sign_flip_rate": 0.07357679914070892,
+      "other_sign_flips_total": 0,
+      "max_other_contribution_change": 0.0,
+      "max_additivity_error": 1.3322676295501878e-15,
+      "direction_agreement": {
+        "n": 1862,
+        "rate": 1.0
+      }
+    }
+  },
+  "categorical": {
+    "n_perturbations": 1700,
+    "abs_dp": {
+      "n": 1700,
+      "mean": 0.05541755727143298,
+      "median": 0.03876349748754013,
+      "p5": 0.0022362782680662163,
+      "p95": 0.1669967357993889,
+      "min": 3.084780865747483e-05,
+      "max": 0.3005250555217346
+    },
+    "linear": {
+      "rank_corr": {
+        "n": 1700,
+        "mean": 0.9279808385518508,
+        "median": 0.9669421487603306,
+        "p5": 0.7527472527472527,
+        "p95": 1.0,
+        "min": 0.5714285714285714,
+        "max": 1.0
+      },
+      "top3_overlap": {
+        "n": 1700,
+        "mean": 0.900392156862745,
+        "median": 1.0,
+        "p5": 0.6666666666666666,
+        "p95": 1.0,
+        "min": 0.6666666666666666,
+        "max": 1.0
+      },
+      "top5_overlap": {
+        "n": 1700,
+        "mean": 0.9047058823529411,
+        "median": 1.0,
+        "p5": 0.8,
+        "p95": 1.0,
+        "min": 0.8,
+        "max": 1.0
+      },
+      "top3_identical_rate": 0.7011764705882353,
+      "own_sign_flip_rate": 0.6664705882352941,
+      "other_sign_flips_total": 0,
+      "max_other_contribution_change": 0.0,
+      "max_additivity_error": 8.881784197001252e-16,
+      "direction_agreement": {
+        "n": 1700,
+        "rate": 1.0
+      }
+    },
+    "shap_equivalent": {
+      "rank_corr": {
+        "n": 1700,
+        "mean": 0.9616127989657403,
+        "median": 0.9945054945054945,
+        "p5": 0.8021978021978022,
+        "p95": 1.0,
+        "min": 0.6373626373626374,
+        "max": 1.0
+      },
+      "top3_overlap": {
+        "n": 1700,
+        "mean": 0.9231372549019607,
+        "median": 1.0,
+        "p5": 0.6666666666666666,
+        "p95": 1.0,
+        "min": 0.6666666666666666,
+        "max": 1.0
+      },
+      "top5_overlap": {
+        "n": 1700,
+        "mean": 0.943764705882353,
+        "median": 1.0,
+        "p5": 0.8,
+        "p95": 1.0,
+        "min": 0.8,
+        "max": 1.0
+      },
+      "top3_identical_rate": 0.7694117647058824,
+      "own_sign_flip_rate": 0.5935294117647059,
+      "other_sign_flips_total": 0,
+      "max_other_contribution_change": 0.0,
+      "max_additivity_error": 1.3322676295501878e-15,
+      "direction_agreement": {
+        "n": 1700,
+        "rate": 1.0
+      }
+    }
+  },
+  "per_feature": {
+    "age": {
+      "n_perturbations": 383,
+      "abs_dp": {
+        "n": 383,
+        "mean": 0.001417258642328464,
+        "median": 0.0012646904632512834,
+        "p5": 0.0002076390841406317,
+        "p95": 0.0030962098069169494,
+        "min": 3.210543523823883e-05,
+        "max": 0.0035611934598187567
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 383,
+          "mean": 0.9985334100453969,
+          "median": 1.0,
+          "p5": 0.9944444444444442,
+          "p95": 1.0,
+          "min": 0.967032967032967,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 383,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 383,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top3_identical_rate": 1.0,
+        "own_sign_flip_rate": 0.05483028720626632,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 383,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 383,
+          "mean": 0.9982784839181705,
+          "median": 1.0,
+          "p5": 0.9945054945054945,
+          "p95": 1.0,
+          "min": 0.9835164835164836,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 383,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 383,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top3_identical_rate": 1.0,
+        "own_sign_flip_rate": 0.06527415143603134,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 383,
+          "rate": 1.0
+        }
+      }
+    },
+    "sex": {
+      "n_perturbations": 100,
+      "abs_dp": {
+        "n": 100,
+        "mean": 0.05903565866233669,
+        "median": 0.0582124818593891,
+        "p5": 0.008990477458693108,
+        "p95": 0.10992938106771581,
+        "min": 0.0014794953316898951,
+        "max": 0.11415113913212915
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 100,
+          "mean": 0.7602208622391801,
+          "median": 0.7785426897512322,
+          "p5": 0.6373626373626374,
+          "p95": 0.8464803161443476,
+          "min": 0.5714285714285714,
+          "max": 0.8852081737457229
+        },
+        "top3_overlap": {
+          "n": 100,
+          "mean": 0.8566666666666669,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 100,
+          "mean": 0.8059999999999998,
+          "median": 0.8,
+          "p5": 0.8,
+          "p95": 0.8,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.57,
+        "own_sign_flip_rate": 1.0,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 100,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 100,
+          "mean": 0.9701098901098902,
+          "median": 0.967032967032967,
+          "p5": 0.9436813186813187,
+          "p95": 0.9945054945054945,
+          "min": 0.8846153846153846,
+          "max": 0.9945054945054945
+        },
+        "top3_overlap": {
+          "n": 100,
+          "mean": 0.99,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 100,
+          "mean": 0.9119999999999999,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.97,
+        "own_sign_flip_rate": 1.0,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 100,
+          "rate": 1.0
+        }
+      }
+    },
+    "cp": {
+      "n_perturbations": 300,
+      "abs_dp": {
+        "n": 300,
+        "mean": 0.06875606381679268,
+        "median": 0.046145609920074326,
+        "p5": 0.004148240697176514,
+        "p95": 0.21451497750020954,
+        "min": 0.000637166023915503,
+        "max": 0.28567784838209165
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 300,
+          "mean": 0.9530635341089885,
+          "median": 0.9669421487603306,
+          "p5": 0.8461538461538461,
+          "p95": 0.9945054945054945,
+          "min": 0.7527472527472527,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 300,
+          "mean": 0.8522222222222223,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 300,
+          "mean": 0.89,
+          "median": 0.8,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.5566666666666666,
+        "own_sign_flip_rate": 0.4533333333333333,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 300,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 300,
+          "mean": 0.9897252747252747,
+          "median": 0.9945054945054945,
+          "p5": 0.967032967032967,
+          "p95": 1.0,
+          "min": 0.9175824175824175,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 300,
+          "mean": 0.8577777777777778,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 300,
+          "mean": 0.9779999999999999,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.5733333333333334,
+        "own_sign_flip_rate": 0.4533333333333333,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 300,
+          "rate": 1.0
+        }
+      }
+    },
+    "trestbps": {
+      "n_perturbations": 366,
+      "abs_dp": {
+        "n": 366,
+        "mean": 0.006738328300259202,
+        "median": 0.0056682263243687525,
+        "p5": 0.0006667420816287017,
+        "p95": 0.016833761412047107,
+        "min": 9.194252162092464e-05,
+        "max": 0.018249719600790026
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 366,
+          "mean": 0.9949902073970629,
+          "median": 0.9999999999999999,
+          "p5": 0.9833333333333333,
+          "p95": 1.0,
+          "min": 0.9175824175824175,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 366,
+          "mean": 0.9972677595628415,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 366,
+          "mean": 0.9890710382513661,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.9918032786885246,
+        "own_sign_flip_rate": 0.06284153005464481,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 366,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 366,
+          "mean": 0.9933345343181408,
+          "median": 0.9945054945054945,
+          "p5": 0.967032967032967,
+          "p95": 1.0,
+          "min": 0.945054945054945,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 366,
+          "mean": 0.994535519125683,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 366,
+          "mean": 0.9896174863387978,
+          "median": 1.0,
+          "p5": 0.8500000000000001,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.9836065573770492,
+        "own_sign_flip_rate": 0.06557377049180328,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 366,
+          "rate": 1.0
+        }
+      }
+    },
+    "chol": {
+      "n_perturbations": 379,
+      "abs_dp": {
+        "n": 379,
+        "mean": 0.024986356249150597,
+        "median": 0.020976467415522948,
+        "p5": 0.0029318611058836044,
+        "p95": 0.06230988827654788,
+        "min": 0.0003325165602925395,
+        "max": 0.0674630744813296
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 379,
+          "mean": 0.9852718987523496,
+          "median": 0.9945054945054945,
+          "p5": 0.9175824175824175,
+          "p95": 1.0,
+          "min": 0.8457300275482094,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 379,
+          "mean": 0.9525065963060686,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 379,
+          "mean": 0.9688654353562006,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.8575197889182058,
+        "own_sign_flip_rate": 0.08179419525065963,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 379,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 379,
+          "mean": 0.9835309808924585,
+          "median": 0.9945054945054945,
+          "p5": 0.9175824175824175,
+          "p95": 1.0,
+          "min": 0.8461538461538461,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 379,
+          "mean": 0.9507475813544415,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 379,
+          "mean": 0.9667546174142481,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.8522427440633246,
+        "own_sign_flip_rate": 0.08179419525065963,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 379,
+          "rate": 1.0
+        }
+      }
+    },
+    "fbs": {
+      "n_perturbations": 100,
+      "abs_dp": {
+        "n": 100,
+        "mean": 0.003059425225338342,
+        "median": 0.003049151839511377,
+        "p5": 0.0002652814336415787,
+        "p95": 0.005918816702300253,
+        "min": 3.084780865747483e-05,
+        "max": 0.0062465560326077085
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 100,
+          "mean": 0.9879231026164967,
+          "median": 0.9903723261853131,
+          "p5": 0.9681964400343844,
+          "p95": 1.0,
+          "min": 0.9573599153124693,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 100,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 100,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top3_identical_rate": 1.0,
+        "own_sign_flip_rate": 1.0,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 100,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 100,
+          "mean": 0.9967032967032964,
+          "median": 0.9945054945054945,
+          "p5": 0.9945054945054945,
+          "p95": 1.0,
+          "min": 0.9835164835164836,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 100,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 100,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top3_identical_rate": 1.0,
+        "own_sign_flip_rate": 1.0,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 100,
+          "rate": 1.0
+        }
+      }
+    },
+    "restecg": {
+      "n_perturbations": 200,
+      "abs_dp": {
+        "n": 200,
+        "mean": 0.024178097406967032,
+        "median": 0.019906056343514944,
+        "p5": 0.0022297528860864835,
+        "p95": 0.06377370812688724,
+        "min": 0.0002696392129136749,
+        "max": 0.07508117354393273
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 200,
+          "mean": 0.985508350235623,
+          "median": 0.9944903581267218,
+          "p5": 0.945054945054945,
+          "p95": 1.0,
+          "min": 0.9444444444444443,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 200,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 200,
+          "mean": 0.9940000000000001,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 1.0,
+        "own_sign_flip_rate": 0.65,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 200,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 200,
+          "mean": 0.9949725274725276,
+          "median": 0.9945054945054945,
+          "p5": 0.9835164835164836,
+          "p95": 1.0,
+          "min": 0.945054945054945,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 200,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 200,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top3_identical_rate": 1.0,
+        "own_sign_flip_rate": 0.65,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 200,
+          "rate": 1.0
+        }
+      }
+    },
+    "thalach": {
+      "n_perturbations": 367,
+      "abs_dp": {
+        "n": 367,
+        "mean": 0.020217160532646283,
+        "median": 0.01748728038416658,
+        "p5": 0.0023714513792285285,
+        "p95": 0.04971305652783893,
+        "min": 0.00027708452207086953,
+        "max": 0.05423329431198598
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 367,
+          "mean": 0.9891483258711399,
+          "median": 0.9945054945054945,
+          "p5": 0.9669421487603306,
+          "p95": 1.0,
+          "min": 0.8833333333333333,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 367,
+          "mean": 0.9464123524069029,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 367,
+          "mean": 0.9743869209809265,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.8392370572207084,
+        "own_sign_flip_rate": 0.08446866485013624,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.7763568394002505e-15,
+        "direction_agreement": {
+          "n": 367,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 367,
+          "mean": 0.9865706500583884,
+          "median": 0.9945054945054945,
+          "p5": 0.945054945054945,
+          "p95": 1.0,
+          "min": 0.8846153846153846,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 367,
+          "mean": 0.950045413260672,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 367,
+          "mean": 0.9705722070844688,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.8501362397820164,
+        "own_sign_flip_rate": 0.07901907356948229,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 367,
+          "rate": 1.0
+        }
+      }
+    },
+    "exang": {
+      "n_perturbations": 100,
+      "abs_dp": {
+        "n": 100,
+        "mean": 0.06368118580972783,
+        "median": 0.062399234715651786,
+        "p5": 0.009418709868247221,
+        "p95": 0.11811089864148681,
+        "min": 0.0014353728583912373,
+        "max": 0.12284485096469067
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 100,
+          "mean": 0.7870172934218802,
+          "median": 0.8021978021978022,
+          "p5": 0.6971014368247569,
+          "p95": 0.866575785412149,
+          "min": 0.6052275326688025,
+          "max": 0.9023392305243964
+        },
+        "top3_overlap": {
+          "n": 100,
+          "mean": 0.9033333333333334,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 100,
+          "mean": 0.834,
+          "median": 0.8,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.71,
+        "own_sign_flip_rate": 1.0,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 100,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 100,
+          "mean": 0.9902747252747253,
+          "median": 0.9945054945054945,
+          "p5": 0.967032967032967,
+          "p95": 1.0,
+          "min": 0.945054945054945,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 100,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 100,
+          "mean": 0.9620000000000001,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 1.0,
+        "own_sign_flip_rate": 1.0,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 100,
+          "rate": 1.0
+        }
+      }
+    },
+    "oldpeak": {
+      "n_perturbations": 367,
+      "abs_dp": {
+        "n": 367,
+        "mean": 0.02330355116220773,
+        "median": 0.020083648276520205,
+        "p5": 0.0031934349300585365,
+        "p95": 0.05701038603599272,
+        "min": 0.00029752450687769993,
+        "max": 0.06192086355092852
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 367,
+          "mean": 0.9895596669314778,
+          "median": 0.9999999999999999,
+          "p5": 0.945054945054945,
+          "p95": 1.0,
+          "min": 0.8842975206611571,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 367,
+          "mean": 0.9609445958219801,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 367,
+          "mean": 0.9727520435967303,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.8828337874659401,
+        "own_sign_flip_rate": 0.07629427792915532,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 367,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 367,
+          "mean": 0.9853879090936313,
+          "median": 1.0,
+          "p5": 0.9175824175824175,
+          "p95": 1.0,
+          "min": 0.8461538461538461,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 367,
+          "mean": 0.9627611262488648,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 367,
+          "mean": 0.973841961852861,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.888283378746594,
+        "own_sign_flip_rate": 0.07629427792915532,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 367,
+          "rate": 1.0
+        }
+      }
+    },
+    "slope": {
+      "n_perturbations": 200,
+      "abs_dp": {
+        "n": 200,
+        "mean": 0.04911233330486329,
+        "median": 0.046121430149706655,
+        "p5": 0.006993572062260663,
+        "p95": 0.1162175749765548,
+        "min": 0.0008250179751195796,
+        "max": 0.1403662221215215
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 200,
+          "mean": 0.9330620768120768,
+          "median": 0.944674012855831,
+          "p5": 0.8021978021978022,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 200,
+          "mean": 0.99,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 200,
+          "mean": 0.9510000000000001,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.97,
+        "own_sign_flip_rate": 0.62,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 200,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 200,
+          "mean": 0.9587637362637363,
+          "median": 0.967032967032967,
+          "p5": 0.8846153846153846,
+          "p95": 1.0,
+          "min": 0.8021978021978022,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 200,
+          "mean": 1.0,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 200,
+          "mean": 0.975,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 1.0,
+        "own_sign_flip_rate": 0.62,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 200,
+          "rate": 1.0
+        }
+      }
+    },
+    "ca": {
+      "n_perturbations": 400,
+      "abs_dp": {
+        "n": 400,
+        "mean": 0.05760544602776406,
+        "median": 0.03939304128559906,
+        "p5": 0.0025034661226427894,
+        "p95": 0.17646542209369248,
+        "min": 0.00020414929399625859,
+        "max": 0.22029779825374463
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 400,
+          "mean": 0.9578512800330984,
+          "median": 0.967032967032967,
+          "p5": 0.8461538461538461,
+          "p95": 1.0,
+          "min": 0.7527472527472527,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 400,
+          "mean": 0.8891666666666665,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 400,
+          "mean": 0.895,
+          "median": 0.8,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.6675,
+        "own_sign_flip_rate": 0.6075,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 400,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 400,
+          "mean": 0.9760989010989012,
+          "median": 0.9945054945054945,
+          "p5": 0.9175824175824175,
+          "p95": 1.0,
+          "min": 0.8846153846153846,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 400,
+          "mean": 0.9083333333333334,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 400,
+          "mean": 0.9215000000000001,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.725,
+        "own_sign_flip_rate": 0.4375,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 400,
+          "rate": 1.0
+        }
+      }
+    },
+    "thal": {
+      "n_perturbations": 300,
+      "abs_dp": {
+        "n": 300,
+        "mean": 0.07768378897728763,
+        "median": 0.06631741964234261,
+        "p5": 0.0034652913371308438,
+        "p95": 0.1875920456075939,
+        "min": 0.00016986788608563952,
+        "max": 0.3005250555217346
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 300,
+          "mean": 0.9042588068497159,
+          "median": 0.8846153846153846,
+          "p5": 0.8016528925619836,
+          "p95": 1.0,
+          "min": 0.6978021978021978,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 300,
+          "mean": 0.8177777777777779,
+          "median": 0.6666666666666666,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 300,
+          "mean": 0.8666666666666667,
+          "median": 0.8,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.4533333333333333,
+        "own_sign_flip_rate": 0.6666666666666666,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 300,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 300,
+          "mean": 0.8697619047619048,
+          "median": 0.8461538461538461,
+          "p5": 0.6978021978021978,
+          "p95": 1.0,
+          "min": 0.6373626373626374,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 300,
+          "mean": 0.8322222222222223,
+          "median": 0.6666666666666666,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 300,
+          "mean": 0.8666666666666667,
+          "median": 0.8,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.49666666666666665,
+        "own_sign_flip_rate": 0.48,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 300,
+          "rate": 1.0
+        }
+      }
+    }
+  },
+  "continuous_by_magnitude": {
+    "+10%": {
+      "n_perturbations": 453,
+      "abs_dp": {
+        "n": 453,
+        "mean": 0.020517847856932662,
+        "median": 0.014136180712055801,
+        "p5": 0.0008217112936379501,
+        "p95": 0.059256784461165266,
+        "min": 6.361345824290598e-05,
+        "max": 0.0674630744813296
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 453,
+          "mean": 0.9883653283412465,
+          "median": 0.9999999999999999,
+          "p5": 0.945054945054945,
+          "p95": 1.0,
+          "min": 0.8457300275482094,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 453,
+          "mean": 0.9587932303164091,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 453,
+          "mean": 0.976158940397351,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.8763796909492274,
+        "own_sign_flip_rate": 0.09050772626931568,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 453,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 453,
+          "mean": 0.9856754724304393,
+          "median": 0.9945054945054945,
+          "p5": 0.945054945054945,
+          "p95": 1.0,
+          "min": 0.8461538461538461,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 453,
+          "mean": 0.9536423841059603,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 453,
+          "mean": 0.9730684326710817,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.8609271523178808,
+        "own_sign_flip_rate": 0.09713024282560706,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 453,
+          "rate": 1.0
+        }
+      }
+    },
+    "+5%": {
+      "n_perturbations": 477,
+      "abs_dp": {
+        "n": 477,
+        "mean": 0.010289877398323759,
+        "median": 0.007203268356519965,
+        "p5": 0.000423030322736695,
+        "p95": 0.029302434562555702,
+        "min": 3.210543523823883e-05,
+        "max": 0.03395015328226114
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 477,
+          "mean": 0.9947474533809583,
+          "median": 1.0,
+          "p5": 0.967032967032967,
+          "p95": 1.0,
+          "min": 0.8846153846153846,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 477,
+          "mean": 0.9748427672955975,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 477,
+          "mean": 0.9916142557651991,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.9245283018867925,
+        "own_sign_flip_rate": 0.04612159329140461,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 477,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 477,
+          "mean": 0.993733729582786,
+          "median": 1.0,
+          "p5": 0.967032967032967,
+          "p95": 1.0,
+          "min": 0.8846153846153846,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 477,
+          "mean": 0.9825296995108315,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 477,
+          "mean": 0.9844863731656185,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.9475890985324947,
+        "own_sign_flip_rate": 0.06079664570230608,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 477,
+          "rate": 1.0
+        }
+      }
+    },
+    "-10%": {
+      "n_perturbations": 452,
+      "abs_dp": {
+        "n": 452,
+        "mean": 0.02054539153193007,
+        "median": 0.013591448129081363,
+        "p5": 0.0008585776062607798,
+        "p95": 0.057734030902585866,
+        "min": 6.604807221266551e-05,
+        "max": 0.06597854563107186
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 452,
+          "mean": 0.9873378409380018,
+          "median": 0.9945054945054945,
+          "p5": 0.9449035812672176,
+          "p95": 1.0,
+          "min": 0.8457300275482094,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 452,
+          "mean": 0.9653392330383481,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 452,
+          "mean": 0.970353982300885,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.8960176991150443,
+        "own_sign_flip_rate": 0.10398230088495575,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 452,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 452,
+          "mean": 0.9841242827968492,
+          "median": 0.9945054945054945,
+          "p5": 0.9175824175824175,
+          "p95": 1.0,
+          "min": 0.8461538461538461,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 452,
+          "mean": 0.967551622418879,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 452,
+          "mean": 0.9738938053097346,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.9026548672566371,
+        "own_sign_flip_rate": 0.10398230088495575,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 452,
+          "rate": 1.0
+        }
+      }
+    },
+    "-5%": {
+      "n_perturbations": 480,
+      "abs_dp": {
+        "n": 480,
+        "mean": 0.010336655953589262,
+        "median": 0.007081850121132605,
+        "p5": 0.00044178402180096167,
+        "p95": 0.029011259768981865,
+        "min": 3.27140336586762e-05,
+        "max": 0.03405415658528255
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 480,
+          "mean": 0.9952247121565304,
+          "median": 1.0,
+          "p5": 0.9833333333333333,
+          "p95": 1.0,
+          "min": 0.8846153846153846,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 480,
+          "mean": 0.986111111111111,
+          "median": 1.0,
+          "p5": 1.0,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 480,
+          "mean": 0.9854166666666667,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.9583333333333334,
+        "own_sign_flip_rate": 0.05,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.7763568394002505e-15,
+        "direction_agreement": {
+          "n": 480,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 480,
+          "mean": 0.9937957875457876,
+          "median": 1.0,
+          "p5": 0.967032967032967,
+          "p95": 1.0,
+          "min": 0.9175824175824175,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 480,
+          "mean": 0.9819444444444445,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 480,
+          "mean": 0.98875,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.9458333333333333,
+        "own_sign_flip_rate": 0.035416666666666666,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 480,
+          "rate": 1.0
+        }
+      }
+    }
+  },
+  "categorical_by_verification": {
+    "verified_only": {
+      "n_perturbations": 1046,
+      "abs_dp": {
+        "n": 1046,
+        "mean": 0.05177675744500252,
+        "median": 0.03187034409021994,
+        "p5": 0.001660305005497853,
+        "p95": 0.1764466500133773,
+        "min": 3.084780865747483e-05,
+        "max": 0.28567784838209165
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 1046,
+          "mean": 0.9303379766553701,
+          "median": 0.967032967032967,
+          "p5": 0.726273039202563,
+          "p95": 1.0,
+          "min": 0.5714285714285714,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 1046,
+          "mean": 0.9037603569152326,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 1046,
+          "mean": 0.9072657743785852,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.7112810707456979,
+        "own_sign_flip_rate": 0.6673040152963671,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 1046,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 1046,
+          "mean": 0.9909072762801254,
+          "median": 0.9945054945054945,
+          "p5": 0.967032967032967,
+          "p95": 1.0,
+          "min": 0.8846153846153846,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 1046,
+          "mean": 0.9413639260675588,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 1046,
+          "mean": 0.9778202676864245,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.8240917782026769,
+        "own_sign_flip_rate": 0.6673040152963671,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 1046,
+          "rate": 1.0
+        }
+      }
+    },
+    "unverified": {
+      "n_perturbations": 500,
+      "abs_dp": {
+        "n": 500,
+        "mean": 0.0662552067083179,
+        "median": 0.05370562911127713,
+        "p5": 0.003873346614144119,
+        "p95": 0.15933596483950255,
+        "min": 0.00016986788608563952,
+        "max": 0.3005250555217346
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 500,
+          "mean": 0.9157801148346603,
+          "median": 0.9173553719008265,
+          "p5": 0.8021978021978022,
+          "p95": 1.0,
+          "min": 0.6978021978021978,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 500,
+          "mean": 0.8866666666666665,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 500,
+          "mean": 0.9004000000000001,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.66,
+        "own_sign_flip_rate": 0.648,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 500,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 500,
+          "mean": 0.9053626373626373,
+          "median": 0.945054945054945,
+          "p5": 0.7527472527472527,
+          "p95": 1.0,
+          "min": 0.6373626373626374,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 500,
+          "mean": 0.8993333333333332,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 500,
+          "mean": 0.91,
+          "median": 1.0,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.698,
+        "own_sign_flip_rate": 0.536,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 1.3322676295501878e-15,
+        "direction_agreement": {
+          "n": 500,
+          "rate": 1.0
+        }
+      }
+    },
+    "undefined_in_codebook": {
+      "n_perturbations": 306,
+      "abs_dp": {
+        "n": 306,
+        "mean": 0.0482663185772844,
+        "median": 0.03531552922595438,
+        "p5": 0.0028490742868026997,
+        "p95": 0.13524796972408096,
+        "min": 0.00016986788608563952,
+        "max": 0.15357703157925084
+      },
+      "linear": {
+        "rank_corr": {
+          "n": 306,
+          "mean": 0.927015553931775,
+          "median": 0.945054945054945,
+          "p5": 0.8021978021978022,
+          "p95": 1.0,
+          "min": 0.7520661157024794,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 306,
+          "mean": 0.8779956427015251,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 306,
+          "mean": 0.8869281045751634,
+          "median": 0.8,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.6339869281045751,
+        "own_sign_flip_rate": 0.7026143790849673,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 306,
+          "rate": 1.0
+        }
+      },
+      "shap_equivalent": {
+        "rank_corr": {
+          "n": 306,
+          "mean": 0.8987825899590606,
+          "median": 0.945054945054945,
+          "p5": 0.7527472527472527,
+          "p95": 0.9945054945054945,
+          "min": 0.6373626373626374,
+          "max": 1.0
+        },
+        "top3_overlap": {
+          "n": 306,
+          "mean": 0.8572984749455339,
+          "median": 1.0,
+          "p5": 0.6666666666666666,
+          "p95": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0
+        },
+        "top5_overlap": {
+          "n": 306,
+          "mean": 0.8470588235294118,
+          "median": 0.8,
+          "p5": 0.8,
+          "p95": 1.0,
+          "min": 0.8,
+          "max": 1.0
+        },
+        "top3_identical_rate": 0.5718954248366013,
+        "own_sign_flip_rate": 0.2973856209150327,
+        "other_sign_flips_total": 0,
+        "max_other_contribution_change": 0.0,
+        "max_additivity_error": 8.881784197001252e-16,
+        "direction_agreement": {
+          "n": 306,
+          "rate": 1.0
+        }
+      }
+    }
+  },
+  "skipped_out_of_range": {
+    "age": 17,
+    "trestbps": 34,
+    "chol": 21,
+    "thalach": 33,
+    "oldpeak": 33
+  },
+  "expectation_checks": {
+    "locality_max_other_contribution_change": 0.0,
+    "locality_holds": true,
+    "max_additivity_error": 1.7763568394002505e-15,
+    "additivity_holds": true,
+    "linear_vs_shap_delta_max_abs_difference": 2.220446049250313e-16,
+    "methods_share_deltas": true
+  },
+  "counts": {
+    "profiles": 100,
+    "perturbations_evaluated": 3562,
+    "continuous": 1862,
+    "categorical": 1700,
+    "skipped_out_of_range": 138
+  },
+  "profiles_sha256": "93487e3c1fb317a85805c15b87a572bcdf70420551b82fac98843d05a57e94c4",
+  "model": {
+    "id": "cardiovanta-lr13",
+    "version": "1.0.0",
+    "outcome_mapping": "interim_legacy",
+    "registry_verified": true
+  },
+  "runtime_seconds": 175.05
+}

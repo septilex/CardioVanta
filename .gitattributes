@@ -6,3 +6,7 @@ configs/artifact_hashes.json text eol=lf
 artifacts/models/**/checksums.sha256 text eol=lf
 artifacts/models/**/*.json text eol=lf
 artifacts/models/**/*.md text eol=lf
+# R6 evidence record: its raw-byte SHA-256 (ed4c17b1...) is cited as an integrity reference, so its bytes are
+# stored and checked out unconverted.
+/experiments/results/r6_codebook_evidence.json -text
+/cardiovanta_ml/contracts/feature_schema.v2.json text eol=lf
