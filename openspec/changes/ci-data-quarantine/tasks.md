@@ -20,5 +20,9 @@
 - [x] 4.2 Pin the Vercel CLI in the deploy job to `59.26.0`, matching `vercel-linux-build.yml`, with a regression test.
 - [x] 4.3 Triggers: pull requests into `main` run every verification job unconditionally. Deployment is gated to `push` on `main` (`environment: production`), and `verify-production` depends on it. Regression-tested.
 
-## 5. Open
-- [ ] 5.1 Run the workflow on GitHub. Not done: it needs a push, which was not authorised.
+## 5. GitHub run
+- [x] 5.1 Run the workflow on GitHub (PR #2, run 41289736991). The test steps passed; the quarantine assertion failed in both Python jobs, with two false-positive findings (section 6). No locked or quarantined data was accessed.
+
+## 6. PR #2 CI findings (2026-11-01)
+- [x] 6.1 Bytecode caches. Importing `cardiovanta_ml.contracts` from the checkout made Python write `__pycache__/*.pyc.<id>` into the write-protected `cardiovanta_ml/contracts`, and the guard refused it (5 backend, 3 research). Local rehearsals had set `PYTHONDONTWRITEBYTECODE=1`; CI did not. Fix: both guard-enable steps export `PYTHONDONTWRITEBYTECODE=1`. The protected-directory rules are unchanged (regression-tested).
+- [x] 6.2 `dir_fd`-relative deletes. Traced with call stacks in a Linux replay: `pip-audit -r requirements.txt` builds a temporary venv and runs `pip install --upgrade pip wheel setuptools` in it. Uninstalling the old `pkg_resources`, and the venv's later cleanup, use `shutil.rmtree`, which on Linux calls `os.rmdir("data", dir_fd=<.../pkg_resources/tests>)`. The guard ignored `dir_fd` and resolved `"data"` against the CWD (the repository), refusing it as the protected `data/` (8 in the pip child, 1 in pip-audit). Fix: the guard resolves `dir_fd`-relative paths (`os.remove`, `os.rmdir`, `os.chmod`, `shutil.rmtree`, `os.rename`, `os.link`, `os.symlink`) against the directory the descriptor refers to. An unresolvable descriptor keeps the stricter CWD resolution. This also closes the converse gap, where a `dir_fd`-relative delete inside a protected directory was resolved against the CWD and allowed. No exception was added for `data/`, and `rmdir` is not allowed broadly (regression-tested on Linux against the old and new guard).

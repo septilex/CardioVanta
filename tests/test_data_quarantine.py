@@ -93,13 +93,13 @@ def fake_root(tmp_path):
     return root
 
 
-def _run(code, fake_root, log, tmp_path, quarantine=True):
+def _run(code, fake_root, log, tmp_path, quarantine=True, cwd=None):
     env = {k: v for k, v in os.environ.items() if not k.startswith("CARDIOVANTA_")}
     env.update({"PYTHONPATH": str(SITE), "CARDIOVANTA_QUARANTINE_EXTRA_ROOTS": str(fake_root),
                 "CARDIOVANTA_QUARANTINE_LOG": str(log)})
     if quarantine:
         env["CARDIOVANTA_DATA_QUARANTINE"] = "1"
-    return subprocess.run([sys.executable, "-c", textwrap.dedent(code)], env=env, cwd=tmp_path,
+    return subprocess.run([sys.executable, "-c", textwrap.dedent(code)], env=env, cwd=cwd or tmp_path,
                           capture_output=True, text=True, timeout=120)
 
 
@@ -151,6 +151,75 @@ def test_guard_inactive_without_flag(fake_root, tmp_path):
              tmp_path / "q.jsonl", tmp_path, quarantine=False)
     expected = len((fake_root / "data" / "raw" / "heart.csv").read_text(encoding="utf-8"))   # synthetic fake file only
     assert r.returncode == 0 and r.stdout.strip() == str(expected)
+
+
+def _dir_fd_resolvable() -> bool:
+    if os.name == "nt" or os.rmdir not in os.supports_dir_fd:
+        return False
+    fd = os.open(".", os.O_RDONLY)
+    try:
+        return dq._fd_dir(fd) is not None
+    finally:
+        os.close(fd)
+
+
+@pytest.mark.skipif(not _dir_fd_resolvable(), reason="dir_fd deletes are POSIX-only (resolved via /proc or F_GETPATH)")
+def test_dir_fd_relative_deletes_resolve_to_the_descriptor_directory(fake_root, tmp_path, monkeypatch):
+    # PR #2 CI finding: shutil.rmtree on Linux calls os.rmdir("data", dir_fd=<parent>) while cleaning a
+    # temporary venv; the guard resolved "data" against the CWD (the repo) and refused it.
+    # Pure decide() calls; the only real opens are read-only opens of directories the policy allows
+    # (this process may itself be guarded in CI, with the fake root registered below).
+    monkeypatch.setenv(dq.ENV_EXTRA_ROOTS, str(fake_root))
+    outside = tmp_path / "venv" / "tests"
+    (outside / "data").mkdir(parents=True)
+    monkeypatch.chdir(fake_root)                              # CWD-relative "data" would be fake_root/data
+    fds = []
+    try:
+        out_fd = os.open(str(outside), os.O_RDONLY); fds.append(out_fd)
+        assert dq.decide("os.rmdir", ("data", out_fd)) is None                     # not the protected data/
+        assert dq.decide("os.remove", ("data", out_fd)) is None
+        assert dq.decide("shutil.rmtree", ("data", out_fd)) is None
+        # no descriptor (-1 / None): CWD-relative resolution and the protected-directory rule are unchanged
+        assert dq.decide("os.rmdir", ("data", -1))["reason"] == "write_protected"
+        assert dq.decide("shutil.rmtree", ("data", None))["reason"] == "write_protected"
+        # the converse is now caught: dir_fd-relative operations INSIDE protected directories
+        monkeypatch.chdir(tmp_path)
+        data_fd = os.open(str(fake_root / "data"), os.O_RDONLY); fds.append(data_fd)
+        res_fd = os.open(str(fake_root / "experiments" / "results"), os.O_RDONLY); fds.append(res_fd)
+        assert dq.decide("os.rmdir", ("raw", data_fd))["reason"] == "research_data"      # data/raw
+        assert dq.decide("os.remove", ("raw/heart.csv", data_fd))["reason"] == "locked_source"
+        assert dq.decide("os.chmod", ("x.json", 0o777, res_fd))["reason"] == "write_protected"
+        assert dq.decide("os.rename", ("a", "x.json", -1, res_fd))["reason"] == "write_protected"
+        assert dq.decide("os.link", ("a", "x.json", -1, res_fd))["reason"] == "write_protected"
+        assert dq.decide("os.symlink", ("anything", "x.json", res_fd))["reason"] == "write_protected"
+    finally:
+        for fd in fds:
+            os.close(fd)
+
+
+def test_guard_allows_rmtree_of_unrelated_tree_containing_data_dir(fake_root, tmp_path):
+    # End to end in a guarded interpreter whose CWD is the (fake) checkout, as in CI: deleting a temporary
+    # tree that happens to contain a "data" directory succeeds and logs nothing, while deleting the
+    # protected data/ is still refused and logged.
+    scratch = tmp_path / "scratch_venv" / "site-packages" / "pkg" / "tests"
+    (scratch / "data" / "nested").mkdir(parents=True)
+    (scratch / "data" / "nested" / "f.txt").write_text("synthetic", encoding="utf-8")
+    log = tmp_path / "q.jsonl"
+    code = f"""
+        import shutil
+        shutil.rmtree(r"{tmp_path / 'scratch_venv'}")
+        try:
+            shutil.rmtree(r"{fake_root / 'data'}")
+            print("PROTECTED:REMOVED")
+        except PermissionError as e:
+            print("PROTECTED:DENIED" if "data quarantine" in str(e) else "PROTECTED:OTHER")
+    """
+    r = _run(code, fake_root, log, tmp_path, cwd=fake_root)
+    assert r.returncode == 0, r.stderr
+    assert r.stdout.split() == ["PROTECTED:DENIED"]
+    assert not (tmp_path / "scratch_venv").exists() and (fake_root / "data" / "raw" / "heart.csv").exists()
+    records = [json.loads(l) for l in log.read_text().splitlines()]
+    assert [(x["event"], x["path"]) for x in records] == [("shutil.rmtree", "data")]
 
 
 def test_present_denied_files_lists_names_without_opening(fake_root):
@@ -228,6 +297,13 @@ def test_workflow_runs_only_classified_safe_tests_under_quarantine():
         assert pytest_lines and all("test_classification.py --list ci_safe" in l for l in pytest_lines)
         # the guard is enabled before any test or verification step runs
         assert block.index("Enable Data Quarantine Guard") < block.index("Verify Quarantine") < block.index("pytest $(")
+        # bytecode caches are never written, so imports from write-protected package directories
+        # (cardiovanta_ml/contracts) do not produce refused __pycache__ writes (PR #2 CI finding)
+        assert 'echo "PYTHONDONTWRITEBYTECODE=1" >> "$GITHUB_ENV"' in block
+        assert block.index("PYTHONDONTWRITEBYTECODE=1") < block.index("Verify Quarantine")
+    # the protected-directory policy is not weakened to accommodate caches
+    assert "cardiovanta_ml/contracts" in dq.WRITE_PROTECTED_DIRS
+    assert dq.decide("open", (str(ROOT / "cardiovanta_ml" / "contracts" / "__pycache__" / "x.pyc.1"), "wb", 0))["reason"] == "write_protected"
     assert "sparse-checkout-cone-mode: false" in jobs["verify-frontend"]
     deploy_needs = re.search(r"needs: \[([^\]]*)\]", jobs["deploy"]).group(1)
     assert "research-data-tests" not in deploy_needs and "quarantined-research-tests" in deploy_needs

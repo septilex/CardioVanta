@@ -61,7 +61,11 @@ jobs:
           python -m pip install pip-audit
 
       - name: Enable Data Quarantine Guard
+        # PYTHONDONTWRITEBYTECODE: importing modules that live in write-protected directories (e.g.
+        # cardiovanta_ml/contracts) must not try to write __pycache__ files there; the guard would refuse
+        # (and log) every such write. The protected-directory rules themselves are unchanged.
         run: |
+          echo "PYTHONDONTWRITEBYTECODE=1" >> "$GITHUB_ENV"
           echo "CARDIOVANTA_DATA_QUARANTINE=1" >> "$GITHUB_ENV"
           echo "CARDIOVANTA_QUARANTINE_LOG=$RUNNER_TEMP/data-quarantine.jsonl" >> "$GITHUB_ENV"
           echo "PYTHONPATH=$GITHUB_WORKSPACE/scripts/ci/quarantine_site" >> "$GITHUB_ENV"
@@ -154,7 +158,11 @@ jobs:
           pip install pytest==9.1.1 pip-audit
 
       - name: Enable Data Quarantine Guard
+        # PYTHONDONTWRITEBYTECODE: importing modules that live in write-protected directories (e.g.
+        # cardiovanta_ml/contracts) must not try to write __pycache__ files there; the guard would refuse
+        # (and log) every such write. The protected-directory rules themselves are unchanged.
         run: |
+          echo "PYTHONDONTWRITEBYTECODE=1" >> "$GITHUB_ENV"
           echo "CARDIOVANTA_DATA_QUARANTINE=1" >> "$GITHUB_ENV"
           echo "CARDIOVANTA_QUARANTINE_LOG=$RUNNER_TEMP/data-quarantine.jsonl" >> "$GITHUB_ENV"
           echo "PYTHONPATH=$GITHUB_WORKSPACE/scripts/ci/quarantine_site" >> "$GITHUB_ENV"
