@@ -14,6 +14,7 @@
 | `main` | `446788d` (merge of PR #1, 2026-10-31) |
 | Open pull request | PR #2 `horizon0/research-ci-quarantine` → `main`: open, not merged, mergeable, 18 commits, 76 files |
 | Latest CI result | GitHub Actions run **`41324184106`** on `bed7e14`: **success** (backend, research and frontend jobs passed; deploy jobs skipped as designed for pull requests) |
+| Phase 9 update (2026-11-03) | Production verified read-only: it serves the **inverted**, pre-R0.3 output, a **production blocker** (§28.3). Bundle composition measured and a standard-library runtime shown to reproduce the model exactly (§28.4, §45.4). Updated roadmap in §45.3. All Phase 9 changes are listed in Appendix D |
 | Audience | The incoming lead engineer and owner of CardioVanta |
 | Authoring standard | Evidence-graded engineering reference, technical audit and teaching text |
 
@@ -195,6 +196,7 @@ References take the form `path:line` (for example `backend/app/main.py:20`) and 
 - [Appendix A. Documentation Coverage Matrix](#appendix-a-documentation-coverage-matrix)
 - [Appendix B. Historical Sources Register](#appendix-b-historical-sources-register)
 - [Appendix C. Evidence Index](#appendix-c-evidence-index)
+- [Appendix D. Phase 9 Corrections and Verification (2026-11-03)](#appendix-d-phase-9-corrections-and-verification-2026-11-03)
 
 ---
 
@@ -287,7 +289,7 @@ The architecture's real centre of gravity is not the web stack but four **trust 
 - **A frontend that lags behind the backend's rigour:** several defects found on 2026-10-31 are still present.
 
 Its biggest unresolved architectural risk is **operational, not structural**:
-- the production deployment has not been rebuilt since before the semantic fix;
+- the production deployment has not been rebuilt since before the semantic fix, and a read-only check on 2026-11-03 confirmed that it serves the inverted output [L1];
 - the Linux Vercel build has never succeeded in evidence;
 - the production path is unprotected (Chapters 27–28).
 
@@ -566,7 +568,7 @@ Every row is **[L1]** from the transcript, Git and GitHub.
 ### 2.13 What remains unfinished
 
 - **R3.1:** the Linux Vercel build. It failed locally, and the Linux workflow has never run.
-- **Deployment of the R0.3–R3 architecture.** Production is still recorded at `3b46957`.
+- **Deployment of the R0.3–R3 architecture.** Production is still recorded at `3b46957`. On 2026-11-03 it was verified to serve the inverted, pre-R0.3 output (§28.3).
 - **Frontend truthfulness defects** from the 2026-10-31 review that remain open (Chapter 32).
 - **Phase 18:** recovery or re-implementation.
 - **R6 decision** on resolving the codebook.
@@ -2103,8 +2105,8 @@ A stateless, `aria-hidden` decorative SVG (`viewBox 0 0 1100 140`): a stylised c
 | `.gitattributes` | `*.joblib binary`; `eol=lf` for artifact JSON/CSV, registry files and the contract; the R6 evidence file `-text` | **No rule for `data/raw/heart.csv`**, so its working copy follows `core.autocrlf` (Chapter 21) |
 | `.gitignore` | Node and Next, venvs, Python caches, `.env*` except `.env.example`, `.vercel/`, logs and zips, the "Stale / abandoned architecture" list (`frontend/`, `render.yaml`, `docker-compose.yml`, `.dockerignore`), scratch scripts, package build output, `_uv/` | — |
 | `pytest.ini` | `pythonpath = .`; `testpaths = backend/tests` | CI passes explicit module lists |
-| `requirements.txt` | Research pins (26 packages) | Unused `cloudpickle`, `narwhals`; LightGBM, CatBoost, TabICL and SHAP missing |
-| `api/requirements.txt` | Serving pins (9 packages) | Exact |
+| `requirements.txt` | Research pins (26 packages) | `cloudpickle` and `narwhals` have no direct imports, but they are pinned transitive requirements (of joblib and scikit-learn), not unused pins; LightGBM, CatBoost, TabICL and SHAP missing |
+| `api/requirements.txt` | Serving pins (9 packages) | Exact for the direct packages. Transitive helpers (`narwhals`, `cloudpickle`, `python-dateutil`, `tzdata`) are unpinned: on 2026-11-03 narwhals resolved to 2.28.0, versus 2.26.0 in the research pins |
 | `backend/requirements.txt` | Serving pins plus `uvicorn`, `httpx` | Local and tests |
 | `.python-version`, `api/.python-version` | `3.12` | Vercel reads the `api/` one (R3) |
 | `.env.example` | Placeholders: `ENVIRONMENT`, `CORS_ORIGINS`, `NEXT_PUBLIC_API_BASE_URL`, `MODEL_ID`, `MODEL_VERSION`, commented `MODEL_REGISTRY_ROOT` | No secrets |
@@ -2259,6 +2261,7 @@ flowchart LR
 | Package | Pulled in by | Why it matters |
 |---|---|---|
 | numpy, scipy, threadpoolctl | scikit-learn | The pickles depend on them; pinned since R3 |
+| cloudpickle, narwhals | joblib (`cloudpickle>=3.0`), scikit-learn (`narwhals>=2.0.1`) | Required at install time, with no direct imports in the project. Pinned in `requirements.txt`; unpinned for serving |
 | starlette | FastAPI | Middleware and `TestClient` (deprecation warning about `httpx`) |
 | sharp 0.35.5 | next | Image processing; upgraded with Next.js 16.4.3 (`eff366c`) |
 | glob 10.5.0 (deprecated), minimatch < 11.0.1, deepmerge ≥ 4.2.0 | Jest 30 and ESLint 9 tooling | The **34 open npm advisories** (31 moderate, 3 low); development-only |
@@ -2268,10 +2271,10 @@ flowchart LR
 
 | Risk | Evidence | Severity |
 |---|---|---|
-| The function bundle is larger than the builder limit | Local build: 301 MB versus a 225 MB maximum | **High** |
+| The function bundle is larger than the builder limit | Local Windows build: 301 MB versus a 225 MB maximum. The Linux wheels of the serving pins measure 242 MB, 95% of it the scientific stack (`docs/reports/VERCEL_BUNDLE_INVESTIGATION_2026-11-03.md`) | **High** |
 | Exact scikit-learn lock blocks upgrades | `registry/loader.py:165` | Medium (by design; the R8 target) |
 | Research studies cannot be rebuilt from pins | LightGBM, CatBoost, TabICL and SHAP missing from requirements | Low |
-| Unused pins | `cloudpickle`, `narwhals` (no imports) | Informational |
+| Transitive helpers unpinned for serving | `cloudpickle` and `narwhals` are required by joblib and scikit-learn. They are not unused, as an earlier version of this report said. They are pinned for research but resolve freely for the function | Informational |
 | Unpinned CI tools in a job holding secrets | `pip install requests urllib3` in `verify-production`; `pip-audit` | Low |
 | Python version spread | Training 3.11.9; serving 3.12; research CI 3.11 | Low (tested on both) |
 | Next.js caret range | `^16.4.3` (a lockfile protects CI) | Low |
@@ -2849,7 +2852,7 @@ The provenance lives in protected metadata, so both options need approval.
 | Malicious workflow change | Repository write access | None besides Git history | Medium (no branch protection) |
 | Token theft from the deploy job | Third-party actions; the CLI from npm | Pinned CLI; environment secret | Low–Medium |
 | Leakage of user health inputs | Logs | No raw values logged | Low |
-| Misleading output (semantic risk) | Live site | R0.3 in code, **not deployed** | **High** until production is verified |
+| Misleading output (semantic risk) | Live site | R0.3 in code, **not deployed** | **Critical**: the live site was verified on 2026-11-03 to serve inverted output (§28.3) |
 
 ## Chapter 23. Protected Files and Safety Mechanisms
 
@@ -2925,7 +2928,7 @@ During the Horizon 0 work, every commit was preceded by a protected-state check.
 
 | Workflow | Failure mode | Cause | Detection | Effect | Mitigation present | Gap |
 |---|---|---|---|---|---|---|
-| Prediction | Wrong orientation served | Pre-R0.3 deployment still live | **None automated** | Inverted risk shown | Code fixed | Production not redeployed; smoke test does not assert orientation |
+| Prediction | Wrong orientation served | Pre-R0.3 deployment still live (verified 2026-11-03) | **None automated**; found by a manual read-only check | Inverted risk shown | Code fixed | Production not redeployed; smoke test does not assert orientation |
 | Prediction | 422 crashes the UI | `detail` array rendered | — | Page error | — | Fix `api.ts` / error rendering |
 | Prediction | Explanation assertion fails | Numeric drift | 500 + log | Outage | Pinned numerical stack | — |
 | Cold start | Library mismatch | Dependency drift | Registry refuses | Outage | Exact pins | — |
@@ -3122,16 +3125,23 @@ The background poller `b3cpzgg5o` reported the same outcome in its log ("RUN COM
 | Vercel Git integration (automatic deploys outside Actions) | **[L4] Unknown** |
 | Manual deploys | Possible (`docs/deployment.md` documents `npx vercel --prod`). The 2026-10-23 Antigravity conversation "Push And Verify Vercel Build" is the only hint, and its outcome is **[L4] Unknown** |
 
-### 28.3 What production probably serves
+### 28.3 What production serves (verified 2026-11-03)
 
-**Inferred [L3].** If production is still the `3b46957` build:
+**Verified [L1] on 2026-11-03.** A read-only check sent only the project's synthetic golden fixtures to the live service (`docs/reports/PRODUCTION_VERIFICATION_2026-11-03.md`). Nothing in production was changed.
+
+| Check | Live result | Expected after R0.3 |
+|---|---|---|
+| HIGH fixture, `probability` | 0.014209071 | 0.985790929 |
+| LOW fixture, `probability` | 0.983934094 | 0.016065906 |
+| `prediction.outcome`, `probability_definition`, `metadata.outcome_mapping` | Absent | Present |
+| Assessment page, `cp = 0` label | "Typical Angina" | "Asymptomatic" |
+
+The live values are exactly 1 − the golden values (differences of about 1e-10). Production therefore loads the same `1.0.0` artifacts but runs the pre-R0.3 serving code. From the code at `3b46957` [L1]:
 - the API returns `predict_proba[0, 1]`, i.e. **P(disease absent)**;
 - the UI calls that number "Model Probability" or "Calibrated Risk Assessment";
 - the UI labels `cp = 0` as "Typical Angina".
 
-Verified [L1] from the code at that commit. The master review (2026-10-31) demonstrated the inversion through the API: a high-risk profile scored 1.4% and a low-risk one 98.4%. The README's "70.2%" example equals 1 − 0.2984 for the form's default profile, the legacy output.
-
-**Not verified [L4]:** the live service was not queried in this investigation.
+**This is a production blocker.** No fix was attempted and nothing was deployed. The check confirms the earlier inference from the code and from the master review (2026-10-31), which had shown a high-risk profile scoring 1.4% and a low-risk one 98.4%. The README's "70.2%" example equals 1 − 0.2984 for the form's default profile, the legacy output.
 
 ### 28.4 Verified build evidence: the bundle-size blocker
 
@@ -3143,11 +3153,23 @@ Verified [L1] from the code at that commit. The master review (2026-10-31) demon
 
 The builder downloaded Linux tooling ("uv … (linux x86_64)"), so the limit very probably applies on Linux too [L3]. Previous production builds evidently succeeded before R3 pinned numpy and scipy and added `cardiovanta_ml/**` to `includeFiles` [L1 for the dates; L3 for the causal link].
 
-**Possible reduction levers (recommendations only):**
-- narrow `includeFiles` (`src/**` bundles TypeScript and research code);
+**Composition (measured 2026-11-03, `docs/reports/VERCEL_BUNDLE_INVESTIGATION_2026-11-03.md`):**
+- **Project files** in `includeFiles`: 98 files, 0.84 MB. The model is 27 KB. Project files are not the problem.
+- **Python dependencies**, measured from the Linux (manylinux, CPython 3.12) wheels of the exact serving pins: **242.10 MB** installed.
+  - The scientific stack (scipy 108.97 MB, numpy 53.92 MB, pandas 37.14 MB, scikit-learn 29.61 MB, joblib, threadpoolctl) is 230.61 MB.
+  - Test folders inside the wheels account for 40.40 MB.
+  - The web stack (FastAPI, Pydantic) is about 8.6 MB.
+- The build log says the four large packages were "force-bundled… without compatible wheels". The most likely reading [L3] is that the Windows host resolved Windows wheels and packed them into the bundle. The exact split of the 301 MB cannot be established, because the build output was not retained [L4].
+- **On Linux the outcome is unknown until R3.1 runs [L3].**
+  - If the builder installs the scientific stack at cold start, the bundle may fit, but every cold start downloads about 73 MB of wheels.
+  - If it bundles everything, about 242 MB of dependencies exceeds 225 MB unless test folders are stripped.
+- **The 301 MB issue is not fixed.** Only a successful Linux Vercel build closes it.
+
+**Possible reduction levers (recommendations only, none applied):**
+- narrow `includeFiles` (`src/**` bundles TypeScript and research code). This saves only about 0.6 MB, so it is insufficient on its own;
 - exclude research-only data from the function;
-- check whether pandas is needed for serving;
-- the portable-runtime plan (R8).
+- check whether pandas (37 MB) is needed for serving;
+- the portable-runtime plan (R8), which would remove about 233 MB of dependencies. Its feasibility was demonstrated on 2026-11-03 (§45.4).
 
 ### 28.5 Production verification
 
@@ -3307,8 +3329,8 @@ Skip reasons are not printed in the CI log. From the skip conditions **[L3]**:
 
 | Severity | Finding | Evidence | Recommendation |
 |---|---|---|---|
-| **Critical** | Production probably serves inverted semantics (pre-R0.3) | §28.3 | Verify live; deploy the current code once deployment is unblocked |
-| **High** | Function bundle exceeds the builder limit | §28.4 | Reduce the bundle (`includeFiles`, dependencies); run R3.1 |
+| **Critical** | Production serves inverted semantics (pre-R0.3); verified 2026-11-03 | §28.3; `docs/reports/PRODUCTION_VERIFICATION_2026-11-03.md` | Owner decision on an interim mitigation; deploy the current code once deployment is unblocked |
+| **High** | Function bundle exceeds the builder limit (301 MB local; 242 MB of Linux dependencies measured) | §28.4 | Run R3.1; R8 portable runtime (feasibility demonstrated, §45.4) |
 | **High** | No branch or environment protection; deploy on push | Chapter 27 | Required reviews and checks; environment reviewers |
 | **High** | Smoke test without assertions or TLS verification | `audit_tests.py` | Rewrite with assertions, timeouts and a golden-value check |
 | Medium | 422 error-rendering crash path | `api.ts:39` | Normalise `detail` to a string |
@@ -3317,12 +3339,12 @@ Skip reasons are not printed in the CI log. From the skip conditions **[L3]**:
 | Medium | Provenance hash depends on line endings | Chapter 21 | Canonical hash plus an attribute rule |
 | Medium | Response types hand-written twice; UI ignores generated ranges | Chapter 11 | Generate response types; use `DEVELOPMENT_RANGES` |
 | Medium | 19 research suites never run | Chapter 30 | Authorised research CI or a documented local protocol |
-| Medium | Stale documentation (README, `docs/`, landing claims, dossier §23 E wording) | Chapters 13, 34 | Correct after deployment is verified |
+| Medium | Stale documentation (README, `docs/`, landing claims). The dossier §23 E statement was corrected in `df1d27d` | Chapters 13, 34 | Correct after a corrected deployment is verified |
 | Low | Validation and transformation repeated per request (median 26 ms predict) | Chapter 38 | Validate once; transform once |
 | Low | `np.testing` assertions in the production path | `explain.py` | Explicit checks with a clear error |
 | Low | Dual model state (`model_package` global and `app.state`) | `main.py` | Single source |
 | Low | 1,306-line page component; 19 inline styles; two token systems | Chapter 15 | Extract components and tokens |
-| Low | Unused pins; unpinned research dependencies; unused CSS and assets | Chapters 4, 15 | Housekeeping |
+| Low | Serving transitive helpers unpinned; research dependencies missing from the pins; unused CSS and assets | Chapters 4, 11, 15 | Housekeeping |
 | Low | No CSP; obsolete `X-XSS-Protection` | `next.config.ts` | Add a CSP |
 | Informational | Time-of-check gap before `joblib.load` | Chapter 21 | Load from verified bytes |
 | Informational | Stale `--contract` help text; stale paths in comments | `generate.py`, `src/types/index.ts` | Edit text |
@@ -3351,7 +3373,7 @@ Status scale: **COMPLETE** (implemented and verified) · **IMPLEMENTED** (in cod
 | Drift detection | Monitoring | `scripts/detect_drift.py` | Logs, research data | **PARTIAL** (offline only) | `test_drift_detection` (not run in CI) | Production log source; frozen baseline |
 | CI verification | Quality gate | `verify.yml` | — | **COMPLETE** | Run `41324184106` green | Lint; required checks |
 | Research-data quarantine | Integrity | `scripts/ci/*`, `verify.yml` | — | **COMPLETE** (verification jobs); **IMPLEMENTED** (deploy jobs, not yet exercised) | 0 refusals; clone test | `vercel-linux-build.yml` checkout |
-| Continuous delivery to Vercel | Deploy | `deploy` job | Secrets | **BLOCKED** | Last deploy 2026-10-19; local build fails on size | Bundle size; protection; merge |
+| Continuous delivery to Vercel | Deploy | `deploy` job | Secrets | **BLOCKED** | Last deploy 2026-10-19; local build fails on size; live output verified inverted (2026-11-03) | Bundle size; protection; merge |
 | Production verification | Post-deploy assurance | `verify-production`, `audit_tests.py` | Deploy | **FAILED** (as a control: cannot fail) | Code | Real assertions |
 | Linux Vercel build (R3.1) | Deployment readiness | `vercel-linux-build.yml`, `inspect_vercel_bundle.py` | Secrets | **BLOCKED** (never run; local evidence of failure) | Local log | Run it; reduce the bundle |
 | Landing page | Communication | `src/app/page.tsx` | — | **IMPLEMENTED** (with inaccurate claims) | Jest 2 tests | Truthful status and claims |
@@ -3361,7 +3383,7 @@ Status scale: **COMPLETE** (implemented and verified) · **IMPLEMENTED** (in cod
 | Model v2 | Better calibration | — | H2.1, R6, R7 | **PLANNED** | — | Pre-registration; approval |
 | What-if explorer, transparency page, history, auth, PDF export | Product features | — | — | **PLANNED** (original v1/v2/v3) | — | — |
 | R8 portable runtime … R13 platform | Roadmap | — | Horizon 0 | **PLANNED** | — | Chapter 45 |
-| Horizon 0 (PR #2) | Release foundation | Branch `horizon0/research-ci-quarantine` | — | **IN PROGRESS** (green, unmerged) | Run `41324184106` | Merge decision; protection; deployment |
+| Horizon 0 (PR #2) | Release foundation | Branch `horizon0/research-ci-quarantine` | — | **IN PROGRESS** (green, unmerged) | Run `41324184106`; Phase 9 runs in Appendix D | Merge decision; protection; deployment |
 
 ## Chapter 34. Outstanding Work and Unresolved Issues
 
@@ -3369,8 +3391,8 @@ Prioritised by severity and impact. Items that need the owner's decision are mar
 
 | # | Item | Kind | Severity | Next step |
 |---|---|---|---|---|
-| 1 | Verify what production serves; it is probably pre-R0.3 | Unverified assumption, user impact | **Critical** | Read-only synthetic request to the live API, comparing with the golden values **(decision)** |
-| 2 | Bundle 301 MB > 225 MB (local); R3.1 never run | Deployment blocker | **High** | Reduce `includeFiles` and dependencies; run `vercel-linux-build.yml` **(decision: uses secrets)** |
+| 1 | Production serves the inverted, pre-R0.3 output (verified 2026-11-03, `docs/reports/PRODUCTION_VERIFICATION_2026-11-03.md`) | **Production blocker**, user impact | **Critical** | Decide on an interim mitigation, then deploy the current code once items 2–5 allow **(decision)** |
+| 2 | Bundle 301 MB > 225 MB (local Windows build); 242 MB of Linux dependencies measured; R3.1 never run | Deployment blocker | **High** | Run `vercel-linux-build.yml` **(decision: uses secrets)**. The R8 portable runtime would remove about 233 MB (`docs/reports/VERCEL_BUNDLE_INVESTIGATION_2026-11-03.md`) |
 | 3 | `main` and the `production` environment unprotected | Security and process | **High** | Branch protection and required checks; environment reviewers **(decision)** |
 | 4 | `audit_tests.py` cannot fail | Broken control | **High** | Assertions, timeouts, TLS, orientation check **(decision: deployment check)** |
 | 5 | PR #2 unmerged; merging deploys at once | Release | High | After 2–4: merge with CI (no `[skip ci]`) **(decision)** |
@@ -3379,8 +3401,8 @@ Prioritised by severity and impact. Items that need the owner's decision are mar
 | 8 | Hidden stages focusable; implicit submit (F-08); inconsistent ranges (F-17) | Accessibility and usability | Medium | Render the active stage only; use the generated ranges |
 | 9 | Provenance hash line-ending-dependent | Reproducibility | Medium | Canonical hash plus `.gitattributes` **(decision: protected metadata)** |
 | 10 | 19 research-data suites never run | Testing gap | Medium | An authorised development-only research job **(decision)** |
-| 11 | Stale public documentation (README figures and `cp` order, `docs/` pages, landing claims) | Documentation | Medium | Rewrite after item 1 |
-| 12 | Dossier §23 E wording about "not opened" files is imprecise | Documentation accuracy | Low | Correct in a follow-up commit **(decision: this mission forbids commits)** |
+| 11 | Stale public documentation (README figures and `cp` order, `docs/` pages, landing claims) | Documentation | Medium | Rewrite after the corrected deployment (item 1) |
+| 12 | Dossier §23 E said the locked-derived files were "not opened", although content searches had scanned them | Documentation accuracy; data governance | Low | **Done**: corrected in `df1d27d` (2026-11-03) |
 | 13 | Codebook meanings unresolved (`slope`, `thal`, `ca=4`, `thal=0`) | Research | High for model v2 | R6 option A, B or C **(decision)** |
 | 14 | Calibration under-confident in production; fix confirmed (H2.1) | Model quality | Medium | Model v2 pre-registration **(decision)** |
 | 15 | Phase 18 lost | Lost work | Medium | Recover from OneDrive version history, or re-run **(decision)** |
@@ -3390,7 +3412,7 @@ Prioritised by severity and impact. Items that need the owner's decision are mar
 | 19 | No lint; no E2E; no accessibility tests | Quality | Low | ESLint CLI; Playwright later |
 | 20 | 34 moderate/low npm advisories; npm `allowScripts` policy | Security | Low | Track upstream; set the policy |
 | 21 | OpenSpec housekeeping (four unarchived changes, unreliable checkboxes) | Process | Low | Archive and reconcile |
-| 22 | Research dependencies unpinned or unused | Reproducibility | Low | Pin or document |
+| 22 | Research dependencies missing from the pins (LightGBM, CatBoost, TabICL, SHAP); serving transitive helpers unpinned | Reproducibility | Low | Pin or document |
 | 23 | No CSP; no rate limiting | Security hardening | Low | Add a CSP; consider platform rate limiting |
 
 ## Chapter 35. Project Health Assessment
@@ -3405,10 +3427,10 @@ Prioritised by severity and impact. Items that need the owner's decision are mar
 | Performance | **Adequate (local measurements only)** | About 50 ms in-process per request; cold start dominated by imports (≈ 10 s locally). Production unmeasured |
 | Maintainability | **Good for Python; fair for the frontend** | Contract generation and registry reduce drift; the frontend monolith and duplicated response types increase it |
 | Reliability | **Fail-closed by design** | The model refuses to serve when in doubt; no fallback; the UI has one crash path |
-| Deployment readiness | **Not ready** | A bundle-size failure, no Linux build evidence, no protection, a smoke test that cannot fail, and probably stale production |
+| Deployment readiness | **Not ready** | A bundle-size failure, no Linux build evidence, no protection, a smoke test that cannot fail, and a live deployment verified on 2026-11-03 to serve inverted output |
 | Documentation | **Rich but uneven** | Excellent R-series reports, model card and dossier; stale README, `docs/` and landing claims; OpenSpec checkboxes unreliable |
 
-**Overall [L3].** CardioVanta is an unusually rigorous *research engineering* project whose *operations and product surface* have not caught up with its core. The next increments are operational and need decisions only you can make: verify production, unblock the build, protect the deploy path, and repair the smoke test.
+**Overall [L3].** CardioVanta is an unusually rigorous *research engineering* project whose *operations and product surface* have not caught up with its core. The next increments are operational and need decisions only you can make: act on the verified production blocker, unblock the build, protect the deploy path, and repair the smoke test.
 
 ---
 
@@ -3855,10 +3877,10 @@ Answer each question before reading the answers in §42.8.
 
 | # | Recommendation | Why / problem | Benefit | Complexity | Depends on | Risks |
 |---|---|---|---|---|---|---|
-| 1 | Verify production with a read-only synthetic request | Production is probably pre-R0.3 (inverted semantics) | Know the real user-facing state | Low | Owner approval | None |
+| 1 | **Verification done on 2026-11-03: production serves inverted output.** Next, decide on an interim mitigation, for example a prominent notice or temporarily disabling the assessment | Live users see an inverted estimate | Stops misleading output while items 2–6 proceed | Low | Owner decision; a separate, deliberate deployment | A production change |
 | 2 | Enable branch protection on `main` (required PR review, the three verification jobs as required checks) and reviewers on the `production` environment | Any push to `main` deploys | Prevents unreviewed deploys | Low | Owner (repository settings) | Slower merges |
 | 3 | Make `audit_tests.py` assert: status codes, golden probabilities, outcome, version; timeouts; TLS on | The production check cannot fail | Real post-deploy assurance | Low–Medium | — | False alarms if tolerances are too tight |
-| 4 | Reduce the function bundle (narrow `includeFiles` from `src/**` to the Python packages actually used; exclude research modules; review pandas use) and run `vercel-linux-build.yml` | 301 MB > 225 MB locally; R3.1 open | Unblocks deployment | Medium | Secrets (owner) | Breaking the bundle's imports (the bundle inspector checks this) |
+| 4 | Run `vercel-linux-build.yml`, and reduce the function bundle (narrow `includeFiles` from `src/**` to the Python packages actually used; exclude research modules; review pandas use). Project files are only 0.84 MB, so the dependencies (242 MB) decide the outcome | 301 MB > 225 MB locally; R3.1 open | Unblocks deployment | Medium | Secrets (owner) | Breaking the bundle's imports (the bundle inspector checks this) |
 | 5 | Normalise API errors in `src/lib/api.ts` (join 422 `detail[].msg` into a string) | F-09 crash path | Robust error UX | Low | — | — |
 | 6 | Merge PR #2 with CI, then watch `deploy` and `verify-production` | Ships R0.3–R3 and the Horizon 0 fixes | Correct semantics live | Low | Items 1–4 | First exercise of the sparse-checkout deploy |
 
@@ -3890,7 +3912,7 @@ Answer each question before reading the answers in §42.8.
 
 | Recommendation | Why | Notes |
 |---|---|---|
-| A portable model runtime: export coefficients, scalers, encoders and calibrators to JSON and compute with numpy only | Removes the scikit-learn pickle lock and much of the bundle size | This is the owner's **R8** |
+| A portable model runtime: export coefficients, scalers, encoders and calibrators to JSON and compute without scikit-learn. The standard library suffices: exact parity was demonstrated on 2026-11-03 (§45.4) | Removes the scikit-learn pickle lock and about 233 MB of dependencies | This is the owner's **R8** |
 | Model v2: disease = 1 label, pooled OOF calibration (H2.1), a decision on unresolved features (R6/R7), an external transportability check | Better calibration and semantics | **R12**, pre-registered, approval needed |
 | Signed artifacts (for example Sigstore or a detached signature over the manifest) | Authenticity, not just integrity | Optional |
 | An evidence ledger generated from result JSON and design hashes | Traceable claims in the UI and documents | **R9** |
@@ -3924,9 +3946,49 @@ The milestone names are from the owner. The repository records only "Horizon 0" 
 | Scalability | The stateless serverless shape is right for the workload. Scale concerns are cold start and bundle size, not throughput |
 | Maintainability | Extend the contract and generation to responses; componentise the frontend; retire compatibility shims once callers migrate |
 | Security | Protect the deployment path first; then a CSP, rate limiting at the platform, signed artifacts |
-| Performance | A portable runtime (numpy only) would cut imports and per-request transforms; measure on Vercel before optimising further |
+| Performance | A portable runtime (standard library or numpy only) would cut imports and per-request transforms; measure on Vercel before optimising further |
 | Operational maturity | Real status data instead of static badges; log retention and alerting; a staging deployment (Vercel preview) verified before production |
 | What not to do | No database, queue, microservices or framework replacement without a concrete requirement. None exists today (Chapter 19) |
+
+### 45.3 Updated priority roadmap (2026-11-03)
+
+> This is a **recommendation**, updated after the Phase 9 production check and bundle investigation. Nothing in it is implemented. Items marked **(decision)** need the owner.
+
+| Priority | Workstream | Goal | Next steps | Exit criterion | Depends on |
+|---|---|---|---|---|---|
+| **P0** | **Production safety** | Stop the inverted estimate reaching users | 1. Decide on an interim mitigation, such as a prominent notice or temporarily disabling `/assessment` **(decision)**. 2. Turn the Phase 9 read-only check into assertions in `audit_tests.py` | The live check returns HIGH ≈ 0.985790929 and LOW ≈ 0.016065906 (tolerance 1e-6), `prediction.outcome` is present, and `cp` 0 is "Asymptomatic" | A deliberate deployment; a build that fits |
+| **P0** | **Remaining Horizon 0** | A protected, verifiable release path | 1. Protect `main` (required review and the three verification jobs) and add reviewers to `production` **(decision)**. 2. Give `audit_tests.py` assertions, timeouts and TLS. 3. Run R3.1 (`vercel-linux-build.yml`) **(decision: uses secrets)**. 4. Fix F-09 in `src/lib/api.ts`. 5. Merge PR #2 with CI, never `[skip ci]` **(decision)**. 6. Watch `deploy` and `verify-production` | A green deployment whose `verify-production` asserts the golden values | The R3.1 result |
+| **P1** | **R8 Portable Model Runtime** | Serve the model without scikit-learn or pickles | Pre-register the parity criteria; export the `1.0.0` parameters into a new registered artifact; run the golden and semantic tests against both runtimes; build on Linux. See §45.4 | Parity within the pre-registered tolerance; the Linux bundle is well under 225 MB; the bundle inspector passes | Horizon 0 protection; the owner's versioning decision |
+| **P2** | **R9 Evidence Ledger** | A machine-readable ledger of studies, design and result hashes, verdicts and adoption status, checked in CI | Define the schema. Generate entries from unprotected result files. Reference locked-derived results by Git blob ID only, never by reading them in default CI. Add a CI check that documented claims cite ledger entries | Every product and documentation claim maps to a ledger entry | Can run in parallel with R8 |
+| **P2** | **R10 Assessment & Explorer** | A truthful assessment and result UI, and a model-behaviour explorer over synthetic profiles | Remove the simulated content (F-16); fix the accessibility issues (F-08); use the generated ranges (F-17); render the real `metadata`; build the explorer on synthetic inputs only | Jest and Playwright tests pass; no simulated values remain | R8 (a cheap runtime for the explorer); R9 (claims) |
+| **P3** | **R11 Experiment Lifecycle** | Templates and runners for pre-registration, double runs and hashing, plus a research CI path | A study template and runner; an authorised research CI job for the 19 idle suites **(decision: data access)** | A new study runs end to end with a recorded design hash and identical double runs | The R9 schema |
+| **P3** | **R12 Model V2 research** | A better-calibrated, orientation-explicit model with disease as label 1 | Resolve the codebook (R6 option A, B or C) **(decision)**; pre-register H2.1 pooled out-of-fold calibration and the feature decisions; any locked-set evaluation only under an owner-approved protocol, never in default CI | The pre-registered criteria are met; a new registry version and model card | The R6 decision; R11; R8, so that v2 ships on the portable runtime |
+| **P4** | **R13 Flagship Platform** | An integrated, publishable research platform | Combine R8–R12; add a verified staging deployment; complete the documentation | — | R8–R12 |
+
+**Conditional re-ordering.** If R3.1 shows that the current runtime cannot fit the limit, or that cold starts are unacceptable, R8 becomes the path to deployment and moves to **P0**, alongside production safety.
+
+### 45.4 R8 readiness assessment (updated 2026-11-03)
+
+**Verdict: AMBER. R8 is technically feasible, but it is not ready to start until its prerequisites are decided.** It has not been started. The feasibility risk is retired; what remains is engineering and governance.
+
+| Dimension | Evidence (`docs/reports/VERCEL_BUNDLE_INVESTIGATION_2026-11-03.md`) | Status |
+|---|---|---|
+| Numerical parity | A standard-library re-implementation of all five calibrated members reproduced the golden values to 12 decimals. The maximum difference in P(disease) was 2.2e-16 over 20,002 synthetic profiles. Linear and SHAP-equivalent explanations were identical (0.0) over 2,002 profiles | **Demonstrated** [L1, read-only experiment under the quarantine guard] |
+| Size | Removes numpy, scipy, pandas, scikit-learn, joblib and their helpers (about 233 MB), leaving about 9 MB of FastAPI and Pydantic | Wheel sizes **measured** [L1]; the Vercel result stays [L3] until a Linux build |
+| Exported parameters | 8,014 bytes of JSON | Measured |
+| Speed | About 32 µs per profile in a pure Python loop | Measured locally |
+| Security | Removes pickle deserialisation from the serving path | By construction |
+| Registry immutability | `1.0.0` must not change. The export needs a new registered version or artifact role, with its own manifest, model card and contract mapping | **Decision needed** |
+| Parity criteria | Not pre-registered | **Open** |
+| Export script | Not in the repository. The feasibility experiment lived in the session workspace; R8 should re-create it as a reviewed, reproducible script with a recorded hash | **Open** |
+| Dual-runtime tests | Not written | **Open** |
+| Linux build proof | R3.1 has never run | **Open**. Only this closes the 301 MB issue |
+| Release path | Branch protection and an asserting smoke test are not in place | **Pending decisions** (§45.3, P0) |
+
+**Recommended entry criteria for R8:**
+1. the owner approves the versioning approach;
+2. the parity criteria are pre-registered;
+3. branch protection and an asserting smoke test are in place, so that R8 ships through a protected, verifiable path.
 
 ---
 
@@ -4167,8 +4229,8 @@ The browser posts JSON to `/api/v1/predict`. Vercel routes it to `api/index.py` 
 
 ### 49.5 Most significant problems
 
-1. Production is probably still serving the **pre-R0.3, inverted** output [L3].
-2. The **function bundle exceeds Vercel's limit** in the only real builds (301 MB > 225 MB) [L1].
+1. Production serves the **pre-R0.3, inverted** output. This was verified [L1] on 2026-11-03 with synthetic fixtures, and it is a production blocker.
+2. The **function bundle exceeds Vercel's limit** in the only real builds (301 MB > 225 MB) [L1]. The Linux dependencies measure 242 MB; a portable runtime would remove about 233 MB [L1, measured].
 3. **No branch or environment protection**, and a **smoke test that cannot fail**.
 4. Frontend truthfulness and accessibility defects remain; the 422 crash path is likely.
 5. Line-ending-dependent provenance hashes; 19 research suites idle; stale public documentation.
@@ -4188,7 +4250,7 @@ The browser posts JSON to `/api/v1/predict`. Vercel routes it to `api/index.py` 
 ### 49.7 What needs immediate attention
 
 In order:
-1. verify production;
+1. act on the verified production blocker (an interim mitigation, then a corrected deployment);
 2. protect `main` and `production`;
 3. make the smoke test assert;
 4. shrink the bundle and run R3.1;
@@ -4215,7 +4277,7 @@ Chapters 1, 6, 7 §7.3, 10.2 (`outcome.py`, `registry/loader.py`), 20, 23 and 34
 > - **know the why:** exact explanations of a clearly identified model;
 > - **know how far to trust it:** ranges, verification status, no false thresholds, recorded research.
 >
-> The core keeps those promises, verified by tests on every change. The **deployment and product surface do not yet**. The live site is probably stale, the build is too large, and the production check is ineffective. Owning CardioVanta now means closing that gap without loosening any of the safeguards that make the core trustworthy.
+> The core keeps those promises, verified by tests on every change. The **deployment and product surface do not yet**. The live site serves inverted output (verified on 2026-11-03), the build is too large, and the production check is ineffective. Owning CardioVanta now means closing that gap without loosening any of the safeguards that make the core trustworthy.
 
 ---
 
@@ -4229,11 +4291,11 @@ Chapters 1, 6, 7 §7.3, 10.2 (`outcome.py`, `registry/loader.py`), 20, 23 and 34
 | Frontend | Yes: both pages read in the parts that hold logic; field blocks sampled | Code | Yes | No runtime or browser testing; responsiveness not observed |
 | Backend | Yes (every file) | Code, synthetic run | Yes | — |
 | ML package | Yes (every module) | Code, tests, measurements | Yes | — |
-| API inventory | Yes | Code, `TestClient` | Yes | Live API not queried |
+| API inventory | Yes | Code, `TestClient`, a read-only live check (2026-11-03) | Yes | — |
 | Database | Yes (confirmed absent) | Code, dependencies | Yes | — |
 | Security | Yes | Code, configuration, audits, GitHub settings | Yes | Vercel settings not visible |
 | Protected-file controls | Yes | Code, CI logs, session script | Yes | — |
-| Deployment configuration | Yes | Configuration, GitHub deployments, local build logs | Yes | Vercel dashboard and logs not accessible; production state unverified |
+| Deployment configuration | Yes | Configuration, GitHub deployments, local build logs | Yes | Vercel dashboard and logs not accessible. Production state verified on 2026-11-03 (§28.3) |
 | Tests | Yes (inventory, names, CI results) | CI logs | Yes | 19 research suites not executed (by rule) |
 | Research code | Module level | Code, reports | Partly (module level) | Function-level detail for research scripts is summarised |
 | CSS and design | Token and structure scan | Code | Yes | No visual inspection of rendered pages |
@@ -4266,3 +4328,31 @@ Chapters 1, 6, 7 §7.3, 10.2 (`outcome.py`, `registry/loader.py`), 20, 23 and 34
 | Hashes | Contract canonical `ec8918e7…`, file bytes `50249533…`; manifest `2e385c35…`; result hashes R4 `495c4496…`, H2 `0c8b7588…`, H2.1 `70b6b136…`, R5 `94c30837…`, R6 `ed4c17b1…`, R7 `7931f88c…` |
 | Local measurements | Imports 9.7 s; `load_model` 1.12 s; predict 26 ms; API 50 ms median (Windows, Python 3.12.16) |
 | Local build evidence | "Total bundle size (301.00 MB) exceeds the maximum function size (225 MB)" (2026-10-31) |
+| Production check (2026-11-03) | HIGH 0.014209070903, LOW 0.983934094106 (inverted); served from `iad1` |
+| Bundle measurement (2026-11-03) | Linux dependencies 242.10 MB; scientific stack 230.61 MB; project files 0.84 MB; portable-runtime parity: maximum difference 2.2e-16 over 20,002 profiles |
+
+## Appendix D. Phase 9 Corrections and Verification (2026-11-03)
+
+This appendix records what changed after the original investigation. The rest of the report keeps its 2026-11-01 snapshot (branch at `bed7e14`), except where a passage now cites a 2026-11-03 result.
+
+| Change | Where in this report | Evidence |
+|---|---|---|
+| Data-access disclosure corrected: two protected-data access incidents disclosed, not minimised | "Safety" item 1; §23.3 | Commit `ac07e87` |
+| Production verified read-only with synthetic fixtures: **inverted output, production blocker** | §1.3, §2.13, §22.2, §24.3, §28.3, Chapters 32–35, §44.1, §49.5, §49.7, §49.10 | `docs/reports/PRODUCTION_VERIFICATION_2026-11-03.md` (commit `7da6f9d`) |
+| Bundle composition measured; standard-library runtime parity demonstrated; 301 MB issue **not fixed** | §11.4, §28.4, §44.4, §45.4 | `docs/reports/VERCEL_BUNDLE_INVESTIGATION_2026-11-03.md` (commit `6006378`) |
+| `cloudpickle` and `narwhals` corrected from "unused pins" to transitive requirements | §10.5, §11.3, §11.4, §32.2, Chapter 34 item 22 | Package metadata: joblib requires `cloudpickle>=3.0`; scikit-learn requires `narwhals>=2.0.1` |
+| Dossier §23 E "not opened" statement corrected | Chapter 34 item 12 | Commit `df1d27d` |
+| Updated priority roadmap and R8 readiness | §45.3, §45.4 | This appendix's commit |
+
+**Validation performed for this update:**
+- **Code references.** 52 file and line references in this report were checked against the source; there were 0 mismatches.
+- **Research hashes.** The six result hashes in Appendix C (R4, H2, H2.1, R5, R6, R7) were each found in their own R-series report.
+- **Markdown structure.** Every table was checked for consistent column counts; code fences are balanced and the table-of-contents links resolve.
+- **Data safety.** The patient-row detector ran under the quarantine guard with 0 refused accesses. There was a scan for credentials and private paths, and the protected-file check passed (13 artifact and contract files unchanged, Git metadata of `data/` and the locked-derived files unchanged, R6 evidence hash `ed4c17b1`).
+
+| Phase 9 commit | GitHub Actions run | Result |
+|---|---|---|
+| `ac07e87` master report with corrected disclosure | `41583927948` | success (3 verification jobs passed; deploy jobs skipped, as designed for pull requests) |
+| `7da6f9d` production verification | `41584172140` | success |
+| `6006378` bundle investigation | `41584873589` | success |
+| `df1d27d` dossier correction | `41585392843` | success |
