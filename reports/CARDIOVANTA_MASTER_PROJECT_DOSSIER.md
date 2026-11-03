@@ -1787,7 +1787,13 @@ npm ci && npx tsc --noEmit && npm run test -- --passWithNoTests && npm run build
    - Read source, tests, workflows, configuration, the model card and non-quarantined reports.
    - Git metadata (log, `ls-tree`, blob IDs) and the GitHub API (PRs, runs, job logs, environments, deployments, branch protection).
    - One synthetic API run (§15.4) under the quarantine guard.
-2. **Not opened:** `data/raw/heart.csv`, `data/processed/dev_indices.json`, the external cohort files, all 14 `LOCKED_DERIVED` files, `reference_predictions.csv`, `phase17_loco_predictions.csv`, images in `reports/`, and the legacy branch's files. Their existence and identity were established from names, sizes, blob IDs and producing code only.
+2. **Not opened or scanned during the dossier work:** `data/raw/heart.csv`, `data/processed/dev_indices.json` and the external cohort files (all under `data/`), and the legacy branch's files. Their existence and identity were established from names, sizes, blob IDs and producing code only.
+
+   **Correction (2026-11-03).** The original version of this item also listed all 14 `LOCKED_DERIVED` files, `reference_predictions.csv`, `phase17_loco_predictions.csv` and the images in `reports/` as "not opened". **That was incorrect.**
+   - During the dossier work, several repository-wide `git grep` content searches (for two hash strings, the roadmap milestone names and a product phrase) excluded only `data/`.
+   - They therefore scanned the contents of every other tracked file on the branch, including those files. **This was protected-data access**, even though, according to the recorded outputs, every match was in an unprotected file and no protected content was printed.
+   - The research results and protected artifacts were reported unchanged afterwards (R6 evidence hash `ed4c17b1`; Git metadata of the `data/` and locked-derived blobs unchanged).
+   - The full disclosure, including a later line-counting incident, is in `docs/reports/CARDIOVANTA_ULTIMATE_MASTER_ENGINEERING_REPORT.md` ("Protected-data access incidents").
 3. **Locked-set metrics** seen in readable reports while classifying them are deliberately **not reproduced**.
 4. **Scans before commit:** this document was checked for patient-row patterns (the project's own detector), credentials, private paths, broken path references and unverified commit or run identifiers.
 5. **Not done:** no deployment, no production query, no merge, no change to research results, artifacts or protected files.
