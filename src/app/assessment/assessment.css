@@ -1410,3 +1410,84 @@
     max-height: 105px;
   }
 }
+
+/* ─── Prediction containment notice (Phase 10; configs/prediction_service.json) ─── */
+.ax-unavailable {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: var(--ax-bg);
+  color: var(--ax-text-main);
+}
+
+.ax-unavailable-card {
+  width: 100%;
+  max-width: 560px;
+  padding: 40px 36px;
+  background: var(--ax-card-bg);
+  border: 1px solid var(--ax-card-border);
+  border-top: 4px solid var(--ax-crimson);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(24, 21, 19, 0.06);
+}
+
+.ax-unavailable-logo {
+  display: block;
+  height: 36px;
+  width: auto;
+  margin-bottom: 28px;
+}
+
+.ax-unavailable-eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ax-crimson);
+}
+
+.ax-unavailable-title {
+  margin: 0 0 16px;
+  font-family: var(--cv-font-display), Georgia, serif;
+  font-size: 1.75rem;
+  line-height: 1.25;
+}
+
+.ax-unavailable-notice {
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  background: var(--ax-crimson-light);
+  border: 1px solid var(--ax-blush-border);
+  border-radius: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.ax-unavailable-detail {
+  margin: 0 0 24px;
+  color: var(--ax-text-muted);
+  line-height: 1.5;
+}
+
+.ax-unavailable-link {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--ax-burgundy);
+  color: #FFFFFF;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ax-unavailable-link:hover {
+  background: var(--ax-burgundy-hover);
+}
+
+.ax-unavailable-link:focus-visible,
+.ax-unavailable-logo-link:focus-visible {
+  outline: 3px solid var(--cv-focus);
+  outline-offset: 3px;
+}

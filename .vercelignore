@@ -15,3 +15,13 @@ Syne_extracted
 docs
 tests
 _uv
+
+# Locked-derived research outputs (computed on the locked Cleveland partition; see
+# scripts/ci/data_quarantine.py LOCKED_DERIVED). Never uploaded to Vercel; not used by the app.
+/experiments/results/error_analysis.json
+/experiments/results/candidate_comparison.json
+/experiments/results/nested_lda_evaluation.json
+/experiments/results/nested_threshold_optimization.json
+/experiments/results/nested_cv_90pct_results.json
+/experiments/phase13/test_results.json
+/experiments/phase13/tabicl_test_results.json

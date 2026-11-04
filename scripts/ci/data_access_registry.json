@@ -1,0 +1,422 @@
+{
+  "description": "Registered references to quarantined research data. Checked by scripts/ci/check_data_access.py; unregistered references fail CI. Roles: research_data_access (never run in default CI), negative_assertion, path_reference.",
+  "files": {
+    "backend/tests/test_r3_deployment.py": {
+      "role": "negative_assertion",
+      "reason": "asserts data/raw/heart.csv is excluded from the deployment bundle",
+      "tokens": [
+        "heart.csv"
+      ]
+    },
+    "experiments/advanced_model_search.py": {
+      "role": "research_data_access",
+      "reason": "load_dev_data/load_locked_test read heart.csv; locked-partition accessor",
+      "tokens": [
+        "candidate_comparison.json",
+        "dev_indices.json",
+        "load_locked_test"
+      ]
+    },
+    "experiments/formal_error_analysis.py": {
+      "role": "research_data_access",
+      "reason": "historical formal error analysis on the locked partition",
+      "tokens": [
+        "error_analysis.json",
+        "load_locked_test"
+      ]
+    },
+    "experiments/h2_calibration_recipe.py": {
+      "role": "research_data_access",
+      "reason": "H2 experiment; reads the 242 development rows via the R4 loader when run",
+      "tokens": [
+        "heart.csv"
+      ]
+    },
+    "experiments/nested_lda_evaluation.py": {
+      "role": "research_data_access",
+      "reason": "research experiment on Cleveland data",
+      "tokens": [
+        "nested_lda_evaluation.json"
+      ]
+    },
+    "experiments/nested_threshold_optimization.py": {
+      "role": "research_data_access",
+      "reason": "research experiment on Cleveland data",
+      "tokens": [
+        "nested_threshold_optimization.json"
+      ]
+    },
+    "experiments/next_research_phase_90pct.py": {
+      "role": "research_data_access",
+      "reason": "research experiment on Cleveland data",
+      "tokens": [
+        "nested_cv_90pct_results.json"
+      ]
+    },
+    "experiments/phase_16_feature_engineering.py": {
+      "role": "research_data_access",
+      "reason": "Phase 16 experiment on development data",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "experiments/r4_ca_count_encoding.py": {
+      "role": "research_data_access",
+      "reason": "development-only loader (locked lines discarded unparsed)",
+      "tokens": [
+        "dev_indices.json",
+        "heart.csv"
+      ]
+    },
+    "experiments/r6_codebook_evidence.py": {
+      "role": "path_reference",
+      "reason": "documentation-only evidence builder; names files in provenance/hygiene notes and searches by file name",
+      "tokens": [
+        "cardio_vanta_master_audit.md",
+        "cleveland.data",
+        "heart.csv",
+        "processed.cleveland.data"
+      ]
+    },
+    "experiments/r7_unverified_feature_ablation.py": {
+      "role": "research_data_access",
+      "reason": "R7 experiment; reads the 242 development rows via the R4 loader when run",
+      "tokens": [
+        "heart.csv"
+      ]
+    },
+    "scripts/ci/check_data_access.py": {
+      "role": "path_reference",
+      "reason": "static guard token list",
+      "tokens": [
+        "cleveland.data",
+        "dev_indices.json",
+        "hungarian.data",
+        "long-beach-va.data",
+        "processed.cleveland.data",
+        "switzerland.data"
+      ]
+    },
+    "scripts/ci/data_quarantine.py": {
+      "role": "path_reference",
+      "reason": "quarantine policy (denied paths)",
+      "tokens": [
+        "candidate_comparison.json",
+        "cardio_vanta_master_audit.md",
+        "error_analysis.json",
+        "error_analysis.md",
+        "heart.csv",
+        "model_baseline_results.csv",
+        "model_baseline_results.json",
+        "nested_cv_90pct_results.json",
+        "nested_lda_evaluation.json",
+        "nested_threshold_optimization.json",
+        "phase2c_final_evaluation.csv",
+        "phase2c_final_evaluation.json",
+        "phase2c_model_selection.json",
+        "tabicl_test_results.json",
+        "test_results.json"
+      ]
+    },
+    "scripts/ci/test_classification.py": {
+      "role": "path_reference",
+      "reason": "classification evidence strings",
+      "tokens": [
+        "dev_indices.json",
+        "heart.csv",
+        "hungarian.data",
+        "nested_cv_90pct_results.json",
+        "nested_lda_evaluation.json",
+        "nested_threshold_optimization.json"
+      ]
+    },
+    "scripts/detect_drift.py": {
+      "role": "research_data_access",
+      "reason": "offline drift detection on development data",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "scripts/profile_external_data.py": {
+      "role": "research_data_access",
+      "reason": "profiles external cohort raw files",
+      "tokens": [
+        "hungarian.data",
+        "long-beach-va.data"
+      ]
+    },
+    "src/cardiovanta/data/external_loader.py": {
+      "role": "research_data_access",
+      "reason": "loads Cleveland and external cohort raw files",
+      "tokens": [
+        "cleveland.data",
+        "dev_indices.json",
+        "heart.csv",
+        "hungarian.data",
+        "long-beach-va.data",
+        "switzerland.data"
+      ]
+    },
+    "src/config/config.py": {
+      "role": "path_reference",
+      "reason": "defines RAW_DATA_PATH; research modules use it to read heart.csv",
+      "tokens": [
+        "heart.csv"
+      ]
+    },
+    "src/data/save_split_indices.py": {
+      "role": "research_data_access",
+      "reason": "creates the development/locked split from heart.csv",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "src/experiment/baseline.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "model_baseline_results.csv",
+        "model_baseline_results.json"
+      ]
+    },
+    "src/experiment/final_evaluation.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "phase2c_final_evaluation.csv",
+        "phase2c_final_evaluation.json",
+        "phase2c_model_selection.json"
+      ]
+    },
+    "src/experiment/phase13/benchmark.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json",
+        "test_results.json"
+      ]
+    },
+    "src/experiment/phase13/shap_equivalent.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "src/experiment/phase13/shap_feasibility.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "src/experiment/phase13/shap_production_decision.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json",
+        "heart.csv"
+      ]
+    },
+    "src/experiment/phase13/shap_robustness.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "src/experiment/phase13/tabicl_benchmark.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json",
+        "tabicl_test_results.json",
+        "test_results.json"
+      ]
+    },
+    "src/experiment/phase13/tabicl_feasibility.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json",
+        "heart.csv"
+      ]
+    },
+    "src/experiment/phase13/tabicl_gpu_feasibility.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json",
+        "heart.csv"
+      ]
+    },
+    "src/experiment/phase13/tabicl_statistical_audit.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "src/experiment/phase3.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "src/experiment/phase4a.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "src/experiment/phase4b.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "src/experiment/phase5.py": {
+      "role": "research_data_access",
+      "reason": "historical research pipeline reading Cleveland development data or the locked partition",
+      "tokens": [
+        "dev_indices.json",
+        "heart.csv"
+      ]
+    },
+    "tests/test_data_quarantine.py": {
+      "role": "path_reference",
+      "reason": "guard tests; runtime tests target a synthetic fake root only",
+      "tokens": [
+        "cardio_vanta_master_audit.md",
+        "dev_indices.json",
+        "error_analysis.json",
+        "heart.csv",
+        "hungarian.data",
+        "phase2c_final_evaluation.json"
+      ]
+    },
+    "tests/test_external_provenance.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "cleveland.data",
+        "dev_indices.json",
+        "hungarian.data",
+        "long-beach-va.data",
+        "processed.cleveland.data"
+      ]
+    },
+    "tests/test_external_schema.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "tests/test_h2_1_calibration_confirmation.py": {
+      "role": "negative_assertion",
+      "reason": "asserts external cohort files are not parsed",
+      "tokens": [
+        "hungarian.data",
+        "long-beach-va.data"
+      ]
+    },
+    "tests/test_loco_evaluation.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "tests/test_multicenter_pipelines.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "tests/test_nested_lda_evaluation.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "nested_lda_evaluation.json"
+      ]
+    },
+    "tests/test_nested_threshold_optimization.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "nested_threshold_optimization.json"
+      ]
+    },
+    "tests/test_next_research_phase.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "nested_cv_90pct_results.json"
+      ]
+    },
+    "tests/test_phase3.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "tests/test_phase4a.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "tests/test_phase4b.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "tests/test_phase5.py": {
+      "role": "research_data_access",
+      "reason": "research-data test (see scripts/ci/test_classification.py)",
+      "tokens": [
+        "dev_indices.json"
+      ]
+    },
+    "tests/test_r5_explanation_stability.py": {
+      "role": "negative_assertion",
+      "reason": "asserts heart.csv is not read",
+      "tokens": [
+        "heart.csv"
+      ]
+    },
+    "tests/test_r6_codebook_resolution.py": {
+      "role": "negative_assertion",
+      "reason": "asserts dataset files are not read",
+      "tokens": [
+        "dev_indices.json",
+        "heart.csv",
+        "hungarian.data"
+      ]
+    },
+    "tests/test_r7_slope_reporting_correction.py": {
+      "role": "negative_assertion",
+      "reason": "asserts heart.csv is not read",
+      "tokens": [
+        "heart.csv"
+      ]
+    },
+    "tests/test_r7_unverified_feature_ablation.py": {
+      "role": "negative_assertion",
+      "reason": "asserts direct dataset reads are absent; uses the verified loader only when run outside tests",
+      "tokens": [
+        "dev_indices.json",
+        "heart.csv"
+      ]
+    }
+  }
+}

@@ -282,8 +282,8 @@ graph LR
   - **Locked Test Set:** 61 rows. Held strictly immutable and isolated.
   - **Split Authority File:** `data/processed/dev_indices.json` (SHA256: `382f0f524cca62b2222338809d1acaa7f629f116ca804e42f0d225ee76e885e6`).
 - **Duplicate Records Forensics:**
-  - In `data/raw/heart.csv`, row index 163 and row index 164 are identical feature duplicates:
-    `age=38, sex=1, cp=2, trestbps=138, chol=175, fbs=0, restecg=1, thalach=173, exang=0, oldpeak=0.0, slope=2, ca=4, thal=2, target=1`.
+  - In `data/raw/heart.csv`, two rows are identical feature duplicates (same 13 feature values and target).
+    *[Redacted 2026-11-01: the duplicated patient-level feature values and their row indices were removed. Reports must not reproduce individual observations.]*
   - Both instances landed in the development partition (`dev_indices.json`).
   - To prevent leakage between cross-validation folds, `dev_groups` was constructed by grouping identical feature rows (`X_dev.groupby(list(X_dev.columns)).ngroup().values`), yielding 241 unique groups across 242 rows.
   - All subsequent CV loops strictly utilize `StratifiedGroupKFold`, ensuring that duplicate observations never span across train and validation folds.
