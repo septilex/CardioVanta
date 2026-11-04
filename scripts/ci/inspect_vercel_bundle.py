@@ -33,7 +33,7 @@ REQUIRED = [
     "artifacts/model/reference_predictions.csv",
     "cardiovanta_ml/contracts/feature_schema.v2.json", "cardiovanta_ml/contracts/generated_features.py",
     "cardiovanta_ml/registry/loader.py", "cardiovanta_ml/registry/integrity.py", "cardiovanta_ml/inference/predict.py",
-    "api/index.py", "backend/app/main.py",
+    "api/index.py", "backend/app/main.py", "configs/prediction_service.json",
 ]
 MB = 1024 * 1024
 
@@ -74,11 +74,17 @@ def probe(root: Path, func: Path, version: str) -> dict:
         "from api.index import app\n"
         "hi = dict(age=67.0,sex=1,cp=0,trestbps=160.0,chol=286.0,fbs=0,restecg=0,thalach=108.0,exang=1,oldpeak=3.0,slope=1,ca=3,thal=3)\n"
         "lo = dict(age=37.0,sex=0,cp=2,trestbps=120.0,chol=200.0,fbs=0,restecg=1,thalach=187.0,exang=0,oldpeak=0.0,slope=2,ca=0,thal=2)\n"
+        "from backend.app.core.prediction_availability import current_availability\n"
         "with TestClient(app) as c:\n"
-        "    e = app.state.inference_engine.loaded\n"
+        "    eng = app.state.inference_engine\n"
+        "    e = eng.loaded\n"
+        "    api = [c.post('/api/v1/predict', json=p) for p in (hi, lo)]\n"
         "    print('PROBE ' + json.dumps({'model': e.metadata.qualified_name, 'root': str(e.artifact_dir.parent),\n"
-        "        'p_high': c.post('/api/v1/predict', json=hi).json()['prediction']['probability'],\n"
-        "        'p_low': c.post('/api/v1/predict', json=lo).json()['prediction']['probability']}))\n"
+        # golden values from the bundled engine itself, independent of the containment switch
+        "        'p_high': eng.predict(hi)['probability'], 'p_low': eng.predict(lo)['probability'],\n"
+        "        'predictions_enabled': current_availability().enabled,\n"
+        "        'api_status': [r.status_code for r in api], 'api_code': [r.json().get('code') for r in api],\n"
+        "        'api_probability': [(r.json().get('prediction') or {}).get('probability') for r in api]}))\n"
     )
     env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH", "MODEL_ID", "MODEL_REGISTRY_ROOT")}
     r = subprocess.run([sys.executable, "-c", code, version], cwd=root, env=env, capture_output=True, text=True, timeout=600)
@@ -139,6 +145,17 @@ def main() -> int:
     check("registry_root_inside_bundle", str(res.get("root", "")).startswith(str(root)), res.get("root"))
     check("golden_probabilities", abs(res.get("p_high", 0) - 0.985790929) < 1e-6 and abs(res.get("p_low", 1) - 0.016065906) < 1e-6,
           {k: res.get(k) for k in ("p_high", "p_low")})
+    # Containment (configs/prediction_service.json): the bundled API must do exactly what the switch says.
+    if res.get("predictions_enabled") is True:
+        api_ok = res.get("api_status") == [200, 200] and all(
+            p is not None and abs(p - g) < 1e-6 for p, g in zip(res.get("api_probability") or [None, None],
+                                                                  (0.985790929, 0.016065906)))
+    else:
+        api_ok = (res.get("api_status") == [503, 503]
+                  and res.get("api_code") == ["predictions_temporarily_unavailable"] * 2
+                  and res.get("api_probability") == [None, None])
+    check("prediction_api_matches_availability_switch", api_ok,
+          {k: res.get(k) for k in ("predictions_enabled", "api_status", "api_code", "api_probability")})
     bad_probe = probe(root, func, "9.9.9")
     check("no_fallback_for_unregistered_version",
           bad_probe["returncode"] != 0 and bad_probe["result"] is None and "not registered" in bad_probe["stderr_tail"],

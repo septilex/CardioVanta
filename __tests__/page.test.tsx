@@ -3,6 +3,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Page from '../src/app/assessment/page';
 import { predict, ApiError } from '../src/lib/api';
 
+// These tests exercise the assessment form itself, so the containment switch
+// (configs/prediction_service.json) is opened for this file only. The shipped,
+// closed state is tested in __tests__/containment.test.tsx.
+jest.mock('../src/lib/predictionAvailability', () => ({
+  ...jest.requireActual('../src/lib/predictionAvailability'),
+  PREDICTION_AVAILABILITY: { enabled: true, notice: 'test notice' },
+}));
+
 jest.mock('../src/lib/api', () => ({
   predict: jest.fn(),
   ApiError: class ApiError extends Error {

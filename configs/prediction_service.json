@@ -1,0 +1,6 @@
+{
+  "predictions_enabled": false,
+  "notice": "CardioVanta predictions are temporarily unavailable while we verify the prediction service. No risk estimate can currently be generated.",
+  "reason": "Production incident containment (Phase 10, 2026-11-04). The live deployment was verified on 2026-11-03 to return the inverted probability (docs/reports/PRODUCTION_VERIFICATION_2026-11-03.md).",
+  "re_enable_only_after": "A deployment of corrected serving code has passed the read-only golden-value check in production. Re-enabling is a reviewed code change to this file, never an environment setting."
+}

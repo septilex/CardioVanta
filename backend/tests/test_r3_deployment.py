@@ -127,6 +127,7 @@ def test_vercel_config_includes_runtime_resources():
         "artifacts/model/metadata.json", "artifacts/model/feature_schema.json",
         "artifacts/model/shap_background.json", "artifacts/model/reference_predictions.csv",
         "backend/app/main.py", "backend/app/core/config.py", "src/config/config.py",
+        "configs/prediction_service.json",
     ]
     for rel in required:
         assert (ROOT / rel).is_file(), rel
@@ -160,6 +161,10 @@ _BUNDLE_PROBE = (
     "from api.index import app\n"
     "from backend.app.core.config import settings\n"
     "from fastapi.testclient import TestClient\n"
+    # serving test: open the containment gate in this probe process only (see the root conftest.py);
+    # the shipped, closed state is checked by test_shipped_bundle_refuses_predictions below
+    "import backend.app.core.prediction_availability as pa\n"
+    "pa.current_availability = lambda: pa.PredictionAvailability(enabled=True, notice=pa.DEFAULT_NOTICE)\n"
     "with TestClient(app) as c:\n"
     "    r = c.post('/api/v1/predict', json=%r)\n"
     "    eng = app.state.inference_engine\n"
@@ -193,6 +198,33 @@ def test_bundle_resolves_registry_inside_function_and_serves_pinned_model(bundle
     assert Path(probe["artifact_dir"]) == root / "artifacts" / "model"
     assert Path(probe["entry_dir"]) == root / "artifacts" / ENTRY_REL
     assert probe["legacy_imported"] is False                             # serving never touches the legacy adapter
+
+
+_CONTAINED_BUNDLE_PROBE = (
+    "import sys, os, json\n"
+    "sys.path.insert(0, os.getcwd())\n"
+    "from api.index import app\n"
+    "from fastapi.testclient import TestClient\n"
+    "with TestClient(app) as c:\n"
+    "    r = c.post('/api/v1/predict', json=%r)\n"
+    "    h = c.get('/api/v1/health')\n"
+    "    print('PROBE ' + json.dumps({'status': r.status_code, 'body': r.json(), 'health': h.status_code,\n"
+    "        'model': app.state.inference_engine.loaded.metadata.qualified_name}))\n"
+) % (HIGH_RISK,)
+
+
+@pytest.mark.prediction_containment
+def test_shipped_bundle_refuses_predictions(bundle):
+    """The simulated Vercel function, exactly as shipped, verifies the model but returns no prediction."""
+    assert json.loads((bundle / "configs" / "prediction_service.json").read_text())["predictions_enabled"] is False
+    r = _run(_CONTAINED_BUNDLE_PROBE, cwd=bundle)
+    lines = [l[6:] for l in r.stdout.splitlines() if l.startswith("PROBE ")]
+    assert r.returncode == 0 and lines, r.stderr[-2000:]
+    probe = json.loads(lines[0])
+    assert probe["status"] == 503 and probe["health"] == 200
+    assert probe["body"]["code"] == "predictions_temporarily_unavailable"
+    assert "prediction" not in probe["body"] and probe["body"]["predictions_available"] is False
+    assert probe["model"] == "cardiovanta-lr13@1.0.0"
 
 
 @pytest.mark.parametrize("env", [{"MODEL_VERSION": "1.0.1"}, {"MODEL_VERSION": "9.9.9"},

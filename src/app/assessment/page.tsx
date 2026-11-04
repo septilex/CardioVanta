@@ -6,6 +6,8 @@ import { PredictRequest, PredictResponse } from "../../types";
 import { CATEGORICAL_LABELS, CATEGORICAL_OPTIONS, type CategoricalFeatureId } from "../../types/generated-features";
 import "./assessment.css";
 import CoronaryArteryVisual from "./CoronaryArteryVisual";
+import PredictionsUnavailable from "./PredictionsUnavailable";
+import { PREDICTION_AVAILABILITY } from "../../lib/predictionAvailability";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    INITIAL DATA — 13 model features, exact existing defaults & encodings
@@ -118,7 +120,16 @@ function describeThreshold(prediction: PredictResponse["prediction"] | undefined
   return prediction.threshold_status;
 }
 
+/* Containment (Phase 10): while configs/prediction_service.json disables predictions, the page renders
+   only the notice. The form, its state and its submit handler are never mounted. */
 export default function Page() {
+  if (!PREDICTION_AVAILABILITY.enabled) {
+    return <PredictionsUnavailable notice={PREDICTION_AVAILABILITY.notice} />;
+  }
+  return <AssessmentForm />;
+}
+
+function AssessmentForm() {
   const [formData, setFormData] = useState<PredictRequest>(initialData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

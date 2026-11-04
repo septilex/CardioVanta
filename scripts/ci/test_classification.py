@@ -35,6 +35,7 @@ CLASSIFICATION: Dict[str, Dict[str, str]] = {
        for n in ("test_phase13_shap", "test_r0_outcome_semantics", "test_r1_feature_contract", "test_r2_registry",
                  "test_r3_deployment", "test_stage1", "test_stage2", "test_stage3", "test_stage4",
                  "test_stage5_contract", "test_stage6_security")},
+    "backend/tests/test_prediction_containment.py": {"class": "ci_safe", "reason": "synthetic profiles; prediction-availability switch (Phase 10 containment)"},
     # ---- tests/: safe ----
     "tests/test_artifact_integrity.py": {"class": "ci_safe", "reason": "hashes production artifacts (reference predictions are development rows)"},
     "tests/test_monitoring.py": {"class": "ci_safe", "reason": "synthetic telemetry tests"},
