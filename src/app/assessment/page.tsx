@@ -5,7 +5,7 @@ import { predict, ApiError } from "../../lib/api";
 import { PredictRequest, PredictResponse } from "../../types";
 import { CATEGORICAL_LABELS, CATEGORICAL_OPTIONS, type CategoricalFeatureId } from "../../types/generated-features";
 import "./assessment.css";
-import CoronaryArteryVisual from "./CoronaryArteryVisual";
+import NextStepStrip from "./NextStepStrip";
 import PredictionsUnavailable from "./PredictionsUnavailable";
 import { PREDICTION_AVAILABILITY } from "../../lib/predictionAvailability";
 
@@ -135,6 +135,9 @@ function AssessmentForm() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [currentStage, setCurrentStage] = useState(0); // Starts cleanly at Step 1 (Patient Profile)
+  // One-screen layout: results replace the form card instead of appearing below it.
+  const [showResults, setShowResults] = useState(false);
+  const [resultTab, setResultTab] = useState<"summary" | "why" | "audit">("summary");
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
   /* ─── Handlers ─── */
@@ -169,12 +172,8 @@ function AssessmentForm() {
       const response = await predict(formData, controller.signal);
       clearTimeout(timeoutId);
       setResult(response);
-      setTimeout(() => {
-        const el = document.getElementById("result-section");
-        if (el && typeof el.scrollIntoView === "function") {
-          el.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 100);
+      setResultTab("summary");
+      setShowResults(true);
     } catch (err: unknown) {
       clearTimeout(timeoutId);
       if ((err instanceof Error && err.name === "AbortError") || err === "timeout") {
@@ -206,6 +205,7 @@ function AssessmentForm() {
     setError(null);
     setLoading(false);
     setCurrentStage(0);
+    setShowResults(false);
     if (typeof window !== "undefined" && typeof window.scrollTo === "function") {
       try {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -229,6 +229,7 @@ function AssessmentForm() {
 
   const goToStep = useCallback((idx: number) => {
     setCurrentStage(idx);
+    setShowResults(false);
   }, []);
 
   /* ─── Dynamically Derived Progress & Completion Indicators ─── */
@@ -451,24 +452,6 @@ function AssessmentForm() {
                   Enter the available measurements to generate a modelled probability estimate from the trained diagnostic model.
                 </p>
               </div>
-
-              {/* Mountain/Contour Graphic with Slogan */}
-              <div className="ax-intro-right">
-                <div className="ax-contour-art" aria-hidden="true">
-                  <svg viewBox="0 0 120 60" fill="none" stroke="currentColor" className="ax-contour-svg">
-                    <path d="M 5 55 Q 35 30 65 48 T 115 40" strokeWidth="1" stroke="#D2C3B5" strokeDasharray="2 2" />
-                    <path d="M 0 45 Q 30 20 60 38 T 110 25 T 120 32" strokeWidth="1.2" stroke="#B8A799" />
-                    <path d="M 12 32 Q 45 8 78 26 T 120 18" strokeWidth="1.4" stroke="#9E1B2E" strokeOpacity="0.4" />
-                    <path d="M 25 20 Q 55 4 85 16 T 120 10" strokeWidth="1" stroke="#A89789" strokeDasharray="3 3" />
-                  </svg>
-                </div>
-                <div className="ax-intro-slogan">
-                  <span>SAME DATA.</span>
-                  <span>DEEPER INSIGHTS</span>
-                  <span>FOR A HEALTHIER</span>
-                  <span>TOMORROW.</span>
-                </div>
-              </div>
             </div>
 
             {/* Four-Stage Stepper Navigation */}
@@ -510,7 +493,10 @@ function AssessmentForm() {
             </nav>
 
             {/* Primary Assessment Form Panel Card */}
-            <form onSubmit={handleSubmit} className="ax-form-card">
+            <form
+              onSubmit={handleSubmit}
+              className={showResults && result ? "ax-form-card ax-panel-off" : "ax-form-card"}
+            >
               {/* Card Header */}
               <div className="ax-card-header">
                 <div className="ax-card-header-left">
@@ -532,6 +518,8 @@ function AssessmentForm() {
                 </div>
               </div>
 
+              {/* Scrollable body: only this region scrolls when the window is too short */}
+              <div className="ax-card-body">
               {/* Error banner */}
               {error && (
                 <div className="ax-error" role="alert">
@@ -996,8 +984,9 @@ function AssessmentForm() {
                   <div className="ax-field-helper">Thallium scintigraphy myocardial perfusion evaluation. Category labels for this field are not yet verified against the training encoding.</div>
                 </div>
               </div>
+              </div>
 
-              {/* ─── Card Actions (Previous / Continue / Submit) ─── */}
+              {/* ─── Card Actions (Previous / Up-next strip / Continue / Submit) ─── */}
               <div className="ax-card-actions">
                 <button
                   type="button"
@@ -1008,6 +997,13 @@ function AssessmentForm() {
                 >
                   ← Previous
                 </button>
+
+                <NextStepStrip
+                  stages={STAGES}
+                  currentStage={currentStage}
+                  hasResult={result != null && !loading}
+                  onViewResult={() => setShowResults(true)}
+                />
 
                 {currentStage < STAGES.length - 1 && (
                   <button type="button" className="ax-btn-continue" onClick={goNext}>
@@ -1027,60 +1023,109 @@ function AssessmentForm() {
               </div>
             </form>
 
-            {/* Scientific Coronary Artery Longitudinal Cutaway Visual */}
-            <CoronaryArteryVisual />
-
             {/* ═══════════════════════════════════════════════════════════
-                RESULTS SECTION (Displayed when predictions exist)
+                RESULTS PANEL (replaces the form card when predictions exist)
                 ═══════════════════════════════════════════════════════════ */}
             {result && !loading && (
-              <section id="result-section" className="ax-result-section">
-                <div className="ax-result-container">
-                  <div className="ax-result-prob-block">
-                    <div className="ax-result-prob-val">
-                      {result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}
-                      <span>%</span>
-                    </div>
-                    <div className="ax-result-label">Modelled probability of significant obstructive CAD</div>
+              <section
+                id="result-section"
+                className={showResults ? "ax-results-panel" : "ax-results-panel ax-panel-off"}
+                aria-label="Analysis results"
+              >
+                <div className="ax-results-head">
+                  <button type="button" className="ax-results-back" onClick={() => setShowResults(false)}>
+                    ← Edit inputs
+                  </button>
+                  <div className="ax-results-tabs" role="tablist" aria-label="Result views">
+                    {([
+                      ["summary", "Result", true],
+                      ["why", "Why", !!result.shap_equivalent_explanation],
+                      ["audit", "Technical audit", !!result.explanation],
+                    ] as const).filter(([, , show]) => show).map(([id, label]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        role="tab"
+                        id={`ax-tab-${id}`}
+                        aria-selected={resultTab === id}
+                        aria-controls={`ax-tabpanel-${id}`}
+                        className="ax-results-tab"
+                        onClick={() => setResultTab(id)}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
-                  <div>
-                    <div className="ax-result-info">
-                      Based on the provided profile, the research model estimates a{" "}
-                      <strong>{result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}%</strong> probability that significant obstructive coronary artery disease is present. This is a research estimate, not a diagnosis, and the model is not clinically validated.
-                    </div>
-                    <div className="ax-result-threshold">
-                      <strong>{describeThreshold(result.prediction)}</strong>
-                    </div>
-                    {result.development_range_warning?.outside_development_range && (
-                      <div className="ax-warning">
-                        <strong>Development Range Guardrail:</strong> Features outside observed development-data range:{" "}
-                        {(result.development_range_warning.features || []).join(", ")}.
+                  <button type="button" className="ax-results-new" onClick={handleReset}>
+                    New assessment
+                  </button>
+                </div>
+
+                <div className="ax-results-body">
+                  <div
+                    role="tabpanel"
+                    id="ax-tabpanel-summary"
+                    aria-labelledby="ax-tab-summary"
+                    className={resultTab === "summary" ? "ax-result-section" : "ax-result-section ax-stage-hidden"}
+                  >
+                    <div className="ax-result-container">
+                      <div className="ax-result-prob-block">
+                        <div className="ax-result-prob-val">
+                          {result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}
+                          <span>%</span>
+                        </div>
+                        <div className="ax-result-label">Modelled probability of significant obstructive CAD</div>
                       </div>
-                    )}
+                      <div>
+                        <div className="ax-result-info">
+                          Based on the provided profile, the research model estimates a{" "}
+                          <strong>{result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}%</strong> probability that significant obstructive coronary artery disease is present. This is a research estimate, not a diagnosis, and the model is not clinically validated.
+                        </div>
+                        <div className="ax-result-threshold">
+                          <strong>{describeThreshold(result.prediction)}</strong>
+                        </div>
+                        {result.development_range_warning?.outside_development_range && (
+                          <div className="ax-warning">
+                            <strong>Development Range Guardrail:</strong> Features outside observed development-data range:{" "}
+                            {(result.development_range_warning.features || []).join(", ")}.
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </section>
-            )}
 
-            {result && !loading && result.shap_equivalent_explanation && (
-              <section className="ax-shap-section">
-                <div className="ax-shap-header">
-                  <h2>Why the model responded this way</h2>
-                  <p className="ax-shap-notice">
-                    <strong>Important Notice:</strong> These are model-attribution signals, not medical causes or a diagnosis. They show how the uncalibrated explanation model weighted each input toward or away from CAD presence, relative to its baseline (log-odds). They are directional signals: they do not exactly decompose the calibrated probability shown above.
-                  </p>
-                </div>
-                {renderShapExplanation(result.shap_equivalent_explanation, result.prediction.probability)}
-              </section>
-            )}
+                  {result.shap_equivalent_explanation && (
+                    <div
+                      role="tabpanel"
+                      id="ax-tabpanel-why"
+                      aria-labelledby="ax-tab-why"
+                      className={resultTab === "why" ? "ax-shap-section" : "ax-shap-section ax-stage-hidden"}
+                    >
+                      <div className="ax-shap-header">
+                        <h2>Why the model responded this way</h2>
+                        <p className="ax-shap-notice">
+                          <strong>Important Notice:</strong> These are model-attribution signals, not medical causes or a diagnosis. They show how the uncalibrated explanation model weighted each input toward or away from CAD presence, relative to its baseline (log-odds). They are directional signals: they do not exactly decompose the calibrated probability shown above.
+                        </p>
+                      </div>
+                      {renderShapExplanation(result.shap_equivalent_explanation, result.prediction.probability)}
+                    </div>
+                  )}
 
-            {result && !loading && result.explanation && (
-              <section className="ax-audit-section">
-                <div className="exp-header">
-                  <h2>Technical Audit (Logistic Regression)</h2>
-                  <p>{result.explanation.note || "Linear feature contributions moving the underlying decision function log-odds."}</p>
+                  {result.explanation && (
+                    <div
+                      role="tabpanel"
+                      id="ax-tabpanel-audit"
+                      aria-labelledby="ax-tab-audit"
+                      className={resultTab === "audit" ? "ax-audit-section" : "ax-audit-section ax-stage-hidden"}
+                    >
+                      <div className="exp-header">
+                        <h2>Technical Audit (Logistic Regression)</h2>
+                        <p>{result.explanation.note || "Linear feature contributions moving the underlying decision function log-odds."}</p>
+                      </div>
+                      {renderExplanation(result.explanation)}
+                    </div>
+                  )}
                 </div>
-                {renderExplanation(result.explanation)}
               </section>
             )}
           </div>

@@ -53,7 +53,6 @@
   border-right: 1px solid var(--ax-sidebar-border);
   display: flex;
   flex-direction: column;
-  position: relative;
   overflow: hidden;
   user-select: none;
   z-index: 20;
@@ -257,7 +256,7 @@
 .ax-center-area {
   flex: 1 1 0;
   min-width: 0;
-  padding: 22px 36px 32px;
+  padding: 18px 36px 24px;
 }
 
 /* ─── Page Introduction ─── */
@@ -265,7 +264,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   gap: 24px;
 }
 
@@ -284,7 +283,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ax-crimson);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .ax-eyebrow-line {
@@ -294,12 +293,12 @@
 
 .ax-intro-title {
   font-family: var(--cv-font-display), Georgia, serif;
-  font-size: clamp(28px, 2.7vw, 36px);
+  font-size: clamp(24px, 2.1vw, 30px);
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.015em;
   color: var(--ax-text-main);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   display: inline-block;
   transform: scale(1.05, 0.96);
   transform-origin: left center;
@@ -308,42 +307,10 @@
 
 .ax-intro-sub {
   font-family: var(--cv-font-body), sans-serif;
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--ax-text-muted);
-  max-width: 660px;
-}
-
-/* Mountain / Contour Subtle Artwork */
-.ax-intro-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-top: 4px;
-  flex-shrink: 0;
-}
-
-.ax-contour-art {
-  width: 90px;
-  height: 48px;
-  opacity: 0.75;
-}
-
-.ax-contour-svg {
-  width: 100%;
-  height: 100%;
-}
-
-.ax-intro-slogan {
-  display: flex;
-  flex-direction: column;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 9px;
+  font-size: 13px;
   line-height: 1.45;
-  letter-spacing: 0.14em;
-  color: var(--ax-text-subtle);
-  font-weight: 600;
-  text-align: right;
+  color: var(--ax-text-muted);
+  max-width: 820px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -354,7 +321,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 26px;
+  margin-bottom: 14px;
   gap: 12px;
   flex-wrap: nowrap;
   overflow-x: auto;
@@ -458,7 +425,7 @@
   background-color: var(--ax-card-bg);
   border: 1px solid var(--ax-card-border);
   border-radius: 10px;
-  padding: 26px 32px 24px;
+  padding: 20px 28px 16px;
   box-shadow: 0 2px 14px rgba(0, 0, 0, 0.025);
   position: relative;
   width: 100%;
@@ -469,7 +436,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 26px;
+  margin-bottom: 16px;
   gap: 20px;
 }
 
@@ -484,12 +451,12 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ax-crimson);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .ax-card-title {
   font-family: var(--cv-font-display), Georgia, serif;
-  font-size: clamp(24px, 2.2vw, 30px);
+  font-size: clamp(22px, 1.9vw, 26px);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.015em;
@@ -552,7 +519,7 @@
 .ax-fields-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px 24px;
+  gap: 14px 20px;
   width: 100%;
 }
 
@@ -561,7 +528,7 @@
   background-color: var(--ax-field-bg);
   border: 1px solid var(--ax-field-border);
   border-radius: 8px;
-  padding: 16px 18px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -576,7 +543,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   gap: 8px;
 }
 
@@ -702,12 +669,12 @@
   font-size: 11.5px;
   line-height: 1.4;
   color: var(--ax-text-subtle);
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 /* ─── Interactive Slider Component ─── */
 .ax-slider-container {
-  margin-top: 14px;
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -780,8 +747,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 28px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 14px;
   border-top: 1px solid #ECE3DA;
   gap: 16px;
 }
@@ -1369,45 +1336,330 @@
   .ax-intro {
     flex-direction: column;
   }
-
-  .ax-intro-right {
-    display: none;
-  }
 }
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SCIENTIFIC CORONARY ARTERY ILLUSTRATION (Beneath Assessment Form)
+   J. ONE-SCREEN LAYOUT
+   On desktop the page is locked to the window: top bar, intro, step tabs and
+   both sidebars stay put. If the window is too short, only the card body
+   (or the results body) scrolls; the card's buttons stay visible.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.ax-artery-visual {
-  width: 100%;
-  margin-top: 18px;
-  margin-bottom: 6px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  pointer-events: none;
-  user-select: none;
-  overflow: hidden;
-  opacity: 0.95;
-  transition: opacity 0.3s ease;
+.ax-panel-off {
+  display: none !important;
 }
 
-.ax-artery-svg {
-  width: 100%;
-  max-width: 1080px;
-  height: auto;
-  max-height: 125px;
-  display: block;
+.ax-card-body {
+  position: relative;
 }
 
-@media (max-width: 900px) {
-  .ax-artery-visual {
-    margin-top: 16px;
-    margin-bottom: 4px;
+@media (min-width: 901px) {
+  .ax-shell {
+    height: 100vh;
+    overflow: hidden;
   }
-  .ax-artery-svg {
-    max-height: 105px;
+
+  .ax-main-col {
+    height: 100vh;
+    min-height: 0;
+  }
+
+  .ax-body-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .ax-center-area {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .ax-intro,
+  .ax-stepper {
+    flex: none;
+  }
+
+  .ax-form-card {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    min-height: 0;
+  }
+
+  .ax-card-header,
+  .ax-card-actions {
+    flex: none;
+  }
+
+  .ax-card-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    /* room for focus rings so they are not clipped by the scroll box */
+    padding: 3px;
+    margin: -3px;
+    scrollbar-width: thin;
+    scrollbar-color: #D8CFC5 transparent;
+  }
+
+  .ax-results-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    min-height: 0;
+  }
+
+  .ax-results-head {
+    flex: none;
+  }
+
+  .ax-results-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #D8CFC5 transparent;
+  }
+}
+
+/* ─── Up-next strip (between Previous and Continue) ─── */
+.ax-strip {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--ax-text-muted);
+}
+
+.ax-strip-tag {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ax-crimson);
+  background-color: var(--ax-crimson-light);
+  border: 1px solid var(--ax-blush-border);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.ax-strip-text {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.ax-strip-step {
+  flex-shrink: 0;
+  font-family: var(--cv-font-syne), sans-serif;
+  font-weight: 600;
+  color: var(--ax-text-main);
+}
+
+.ax-strip-fields {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ax-text-subtle);
+}
+
+.ax-strip-more {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  color: var(--ax-text-subtle);
+}
+
+.ax-strip-mark {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ax-burgundy);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ax-strip--ready .ax-strip-text {
+  font-family: var(--cv-font-syne), sans-serif;
+  font-weight: 600;
+  color: var(--ax-text-main);
+}
+
+.ax-strip-link {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--cv-font-body), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ax-burgundy);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.ax-strip-link:hover {
+  color: var(--ax-burgundy-hover);
+}
+
+/* ─── Results panel (replaces the form card) ─── */
+.ax-results-panel {
+  background-color: var(--ax-card-bg);
+  border: 1px solid var(--ax-card-border);
+  border-radius: 10px;
+  padding: 14px 24px 20px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.025);
+  width: 100%;
+}
+
+.ax-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #ECE3DA;
+}
+
+.ax-results-back {
+  background-color: transparent;
+  border: 1px solid #D8CFC5;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-family: var(--cv-font-syne), sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ax-text-main);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.ax-results-back:hover {
+  background-color: #F5EFE7;
+  border-color: #C8BFB5;
+}
+
+.ax-results-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background-color: var(--ax-field-bg);
+  border: 1px solid var(--ax-field-border);
+  border-radius: 8px;
+}
+
+.ax-results-tab {
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-family: var(--cv-font-syne), sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ax-text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ax-results-tab:hover {
+  color: var(--ax-text-main);
+}
+
+.ax-results-tab[aria-selected="true"] {
+  background-color: var(--ax-card-bg);
+  color: var(--ax-burgundy);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ax-results-back:focus-visible,
+.ax-results-tab:focus-visible,
+.ax-results-new:focus-visible,
+.ax-strip-link:focus-visible {
+  outline: 2px solid var(--ax-burgundy);
+  outline-offset: 2px;
+}
+
+.ax-results-new {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--cv-font-body), sans-serif;
+  font-size: 12px;
+  color: var(--ax-text-subtle);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.ax-results-new:hover {
+  color: var(--ax-burgundy);
+}
+
+/* Inside the panel the result blocks lose their own card chrome */
+.ax-results-body .ax-result-section,
+.ax-results-body .ax-shap-section,
+.ax-results-body .ax-audit-section {
+  margin-top: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 600px) {
+  .ax-card-actions {
+    flex-wrap: wrap;
+  }
+
+  .ax-strip {
+    order: -1;
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+
+  .ax-results-panel {
+    padding: 14px 16px 18px;
+  }
+}
+
+/* Buttons in the card footer never wrap or shrink; the strip absorbs the squeeze */
+.ax-card-actions .ax-btn-prev,
+.ax-card-actions .ax-btn-continue,
+.ax-card-actions .ax-final-btn-group,
+.ax-card-actions .ax-btn-reset,
+.ax-card-actions .ax-btn-submit {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Laptop widths: drop the connector lines so all four step tabs fit */
+@media (max-width: 1440px) {
+  .ax-stepper {
+    gap: 4px;
+    justify-content: space-between;
+  }
+
+  .ax-step-line {
+    display: none;
   }
 }
 
