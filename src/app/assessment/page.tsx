@@ -2,19 +2,21 @@
 
 import React, { useState, useCallback, useLayoutEffect, useMemo, useRef, type CSSProperties, type KeyboardEvent } from "react";
 import Link from "next/link";
-import { AnimatePresence, m, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { predict, ApiError } from "../../lib/api";
 import { PredictRequest, PredictResponse } from "../../types";
-import { CATEGORICAL_LABELS, CATEGORICAL_OPTIONS, type CategoricalFeatureId } from "../../types/generated-features";
+import { CATEGORICAL_LABELS, CATEGORICAL_OPTIONS, FEATURE_METADATA, type CategoricalFeatureId } from "../../types/generated-features";
 import "./assessment.css";
 import NextStepStrip from "./NextStepStrip";
+import { EcgTrace } from "../../components/motion/EcgTrace";
+import StepsOverview from "./StepsOverview";
 import PredictionsUnavailable from "./PredictionsUnavailable";
 import { PREDICTION_AVAILABILITY, UNAVAILABLE_CODE } from "../../lib/predictionAvailability";
 import { MotionProvider } from "../../components/motion/MotionProvider";
 import { AnimatedNumber } from "../../components/motion/AnimatedNumber";
 import { RouteTransition } from "../../components/motion/RouteTransition";
 import { AppSidebar, MobileNav } from "../../components/shell/AppNav";
-import { NAV_BACK, TRANSITION, collapse, formatProbability, panelSwap, revealGroup, revealItem } from "../../lib/motion";
+import { NAV_BACK, collapse, formatProbability, panelSwap, revealGroup, revealItem } from "../../lib/motion";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    INITIAL DATA — 13 model features, exact existing defaults & encodings
@@ -286,9 +288,37 @@ function ResultTabs({
 
 /* ─── Result: gauge, count-up and the threshold statement ─────────────────────────────── */
 
+/** Top features by contribution in one direction, named the way the form names them. */
+function topFactors(result: PredictResponse, direction: 1 | -1, count = 3): string[] {
+  const contributions = (result.shap_equivalent_explanation ?? result.explanation)?.contributions;
+  if (!contributions) return [];
+  return (Object.entries(contributions) as [keyof PredictRequest, number][])
+    .filter(([, v]) => v * direction > 0)
+    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+    .slice(0, count)
+    .map(([k]) => FEATURE_METADATA[k]?.label ?? String(k));
+}
+
+/** 100 dots, `filled` of them coloured: the easiest way to read "n in 100". Decorative. */
+function DotArray({ filled }: { filled: number }) {
+  return (
+    <div className="ax-dots" aria-hidden="true">
+      {Array.from({ length: 100 }, (_, i) => (
+        <span key={i} className={i < filled ? "ax-dot is-on" : "ax-dot"} style={{ "--d": i } as CSSProperties} />
+      ))}
+    </div>
+  );
+}
+
 function SummaryPanel({ result, active }: { result: PredictResponse; active: boolean }) {
   const probability = result.prediction?.probability;
   const percentText = probability != null ? formatProbability(probability) : "--";
+  const inHundred = probability != null ? Math.min(100, Math.max(0, Math.round(probability * 100))) : null;
+  const headline = inHundred === null ? "--" : inHundred === 0 ? "Fewer than 1" : `About ${inHundred}`;
+  const up = topFactors(result, 1);
+  const down = topFactors(result, -1);
+  const outside = result.development_range_warning?.outside_development_range;
+  const outsideList = (result.development_range_warning?.features || []).join(", ");
 
   return (
     <div
@@ -298,73 +328,100 @@ function SummaryPanel({ result, active }: { result: PredictResponse; active: boo
       hidden={!active}
       className={cx("ax-result-section", "ax-tabpanel", !active && "ax-stage-hidden")}
     >
-      <m.div className="ax-result-container" variants={revealGroup} initial="hidden" animate="visible">
-        <m.div className="ax-result-prob-block" variants={revealItem}>
-          <div className="ax-gauge-wrap">
-          {probability != null && <ProbabilityGauge probability={probability} />}
-          <div className="ax-result-prob-val">
-            {probability != null ? (
-              <>
-                <AnimatedNumber
-                  className="ax-prob-number"
-                  value={probability * 100}
-                  format={formatPercentFrame}
-                  delay={COUNT_DELAY}
-                />
-                <span className="ax-prob-unit" aria-hidden="true">%</span>
-                <span className="sr-only">{percentText}%</span>
-              </>
-            ) : (
-              <>
-                --<span className="ax-prob-unit">%</span>
-              </>
+      <m.div className="ax-res" variants={revealGroup} initial="hidden" animate="visible">
+        {/* The headline: one number a person can picture. */}
+        <m.section className="ax-res-hero" variants={revealItem} aria-labelledby="ax-res-headline">
+          <div className="ax-res-figure">
+            <p className="ax-res-kicker">Your estimate</p>
+            <h3 id="ax-res-headline" className="ax-res-headline">
+              <span className="ax-res-big">{headline}</span> <span className="ax-res-of">in 100</span>
+            </h3>
+            <p className="ax-res-plain">
+              In the research records this model learned from, about <strong>{inHundred ?? "--"} out of every 100</strong>{" "}
+              people with measurements like yours had a significantly narrowed heart artery.
+            </p>
+            <div className="ax-res-exact">
+              <span className="ax-result-label">Modelled probability of significant obstructive CAD</span>
+              <span className="ax-result-prob-val">
+                {probability != null ? (
+                  <>
+                    <AnimatedNumber className="ax-prob-number" value={probability * 100} format={formatPercentFrame} delay={COUNT_DELAY} />
+                    <span className="ax-prob-unit" aria-hidden="true">%</span>
+                    <span className="sr-only">{percentText}%</span>
+                  </>
+                ) : (
+                  <>
+                    --<span className="ax-prob-unit">%</span>
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
+          {inHundred !== null && <DotArray filled={inHundred} />}
+        </m.section>
+
+        {outside && (
+          <m.div className="ax-res-caution" variants={revealItem} role="note">
+            <strong>Treat this estimate with extra caution.</strong> Some of your numbers are outside the range the model
+            learned from, so it is less sure about people like you.
+            <span className="ax-res-fine">
+              Development Range Guardrail: Features outside observed development-data range: {outsideList}.
+            </span>
+          </m.div>
+        )}
+
+        <div className="ax-res-cards">
+          <m.article className="ax-res-card" variants={revealItem}>
+            <h4>What this number means</h4>
+            <p>
+              <strong>Significant obstructive coronary artery disease</strong> means at least one of the main blood vessels
+              that feed the heart muscle is noticeably narrowed. It is usually confirmed with a test such as a coronary
+              angiogram.
+            </p>
+            <p className="ax-result-info">
+              Based on the provided profile, the research model estimates a <strong>{percentText}%</strong> probability
+              that significant obstructive coronary artery disease is present. This is a research estimate, not a
+              diagnosis, and the model is not clinically validated.
+            </p>
+          </m.article>
+
+          <m.article className="ax-res-card" variants={revealItem}>
+            <h4>What moved this estimate</h4>
+            {up.length > 0 && (
+              <div className="ax-res-factors">
+                <span className="ax-res-dir is-up">Pushed it up</span>
+                <ul>{up.map((f) => <li key={f}>{f}</li>)}</ul>
+              </div>
             )}
-          </div>
-          </div>
-          <div className="ax-result-label">Modelled probability of significant obstructive CAD</div>
-        </m.div>
-        <div>
-          <m.div className="ax-result-info" variants={revealItem}>
-            Based on the provided profile, the research model estimates a{" "}
-            <strong>{percentText}%</strong> probability that significant obstructive coronary artery disease is present. This is a research estimate, not a diagnosis, and the model is not clinically validated.
-          </m.div>
-          <m.div className="ax-result-threshold" variants={revealItem}>
-            <strong>{describeThreshold(result.prediction)}</strong>
-          </m.div>
-          {result.development_range_warning?.outside_development_range && (
-            <m.div className="ax-warning" variants={revealItem}>
-              <strong>Development Range Guardrail:</strong> Features outside observed development-data range:{" "}
-              {(result.development_range_warning.features || []).join(", ")}.
-            </m.div>
-          )}
+            {down.length > 0 && (
+              <div className="ax-res-factors">
+                <span className="ax-res-dir is-down">Pushed it down</span>
+                <ul>{down.map((f) => <li key={f}>{f}</li>)}</ul>
+              </div>
+            )}
+            <p className="ax-res-note">
+              This shows how the model reacted to your numbers. It does not show what causes heart disease. See the
+              Why tab for the full picture.
+            </p>
+          </m.article>
+
+          <m.article className="ax-res-card is-action" variants={revealItem}>
+            <h4>What to do with it</h4>
+            <ul className="ax-res-steps">
+              <li>Use it to start a conversation with a doctor, not as an answer.</li>
+              <li>It cannot confirm or rule out heart disease on its own.</li>
+              <li>
+                <strong>Chest pain, breathlessness or fainting right now?</strong> Call your local emergency number.
+              </li>
+            </ul>
+            <p className="ax-res-fine ax-result-threshold">{describeThreshold(result.prediction)}</p>
+          </m.article>
         </div>
       </m.div>
     </div>
   );
 }
 
-/**
- * A ring whose filled share equals the returned probability. One colour regardless of value:
- * no validated decision threshold exists, so the gauge must not suggest risk bands.
- */
-function ProbabilityGauge({ probability }: { probability: number }) {
-  const reduce = useReducedMotion();
-  const share = Math.min(1, Math.max(0, probability));
-  return (
-    <svg className="ax-gauge" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-      <circle className="ax-gauge-track" cx="60" cy="60" r="52" />
-      <m.circle
-        className="ax-gauge-fill"
-        cx="60"
-        cy="60"
-        r="52"
-        initial={{ pathLength: reduce ? share : 0 }}
-        animate={{ pathLength: share }}
-        transition={reduce ? { duration: 0 } : { ...TRANSITION.count, delay: COUNT_DELAY }}
-      />
-    </svg>
-  );
-}
 
 /* ─── Why: attribution bars that grow to their real length ────────────────────────────── */
 
@@ -731,6 +788,7 @@ function AssessmentForm() {
                   Enter the available measurements to generate a modelled probability estimate from the trained diagnostic model.
                 </p>
               </div>
+              <EcgTrace className="ax-intro-ecg" />
             </div>
 
             {/* Four-Stage Stepper Navigation */}
@@ -1343,6 +1401,11 @@ function AssessmentForm() {
             </m.form>
             )}
             </AnimatePresence>
+
+            {/* Step overview: fills the space below the card while the form is shown */}
+            {!(showResults && result) && (
+              <StepsOverview stages={STAGES} currentStage={currentStage} formData={formData} onJump={goToStep} />
+            )}
           </div>
 
           {/* ═════════════════════════════════════════════════════════════

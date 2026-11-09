@@ -2216,3 +2216,509 @@
   outline: 2px solid var(--ax-burgundy);
   outline-offset: 2px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   L. STEP OVERVIEW (below the form card; fills the remaining height)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ax-journey {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+  animation: cv-fade var(--cv-dur-base) var(--cv-ease-out) both;
+}
+.ax-journey-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.ax-journey-title {
+  margin: 0;
+  font-family: var(--cv-font-display), Georgia, serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ax-text-main);
+}
+.ax-journey-meta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ax-text-subtle);
+}
+.ax-journey-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.ax-journey-grid > li {
+  display: flex;
+  min-height: 0;
+}
+.ax-journey-card {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 18px 16px;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--ax-card-bg);
+  border: 1px solid var(--ax-card-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    transform var(--cv-dur-base) var(--cv-ease-out),
+    box-shadow var(--cv-dur-base) var(--cv-ease-out),
+    border-color var(--cv-dur-fast) var(--cv-ease-out),
+    background-color var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-journey-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--ax-blush-border);
+  box-shadow: 0 12px 28px rgba(24, 21, 19, 0.07);
+}
+.ax-journey-card:active {
+  transform: translateY(-1px) scale(0.99);
+  transition-duration: var(--cv-dur-press);
+}
+.ax-journey-card:focus-visible {
+  outline: 2px solid var(--ax-burgundy);
+  outline-offset: 2px;
+}
+.ax-journey-card[data-state="current"] {
+  border-color: var(--ax-blush-border);
+  box-shadow: inset 0 3px 0 var(--ax-crimson), 0 6px 18px rgba(125, 10, 20, 0.06);
+}
+.ax-journey-card[data-state="done"] {
+  background: var(--ax-field-bg);
+}
+.ax-journey-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ax-journey-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ax-crimson);
+}
+.ax-journey-state {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--ax-text-subtle);
+  background: var(--ax-field-bg);
+  border: 1px solid var(--ax-field-border);
+}
+.ax-journey-card[data-state="current"] .ax-journey-state {
+  color: var(--ax-crimson);
+  background: var(--ax-crimson-light);
+  border-color: var(--ax-blush-border);
+}
+.ax-journey-card[data-state="done"] .ax-journey-state {
+  color: #2F6B3F;
+  background: #E6F0E7;
+  border-color: transparent;
+}
+.ax-journey-name {
+  font-family: var(--cv-font-display), Georgia, serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ax-text-main);
+}
+.ax-journey-fields {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px dashed var(--ax-field-border);
+  padding-top: 6px;
+  min-height: 0;
+}
+.ax-journey-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 12.5px;
+  line-height: 1.35;
+  border-bottom: 1px solid rgba(234, 226, 216, 0.6);
+}
+.ax-journey-field:last-child {
+  border-bottom: 0;
+}
+.ax-journey-label {
+  color: var(--ax-text-muted);
+  min-width: 0;
+}
+.ax-journey-value {
+  flex-shrink: 0;
+  max-width: 55%;
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ax-text-main);
+}
+.ax-journey-card[data-state="next"] .ax-journey-value {
+  font-weight: 400;
+  color: var(--ax-text-subtle);
+}
+.ax-journey-go {
+  font-family: var(--cv-font-syne), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ax-burgundy);
+  opacity: 0.8;
+}
+.ax-journey-card:hover .ax-journey-go {
+  opacity: 1;
+}
+.ax-journey-card:hover .ax-btn-arrow {
+  translate: 3px 0;
+}
+
+/* Desktop one-screen layout: the overview takes the remaining height under the card. */
+@media (min-width: 901px) {
+  .ax-journey {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .ax-journey-grid {
+    flex: 1 1 0;
+    min-height: 0;
+    grid-auto-rows: minmax(0, 1fr);
+  }
+}
+/* The panel adapts to the height it actually gets (it changes with each step and window):
+   full cards when there is room, a one-line summary per card when there is less, and nothing
+   when there is almost none. Cards are never squeezed below their content. */
+.ax-journey-summary {
+  display: none;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ax-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ax-journey-go {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+@media (min-width: 901px) {
+  .ax-journey {
+    container: journey / size;
+  }
+  /* Medium height: every field stays, in tighter single-line rows. */
+  @container journey (max-height: 340px) {
+    .ax-journey-card {
+      gap: 6px;
+      padding: 14px 16px 12px;
+    }
+    .ax-journey-name {
+      font-size: 15.5px;
+    }
+    .ax-journey-fields {
+      padding-top: 2px;
+    }
+    .ax-journey-field {
+      padding: 3px 0;
+      font-size: 11.5px;
+      border-bottom: 0;
+    }
+    .ax-journey-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  /* Small height: one-line summary per card. */
+  @container journey (max-height: 245px) {
+    .ax-journey-fields {
+      display: none;
+    }
+    .ax-journey-summary {
+      display: block;
+    }
+  }
+  @container journey (max-height: 175px) {
+    .ax-journey-head,
+    .ax-journey-grid {
+      display: none;
+    }
+  }
+}
+@media (max-width: 1200px) {
+  .ax-journey-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .ax-journey-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ax-journey-card:hover,
+  .ax-journey-card:active {
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   M. RESULT TAB, PLAIN-LANGUAGE LAYOUT
+   One headline people can picture ("about N in 100"), a 100-dot picture, then three short
+   cards. One colour for the dots whatever the value: no validated threshold exists, so
+   nothing may suggest "low" or "high" risk bands.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ax-res {
+  display: grid;
+  gap: 16px;
+}
+.ax-res-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 300px);
+  align-items: center;
+  gap: 28px;
+  padding: 22px 26px;
+  border-radius: 14px;
+  background:
+    radial-gradient(70% 120% at 100% 0%, rgba(158, 27, 46, 0.07), transparent 60%),
+    var(--ax-field-bg);
+  border: 1px solid var(--ax-field-border);
+}
+.ax-res-figure {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.ax-res-kicker {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ax-crimson);
+}
+.ax-res-headline {
+  margin: 0;
+  font-family: var(--cv-font-display), Georgia, serif;
+  line-height: 1;
+  color: var(--ax-text-main);
+}
+.ax-res-big {
+  font-size: clamp(40px, 4vw, 56px);
+  font-weight: 700;
+  color: var(--ax-burgundy);
+}
+.ax-res-of {
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 700;
+}
+.ax-res-plain {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ax-text-main);
+}
+.ax-res-exact {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+}
+.ax-res-exact .ax-result-label {
+  margin: 0;
+  font-size: 10px;
+}
+.ax-res-exact .ax-result-prob-val {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.ax-res-exact .ax-result-prob-val .ax-prob-unit {
+  font-size: 13px;
+}
+
+/* 100 dots: filled ones show the estimate. */
+.ax-dots {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 5px;
+  width: 100%;
+  max-width: 280px;
+  justify-self: end;
+}
+.ax-dot {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #E7DDD2;
+}
+.ax-dot.is-on {
+  background: var(--ax-burgundy);
+  animation: cv-pop var(--cv-dur-base) var(--cv-ease-out) both;
+  animation-delay: calc(250ms + var(--d, 0) * 8ms);
+}
+
+.ax-res-caution {
+  display: grid;
+  gap: 4px;
+  padding: 12px 16px;
+  border-left: 3px solid #D97706;
+  border-radius: 0 10px 10px 0;
+  background: rgba(217, 119, 6, 0.08);
+  color: #6B3A08;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ax-res-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.ax-res-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 18px 18px 16px;
+  border-radius: 12px;
+  background: var(--ax-card-bg);
+  border: 1px solid var(--ax-card-border);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ax-text-muted);
+  transition: transform var(--cv-dur-base) var(--cv-ease-out), box-shadow var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-res-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(24, 21, 19, 0.06);
+}
+.ax-res-card h4 {
+  margin: 0;
+  font-family: var(--cv-font-display), Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ax-text-main);
+}
+.ax-res-card p {
+  margin: 0;
+}
+.ax-res-card strong {
+  color: var(--ax-text-main);
+}
+.ax-res-card .ax-result-info {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ax-text-subtle);
+  margin: 0;
+}
+.ax-res-card.is-action {
+  border-color: var(--ax-blush-border);
+  background: linear-gradient(180deg, var(--ax-crimson-light), var(--ax-card-bg) 70%);
+}
+.ax-res-factors {
+  display: grid;
+  gap: 6px;
+}
+.ax-res-factors ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ax-res-factors li {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ax-text-main);
+  background: var(--ax-field-bg);
+  border: 1px solid var(--ax-field-border);
+}
+.ax-res-dir {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ax-res-dir.is-up {
+  color: #9E1B2E;
+}
+.ax-res-dir.is-up::before {
+  content: "▲ ";
+}
+.ax-res-dir.is-down {
+  color: #4A72C8;
+}
+.ax-res-dir.is-down::before {
+  content: "▼ ";
+}
+.ax-res-note {
+  font-size: 12.5px;
+  color: var(--ax-text-subtle);
+}
+.ax-res-steps {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--ax-text-main);
+}
+.ax-res-fine {
+  display: block;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ax-text-subtle);
+}
+.ax-res-card .ax-result-threshold {
+  padding: 8px 10px;
+  margin: 0;
+  border-left-width: 2px;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  color: var(--ax-text-subtle);
+}
+
+@media (max-width: 1200px) {
+  .ax-res-cards {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .ax-res-hero {
+    grid-template-columns: 1fr;
+  }
+  .ax-dots {
+    justify-self: start;
+    max-width: 240px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ax-dot.is-on {
+    animation: none;
+  }
+  .ax-res-card:hover {
+    transform: none;
+  }
+}

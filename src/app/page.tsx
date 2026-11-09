@@ -13,6 +13,7 @@ import {
   animate,
 } from "framer-motion";
 import { RouteTransition } from "../components/motion/RouteTransition";
+import { EcgTrace } from "../components/motion/EcgTrace";
 import {
   EASE,
   NAV_FORWARD,
@@ -254,6 +255,7 @@ export default function LandingPage() {
           <div className="lp-hero-glow" />
 
           <div className="lp-hero-content">
+            <EcgTrace className="lp-hero-ecg" />
             <m.span
               className="lp-eyebrow"
               initial={{ opacity: 0, letterSpacing: "0.35em" }}

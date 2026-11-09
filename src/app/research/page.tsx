@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 import { DocShell } from "../../components/shell/DocShell";
+import { CountUp } from "../../components/motion/CountUp";
 import { NAV_BACK, NAV_LATERAL } from "../../lib/motion";
 
 export const metadata: Metadata = {
@@ -286,8 +287,8 @@ export default function ResearchPage() {
             model, and where the evidence stops. Every figure on this page links back to a report in the repository.
           </p>
           <ul className="doc-hero-facts cv-rise" style={order(3)} aria-label="Key facts">
-            <li>242 development patients</li>
-            <li>13 clinical inputs</li>
+            <li><CountUp value="242" /> development patients</li>
+            <li><CountUp value="13" /> clinical inputs</li>
             <li>Pre-registered studies R4–R7, H2, H2.1</li>
             <li>No external validation of this model</li>
           </ul>
@@ -374,10 +375,10 @@ export default function ResearchPage() {
                   <tr key={m.name}>
                     <th scope="row">{m.name}</th>
                     <td className="num">
-                      {m.production}
+                      <CountUp value={m.production} />
                       {m.range && <span className="range">{m.range}</span>}
                     </td>
-                    <td className="num">{m.pooled}</td>
+                    <td className="num"><CountUp value={m.pooled} /></td>
                     <td>
                       {m.meaning} <strong>Limit:</strong> {m.limit}
                     </td>

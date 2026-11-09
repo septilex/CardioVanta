@@ -2,7 +2,6 @@
 
 import React from "react";
 import type { PredictRequest } from "../../types";
-import { FEATURE_METADATA } from "../../types/generated-features";
 
 export interface StripStage {
   num: string;
@@ -51,21 +50,6 @@ export default function NextStepStrip({ stages, currentStage, loading, hasResult
     );
   }
 
-  const fields = next.fieldKeys.map((k) => FEATURE_METADATA[k].label).join(" · ");
-  const laterSteps = stages.length - currentStage - 2;
-
-  return (
-    <div className="ax-strip" title={`${next.title}: ${fields}`}>
-      <span className="ax-strip-tag">Up next</span>
-      <span className="ax-strip-text">
-        <span className="ax-strip-step">
-          {next.num} {next.title}
-        </span>
-        <span className="ax-strip-fields">{fields}</span>
-      </span>
-      {laterSteps > 0 && (
-        <span className="ax-strip-more">+{laterSteps} more</span>
-      )}
-    </div>
-  );
+  // Earlier steps: the step overview below the card shows what comes next, so the strip stays empty.
+  return <div className="ax-strip" aria-hidden="true" />;
 }

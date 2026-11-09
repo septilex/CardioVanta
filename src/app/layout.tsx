@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { AmbientEffects } from "../components/motion/AmbientEffects";
 
 const displayFont = localFont({
   src: [
@@ -44,6 +45,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${bodyFont.variable} ${displayFont.variable} ${syneFont.variable}`}>
         {children}
+        <AmbientEffects />
       </body>
     </html>
   );
