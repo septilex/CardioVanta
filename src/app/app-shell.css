@@ -4,7 +4,7 @@
 /* ─── Base Color Tokens ─── */
 :root {
   --ax-bg: #F8F4EF;
-  --ax-sidebar-bg: #F1E7E0;
+  --ax-sidebar-bg: #F6EEE3; /* the paper colour of /images/anatomical-heart.jpg, so the artwork blends in */
   --ax-sidebar-border: #E4D8CE;
   --ax-card-bg: #FFFFFF;
   --ax-card-border: #E2DAD0;
@@ -114,6 +114,9 @@
   pointer-events: none;
   z-index: 1;
   overflow: hidden;
+  /* Fade the artwork in from its top edge so no seam shows where the picture starts. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 110px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 110px);
 }
 
 .ax-sidebar-heart-img {
@@ -121,9 +124,7 @@
   height: 100%;
   object-fit: cover;
   object-position: left 2%;
-  mix-blend-mode: multiply;
-  opacity: 0.95;
-  filter: contrast(1.05) brightness(0.99);
+  /* Drawn as-is (no blend, filter or transparency) so its paper matches --ax-sidebar-bg exactly. */
 }
 
 
@@ -199,4 +200,91 @@
   .ax-nav-item:hover .ax-nav-icon {
     transform: none;
   }
+}
+
+/* Sidebar items: fully transparent at rest; frosted glass (translucent tint + blur of the
+   artwork behind) on hover and keyboard focus. The current page keeps its burgundy text. */
+.ax-nav-item,
+.ax-nav-item.ax-nav-active {
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition:
+    background-color var(--cv-dur-base) var(--cv-ease-out),
+    border-color var(--cv-dur-base) var(--cv-ease-out),
+    backdrop-filter var(--cv-dur-base) var(--cv-ease-out),
+    -webkit-backdrop-filter var(--cv-dur-base) var(--cv-ease-out),
+    color var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-nav-item:hover,
+.ax-nav-item:hover:not(.ax-nav-active),
+.ax-nav-item:focus-visible {
+  background-color: rgba(255, 255, 255, 0.38);
+  border-color: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  backdrop-filter: blur(10px) saturate(1.15);
+}
+
+/* Hover motion: the item slides right, an accent bar grows on its left edge and the icon pops.
+   The current page keeps its bar, which marks it now that items have no fill at rest. */
+.ax-nav-item {
+  transform: translateX(0);
+  transition:
+    background-color var(--cv-dur-base) var(--cv-ease-out),
+    border-color var(--cv-dur-base) var(--cv-ease-out),
+    backdrop-filter var(--cv-dur-base) var(--cv-ease-out),
+    -webkit-backdrop-filter var(--cv-dur-base) var(--cv-ease-out),
+    color var(--cv-dur-fast) var(--cv-ease-out),
+    transform var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-nav-item::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 22%;
+  bottom: 22%;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--ax-burgundy);
+  transform: scaleY(0);
+  transition: transform var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-nav-item:hover,
+.ax-nav-item:focus-visible {
+  transform: translateX(4px);
+}
+.ax-nav-item:hover::before,
+.ax-nav-item:focus-visible::before,
+.ax-nav-item.ax-nav-active::before {
+  transform: scaleY(1);
+}
+.ax-nav-item:hover .ax-nav-icon,
+.ax-nav-item:focus-visible .ax-nav-icon {
+  transform: translateX(2px) scale(1.14) rotate(-4deg);
+}
+.ax-nav-item:active {
+  transform: translateX(4px) scale(0.98);
+  transition-duration: var(--cv-dur-press);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-nav-item:hover,
+  .ax-nav-item:focus-visible,
+  .ax-nav-item:active,
+  .ax-nav-item:hover .ax-nav-icon,
+  .ax-nav-item:focus-visible .ax-nav-icon {
+    transform: none;
+  }
+  .ax-nav-item::before {
+    transition: none;
+  }
+}
+
+/* No resting highlight, not even for the current page: every item looks the same until it is
+   hovered or focused. The current page is still announced through aria-current="page". */
+.ax-nav-item.ax-nav-active {
+  color: var(--ax-text-main);
+  font-weight: 500;
+}
+.ax-nav-item.ax-nav-active:not(:hover):not(:focus-visible)::before {
+  transform: scaleY(0);
 }

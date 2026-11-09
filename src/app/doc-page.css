@@ -708,3 +708,127 @@
 .doc-section.doc-next {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Scroll choreography (Research, About)
+   CSS scroll-driven animations: tied to scroll position, run on the compositor, no JS.
+   Off for reduced motion; browsers without view timelines show everything at rest.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.doc-progress {
+  display: none;
+}
+
+@keyframes doc-progress-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes doc-hero-drift { to { opacity: 0.15; translate: 0 -70px; scale: 0.97; } }
+@keyframes doc-glow-shift { to { translate: -12% 18%; scale: 1.25; } }
+@keyframes doc-rise { from { opacity: 0; translate: 0 36px; scale: 0.97; } }
+@keyframes doc-from-line { from { opacity: 0; translate: -28px 0; } }
+@keyframes doc-dot-pop { from { scale: 0; } 70% { scale: 1.35; } to { scale: 1; } }
+@keyframes doc-row-in { from { opacity: 0; translate: 22px 0; } }
+@keyframes doc-draw-x { from { transform: scaleX(0); } }
+@keyframes doc-settle { from { opacity: 0.4; scale: 0.94; } }
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Reading progress across the whole page. */
+    .doc-progress {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 255px;
+      right: 0;
+      height: 3px;
+      z-index: 40;
+      background: linear-gradient(90deg, var(--ax-burgundy), #E0566A);
+      transform-origin: left center;
+      animation: doc-progress-fill linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    /* Hero: content drifts up and fades as it leaves; the glow shifts behind it. */
+    .doc-hero::before {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(35% 45% at 70% 30%, rgba(224, 86, 106, 0.22), transparent 70%);
+      pointer-events: none;
+      animation: doc-glow-shift linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+    .doc-hero-inner {
+      position: relative;
+      animation: doc-hero-drift linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 90%;
+    }
+
+    /* Generic reveal, stronger than before. */
+    .reveal {
+      animation-name: doc-rise;
+      animation-range: entry 0% cover 22%;
+    }
+
+    /* Cards in a row arrive one after another. */
+    .doc-grid > .reveal:nth-child(3n + 2),
+    .doc-links > .reveal:nth-child(3n + 2) {
+      animation-range: entry 8% cover 28%;
+    }
+    .doc-grid > .reveal:nth-child(3n + 3),
+    .doc-links > .reveal:nth-child(3n + 3) {
+      animation-range: entry 16% cover 34%;
+    }
+    .doc-grid.is-four > .reveal:nth-child(even) {
+      animation-range: entry 10% cover 30%;
+    }
+
+    /* Timeline: items slide out of the line, dots pop as each arrives. */
+    .doc-timeline > li {
+      view-timeline-name: --doc-item;
+      animation: doc-from-line linear both;
+      animation-timeline: --doc-item;
+      animation-range: entry 0% cover 25%;
+    }
+    .doc-timeline > li::before {
+      animation: doc-dot-pop linear both;
+      animation-timeline: --doc-item;
+      animation-range: entry 20% cover 30%;
+    }
+
+    /* Evaluation table: rows slide in one by one. */
+    .doc-table tbody tr {
+      animation: doc-row-in linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 30%;
+    }
+
+    /* About flow: steps rise in sequence, connectors draw between them. */
+    .doc-flow {
+      view-timeline-name: --doc-flow;
+    }
+    .doc-flow > li:nth-child(1) { animation-range: entry 0% cover 20%; }
+    .doc-flow > li:nth-child(2) { animation-range: entry 6% cover 26%; }
+    .doc-flow > li:nth-child(3) { animation-range: entry 12% cover 32%; }
+    .doc-flow > li:nth-child(4) { animation-range: entry 18% cover 38%; }
+    .doc-flow > li:nth-child(5) { animation-range: entry 24% cover 44%; }
+    .doc-flow > li:not(:last-child)::after {
+      transform-origin: left center;
+      animation: doc-draw-x linear both;
+      animation-timeline: --doc-flow;
+      animation-range: entry 30% cover 50%;
+    }
+
+    /* Disclaimer settles into place. */
+    .doc-disclaimer.reveal {
+      animation-name: doc-settle;
+      animation-range: entry 0% cover 30%;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .doc-progress {
+    left: 0 !important;
+  }
+}

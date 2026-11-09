@@ -12,6 +12,7 @@ export function DocShell({ section, children }: { section: string; children: Rea
       <div className="cv-doc-shell">
         <AppSidebar />
         <div className="cv-doc-main">
+          <div className="doc-progress" aria-hidden="true" />
           <MobileNav />
           <header className="doc-topbar">
             <p className="doc-crumbs">
