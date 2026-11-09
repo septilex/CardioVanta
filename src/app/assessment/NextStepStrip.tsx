@@ -13,6 +13,8 @@ export interface StripStage {
 interface NextStepStripProps {
   stages: StripStage[];
   currentStage: number;
+  /** True while a prediction request is in flight. */
+  loading: boolean;
   hasResult: boolean;
   onViewResult: () => void;
 }
@@ -20,20 +22,30 @@ interface NextStepStripProps {
 /**
  * One-line "up next" hint that sits between the Previous and Continue buttons.
  * Field names come from the generated feature contract so they match the form.
+ * On the last step it is a polite live region, so the request starting is announced.
  */
-export default function NextStepStrip({ stages, currentStage, hasResult, onViewResult }: NextStepStripProps) {
+export default function NextStepStrip({ stages, currentStage, loading, hasResult, onViewResult }: NextStepStripProps) {
   const next = stages[currentStage + 1];
 
   if (!next) {
     const total = stages.reduce((n, s) => n + s.fieldKeys.length, 0);
     return (
-      <div className="ax-strip ax-strip--ready">
-        <span className="ax-strip-mark" aria-hidden="true">✓</span>
-        <span className="ax-strip-text">All {total} inputs ready</span>
-        {hasResult && (
-          <button type="button" className="ax-strip-link" onClick={onViewResult}>
-            View last result →
-          </button>
+      <div className={loading ? "ax-strip ax-strip--busy" : "ax-strip ax-strip--ready"} role="status" aria-live="polite">
+        {loading ? (
+          <>
+            <span className="ax-spinner ax-spinner--muted" aria-hidden="true" />
+            <span className="ax-strip-text">Waiting for the model&apos;s response…</span>
+          </>
+        ) : (
+          <>
+            <span className="ax-strip-mark" aria-hidden="true">✓</span>
+            <span className="ax-strip-text">All {total} inputs ready</span>
+            {hasResult && (
+              <button type="button" className="ax-strip-link" onClick={onViewResult}>
+                View last result <span className="ax-btn-arrow" aria-hidden="true">→</span>
+              </button>
+            )}
+          </>
         )}
       </div>
     );

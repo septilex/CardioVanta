@@ -916,7 +916,7 @@
 
 .ax-donut-fg {
   stroke: var(--ax-crimson);
-  transition: stroke-dasharray 0.4s ease;
+  transition: stroke-dashoffset var(--cv-dur-slow) var(--cv-ease-out);
 }
 
 .ax-donut-text {
@@ -1212,7 +1212,7 @@
   line-height: 1;
 }
 
-.ax-result-prob-val span {
+.ax-result-prob-val .ax-prob-unit {
   font-size: 28px;
   color: var(--ax-crimson);
   margin-left: 2px;
@@ -1742,4 +1742,582 @@
 .ax-unavailable-logo-link:focus-visible {
   outline: 3px solid var(--cv-focus);
   outline-offset: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   K. MOTION & INTERACTION
+   Tokens: src/app/globals.css (--cv-*) mirrored in src/lib/motion.ts.
+   Rule of thumb: entrances use the individual translate/scale properties; hover and press
+   feedback uses transform, so the two always compose instead of overriding each other.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Page entrance: the summary rail settles in just after the main column ─── */
+.ax-summary-rail > * {
+  animation: cv-rise var(--cv-dur-slow) var(--cv-ease-out) both;
+}
+.ax-summary-rail > :nth-child(1) { animation-delay: calc(2 * var(--cv-stagger)); }
+.ax-summary-rail > :nth-child(2) { animation-delay: calc(3 * var(--cv-stagger)); }
+.ax-summary-rail > :nth-child(3) { animation-delay: calc(4 * var(--cv-stagger)); }
+.ax-summary-rail > :nth-child(4) { animation-delay: calc(5 * var(--cv-stagger)); }
+.ax-summary-rail > :nth-child(5) { animation-delay: calc(6 * var(--cv-stagger)); }
+.ax-summary-rail > :nth-child(n + 6) { animation-delay: calc(7 * var(--cv-stagger)); }
+
+/* ─── Step change ───
+   The fields fade in with a stagger. They sit inside a scroll container (.ax-card-body), where any
+   movement makes the browser recompute the scrollable area on every frame (measured: 17 layout passes
+   per step change vs 5 without movement, 4x CPU), so the direction of travel is carried by the card
+   header instead, which is outside the scroller. */
+.ax-fields-grid:not(.ax-stage-hidden) > .ax-field-box {
+  animation: cv-fade var(--cv-dur-base) var(--cv-ease-out) both;
+}
+.ax-fields-grid:not(.ax-stage-hidden) > .ax-field-box:nth-child(2) { animation-delay: var(--cv-stagger-tight); }
+.ax-fields-grid:not(.ax-stage-hidden) > .ax-field-box:nth-child(3) { animation-delay: calc(2 * var(--cv-stagger-tight)); }
+.ax-fields-grid:not(.ax-stage-hidden) > .ax-field-box:nth-child(4) { animation-delay: calc(3 * var(--cv-stagger-tight)); }
+
+/* Card header and up-next strip are re-keyed per step, so this replays on every step change.
+   The header slides from the direction of travel (two fixed keyframe sets keep it on the compositor). */
+@keyframes ax-swap-in {
+  from { opacity: 0; translate: 0 6px; }
+}
+@keyframes ax-header-in {
+  from { opacity: 0; translate: 14px 0; }
+}
+@keyframes ax-header-in-back {
+  from { opacity: 0; translate: -14px 0; }
+}
+.ax-card-header.ax-swap-in {
+  animation: ax-header-in var(--cv-dur-base) var(--cv-ease-out) both;
+}
+.ax-form-card[data-dir="back"] .ax-card-header.ax-swap-in {
+  animation-name: ax-header-in-back;
+}
+.ax-strip,
+.ax-tabpanel:not(.ax-stage-hidden) {
+  animation: ax-swap-in var(--cv-dur-base) var(--cv-ease-out) both;
+}
+
+/* ─── Stepper ─── */
+.ax-step-circle {
+  transition:
+    background-color var(--cv-dur-base) var(--cv-ease-out),
+    border-color var(--cv-dur-base) var(--cv-ease-out),
+    color var(--cv-dur-base) var(--cv-ease-out),
+    transform var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-step-btn:hover .ax-step-circle {
+  transform: translateY(-1px);
+}
+.ax-step-btn:active .ax-step-circle {
+  transform: scale(0.94);
+  transition-duration: var(--cv-dur-press);
+}
+.ax-step-check {
+  animation: cv-fade var(--cv-dur-base) var(--cv-ease-out) both;
+}
+.ax-step-line {
+  position: relative;
+  overflow: hidden;
+}
+.ax-step-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--ax-text-main);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--cv-dur-slow) var(--cv-ease-out);
+}
+.ax-step-line[data-done="true"]::after {
+  transform: scaleX(1);
+}
+
+/* ─── Buttons ─── */
+.ax-btn-continue,
+.ax-btn-submit {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color var(--cv-dur-fast) var(--cv-ease-out),
+    box-shadow var(--cv-dur-base) var(--cv-ease-out),
+    transform var(--cv-dur-fast) var(--cv-ease-out),
+    opacity var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-btn-continue:hover,
+.ax-btn-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(125, 10, 20, 0.26);
+}
+.ax-btn-continue:active,
+.ax-btn-submit:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 4px rgba(125, 10, 20, 0.2);
+  transition-duration: var(--cv-dur-press);
+}
+
+/* A single light sweep on hover (no loop): it travels once and resets while off-screen. */
+.ax-btn-continue::after,
+.ax-btn-submit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.2) 50%, transparent 65%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.ax-btn-continue:hover::after,
+.ax-btn-submit:hover:not(:disabled)::after {
+  transform: translateX(120%);
+  transition: transform var(--cv-dur-reveal) var(--cv-ease-out);
+}
+
+.ax-btn-submit[aria-busy="true"] {
+  cursor: progress;
+}
+
+.ax-btn-prev,
+.ax-btn-reset,
+.ax-results-back {
+  transition:
+    background-color var(--cv-dur-fast) var(--cv-ease-out),
+    border-color var(--cv-dur-fast) var(--cv-ease-out),
+    color var(--cv-dur-fast) var(--cv-ease-out),
+    transform var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-btn-prev:active:not(:disabled),
+.ax-btn-reset:active,
+.ax-results-back:active {
+  transform: scale(0.97);
+  transition-duration: var(--cv-dur-press);
+}
+
+/* Arrows nudge in the direction they point. */
+.ax-btn-arrow {
+  display: inline-block;
+  transition: translate var(--cv-dur-base) var(--cv-ease-out);
+}
+:is(button, a):hover > .ax-btn-arrow,
+:is(button, a):focus-visible > .ax-btn-arrow {
+  translate: 3px 0;
+}
+:is(button, a):hover > .ax-btn-arrow--back,
+:is(button, a):focus-visible > .ax-btn-arrow--back {
+  translate: -3px 0;
+}
+.ax-topbar-back svg {
+  transition: translate var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-topbar-back:hover svg,
+.ax-topbar-back:focus-visible svg {
+  translate: -3px 0;
+}
+
+/* One consistent, clearly visible keyboard focus ring across the page. */
+.ax-shell :is(button, a):focus-visible {
+  outline: 2px solid var(--ax-burgundy);
+  outline-offset: 2px;
+}
+
+/* Loading spinner: exists only while a request is in flight. */
+.ax-spinner {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #FFFFFF;
+  animation: cv-spin 0.7s linear infinite;
+}
+.ax-spinner--muted {
+  border-color: rgba(125, 10, 20, 0.16);
+  border-top-color: var(--ax-burgundy);
+}
+
+/* ─── Fields: focus, hover and selection feedback ─── */
+.ax-field-box {
+  transition:
+    border-color var(--cv-dur-fast) var(--cv-ease-out),
+    box-shadow var(--cv-dur-base) var(--cv-ease-out),
+    background-color var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-field-box:hover {
+  border-color: #DED3C7;
+}
+.ax-field-box:focus-within {
+  border-color: #D2C4B7;
+  background-color: #FFFDFB;
+  box-shadow: 0 4px 14px rgba(24, 21, 19, 0.05);
+}
+.ax-field-icon,
+.ax-field-label {
+  transition: color var(--cv-dur-fast) var(--cv-ease-out), transform var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-field-box:focus-within .ax-field-icon {
+  transform: scale(1.12);
+}
+.ax-field-box:focus-within .ax-field-label {
+  color: var(--ax-burgundy);
+}
+
+.ax-input-row,
+.ax-select-wrap {
+  transition:
+    border-color var(--cv-dur-fast) var(--cv-ease-out),
+    box-shadow var(--cv-dur-base) var(--cv-ease-out),
+    background-color var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-input-row:hover,
+.ax-select-wrap:hover {
+  border-color: #CBBFB2;
+}
+.ax-input-row:focus-within,
+.ax-select-wrap:focus-within {
+  border-color: var(--ax-burgundy);
+  box-shadow: 0 0 0 3px rgba(125, 10, 20, 0.12);
+}
+.ax-select-chevron {
+  transition: color var(--cv-dur-fast) var(--cv-ease-out), transform var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-select-wrap:hover .ax-select-chevron {
+  color: var(--ax-text-main);
+  transform: translateY(1px);
+}
+.ax-select-wrap:focus-within .ax-select-chevron {
+  color: var(--ax-burgundy);
+}
+
+/* Validation: shown only after the person has interacted (:user-invalid), never on first paint.
+   It reflects the rules the inputs already carry (required, Age 1 to 110); no new limits are added. */
+.ax-input-row:has(.ax-input-control:user-invalid) {
+  border-color: var(--ax-crimson);
+  background-color: #FFF7F7;
+  box-shadow: 0 0 0 3px rgba(158, 27, 46, 0.12);
+}
+.ax-field-box:has(.ax-input-control:user-invalid) .ax-field-helper {
+  color: var(--ax-crimson);
+}
+.ax-field-box:has(.ax-input-control:user-invalid) .ax-field-label::after {
+  content: " · check this value";
+  font-family: var(--cv-font-body), sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ax-crimson);
+}
+
+/* Slider: the track fills up to the current value (--pct is set inline). */
+.ax-slider-range {
+  background: linear-gradient(
+    to right,
+    var(--ax-burgundy) 0 var(--pct, 0%),
+    #E4DAD0 var(--pct, 0%) 100%
+  );
+}
+.ax-slider-range::-webkit-slider-thumb {
+  transition: transform var(--cv-dur-fast) var(--cv-ease-out), box-shadow var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-slider-range:active::-webkit-slider-thumb {
+  transform: scale(1.3);
+  box-shadow: 0 0 0 6px rgba(125, 10, 20, 0.12), 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.ax-slider-range:active::-moz-range-thumb {
+  transform: scale(1.3);
+  box-shadow: 0 0 0 6px rgba(125, 10, 20, 0.12), 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Loading: inputs rest while the request is in flight ─── */
+.ax-card-body {
+  transition: opacity var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-form-card[aria-busy="true"] .ax-card-body {
+  opacity: 0.55;
+  pointer-events: none;
+}
+/* Indeterminate activity line: the API reports no progress, so none is implied. */
+.ax-form-card[aria-busy="true"]::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--ax-crimson), transparent) no-repeat;
+  background-size: 35% 100%;
+  animation: ax-activity 1.1s var(--cv-ease-in-out) infinite;
+}
+@keyframes ax-activity {
+  from { background-position: -40% 0; }
+  to { background-position: 140% 0; }
+}
+.ax-strip--busy .ax-strip-text {
+  color: var(--ax-text-muted);
+}
+
+/* ─── Error banner (expands into place; stays until the next attempt) ─── */
+.ax-error-wrap {
+  overflow: hidden;
+}
+.ax-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  background-color: var(--ax-crimson-light);
+  border: 1px solid var(--ax-blush-border);
+  border-left: 3px solid var(--ax-crimson);
+  border-radius: 8px;
+  color: #5C1019;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.ax-error svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--ax-crimson);
+}
+.ax-error-text {
+  flex: 1;
+  min-width: 0;
+}
+/* The API containment response is a pause, not a failure: calmer tone, no retry. */
+.ax-error--paused {
+  background-color: #F5F1EB;
+  border-color: var(--ax-field-border);
+  border-left-color: var(--ax-text-subtle);
+  color: var(--ax-text-main);
+}
+.ax-error--paused svg {
+  color: var(--ax-text-subtle);
+}
+.ax-error-retry {
+  flex-shrink: 0;
+  align-self: center;
+  padding: 6px 12px;
+  background-color: var(--ax-card-bg);
+  border: 1px solid var(--ax-blush-border);
+  border-radius: 6px;
+  font-family: var(--cv-font-syne), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ax-burgundy);
+  cursor: pointer;
+  transition:
+    border-color var(--cv-dur-fast) var(--cv-ease-out),
+    box-shadow var(--cv-dur-fast) var(--cv-ease-out),
+    transform var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-error-retry:hover:not(:disabled) {
+  border-color: var(--ax-crimson);
+  box-shadow: 0 2px 8px rgba(125, 10, 20, 0.12);
+  transform: translateY(-1px);
+}
+.ax-error-retry:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: var(--cv-dur-press);
+}
+.ax-error-retry:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+/* ─── Results ─── */
+.ax-gauge-wrap {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  margin: 0 auto 6px;
+  display: grid;
+  place-items: center;
+}
+.ax-gauge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.ax-gauge-track {
+  fill: none;
+  stroke: #EAE1D6;
+  stroke-width: 8;
+}
+.ax-gauge-fill {
+  fill: none;
+  stroke: var(--ax-burgundy);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+.ax-gauge-wrap .ax-result-prob-val {
+  position: relative;
+  font-size: 40px;
+  font-variant-numeric: tabular-nums;
+}
+.ax-gauge-wrap .ax-result-prob-val .ax-prob-unit {
+  font-size: 20px;
+}
+
+.ax-result-prob-block,
+.ax-insight-card {
+  transition: box-shadow var(--cv-dur-base) var(--cv-ease-out), transform var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-result-prob-block:hover {
+  box-shadow: 0 8px 24px rgba(24, 21, 19, 0.06);
+}
+.ax-insight-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(24, 21, 19, 0.06);
+}
+
+/* Bars grow with scaleX from their starting edge to their real width. CSS rather than JS: hidden tab
+   panels are display:none, so the growth replays each time a panel is shown, at no scripting cost. */
+@keyframes ax-bar-grow {
+  from { transform: scaleX(0); }
+}
+.ax-bar-fill {
+  transform-origin: left center;
+  animation: ax-bar-grow var(--cv-dur-count) var(--cv-ease-out) both;
+  animation-delay: calc(var(--i, 0) * var(--cv-stagger-tight));
+}
+
+/* Tabs: a single indicator slides to the active tab (positioned by ResultsPanel). */
+.ax-results-tabs {
+  position: relative;
+}
+.ax-results-tab {
+  position: relative;
+  z-index: 1;
+}
+.ax-results-tab-indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  width: 0;
+  border-radius: 6px;
+  background-color: var(--ax-card-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--cv-dur-base) var(--cv-ease-out),
+    width var(--cv-dur-base) var(--cv-ease-out),
+    opacity var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-results-tab-indicator[data-ready="true"] {
+  opacity: 1;
+}
+.ax-results-tabs:has(.ax-results-tab-indicator[data-ready="true"]) .ax-results-tab[aria-selected="true"] {
+  background-color: transparent;
+  box-shadow: none;
+}
+.ax-results-new {
+  transition: color var(--cv-dur-fast) var(--cv-ease-out);
+}
+
+/* ─── Summary rail: new entries arrive, changed values briefly highlight ───
+   The rail scrolls, so these fade without moving (see the step-change note above). */
+@keyframes ax-value-flash {
+  from { opacity: 0.25; }
+}
+.ax-inputs-list .ax-input-item {
+  animation: cv-fade var(--cv-dur-base) var(--cv-ease-out) both;
+}
+.ax-input-item-val,
+.ax-recorded-big {
+  animation: ax-value-flash var(--cv-dur-slow) var(--cv-ease-out) both;
+}
+.ax-rail-status-icon {
+  animation: cv-fade var(--cv-dur-base) var(--cv-ease-out) both;
+}
+
+/* ─── Unavailable (containment) notice ─── */
+.ax-unavailable-logo-link {
+  display: inline-block;
+}
+.ax-unavailable-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background-color: var(--ax-crimson);
+  vertical-align: 1px;
+  animation: cv-pop var(--cv-dur-base) var(--cv-ease-out) both;
+  animation-delay: calc(3 * var(--cv-stagger));
+}
+.ax-unavailable-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition:
+    background-color var(--cv-dur-fast) var(--cv-ease-out),
+    box-shadow var(--cv-dur-base) var(--cv-ease-out),
+    transform var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-unavailable-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(125, 10, 20, 0.22);
+}
+.ax-unavailable-link:active {
+  transform: scale(0.98);
+  transition-duration: var(--cv-dur-press);
+}
+
+/* ─── Reduced motion: every state change stays, movement goes ─── */
+@media (prefers-reduced-motion: reduce) {
+  .ax-summary-rail > *,
+  .ax-fields-grid:not(.ax-stage-hidden) > .ax-field-box,
+  .ax-swap-in,
+  .ax-strip,
+  .ax-tabpanel:not(.ax-stage-hidden),
+  .ax-inputs-list .ax-input-item,
+  .ax-input-item-val,
+  .ax-recorded-big,
+  .ax-rail-status-icon,
+  .ax-step-check,
+  .ax-card-header.ax-swap-in,
+  .ax-form-card[data-dir="back"] .ax-card-header.ax-swap-in,
+  .ax-unavailable-dot {
+    animation-name: cv-fade;
+    animation-duration: var(--cv-dur-fast);
+    animation-delay: 0ms;
+  }
+
+  .ax-btn-continue::after,
+  .ax-btn-submit::after {
+    display: none;
+  }
+
+  .ax-bar-fill {
+    animation: none;
+  }
+
+  .ax-btn-continue:hover,
+  .ax-btn-submit:hover:not(:disabled),
+  .ax-insight-card:hover,
+  .ax-unavailable-link:hover,
+  .ax-error-retry:hover:not(:disabled),
+  .ax-step-btn:hover .ax-step-circle,
+  .ax-select-wrap:hover .ax-select-chevron {
+    transform: none;
+  }
+
+  :is(button, a):hover > .ax-btn-arrow,
+  :is(button, a):focus-visible > .ax-btn-arrow,
+  .ax-topbar-back:hover svg,
+  .ax-topbar-back:focus-visible svg {
+    translate: none;
+  }
+
+  /* A static line still says "working"; a slower spinner keeps the busy cue without urgency. */
+  .ax-form-card[aria-busy="true"]::before {
+    animation: none;
+    background: var(--ax-crimson);
+    opacity: 0.4;
+  }
+  .ax-spinner {
+    animation-duration: 1.6s;
+  }
 }

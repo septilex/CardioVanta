@@ -1,13 +1,19 @@
 "use client";
 
 import React, { useState, useCallback, useMemo } from "react";
+import Link from "next/link";
+import { AnimatePresence, m } from "framer-motion";
 import { predict, ApiError } from "../../lib/api";
 import { PredictRequest, PredictResponse } from "../../types";
 import { CATEGORICAL_LABELS, CATEGORICAL_OPTIONS, type CategoricalFeatureId } from "../../types/generated-features";
 import "./assessment.css";
 import NextStepStrip from "./NextStepStrip";
 import PredictionsUnavailable from "./PredictionsUnavailable";
-import { PREDICTION_AVAILABILITY } from "../../lib/predictionAvailability";
+import { ResultsPanel, type ResultTab } from "./ResultsPanel";
+import { PREDICTION_AVAILABILITY, UNAVAILABLE_CODE } from "../../lib/predictionAvailability";
+import { MotionProvider } from "../../components/motion/MotionProvider";
+import { RouteTransition } from "../../components/motion/RouteTransition";
+import { NAV_BACK, collapse, panelSwap } from "../../lib/motion";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    INITIAL DATA — 13 model features, exact existing defaults & encodings
@@ -102,42 +108,52 @@ function renderOptions(feature: CategoricalFeatureId) {
   ));
 }
 
-// Human-readable threshold status. The API's class is disease-positive:
-// class 1 = P(CAD present) >= threshold, class 0 = below it. Unknown statuses fall back to the raw text.
-function describeThreshold(prediction: PredictResponse["prediction"] | undefined): string {
-  if (!prediction || !prediction.threshold_status) {
-    return "No validated decision threshold is configured. Probability only.";
-  }
-  if (prediction.threshold_status === "no_validated_production_threshold_configured") {
-    return "No validated decision threshold is configured. Probability only.";
-  }
-  if (prediction.threshold_status === "mathematical_model_operating_point" && prediction.threshold_applied != null) {
-    const pct = (prediction.threshold_applied * 100).toFixed(0);
-    return prediction.class === 1
-      ? `At or above the ${pct}% operating point: classified as CAD present (mathematical operating point, not a diagnosis).`
-      : `Below the ${pct}% operating point: classified as CAD absent (mathematical operating point, not a diagnosis).`;
-  }
-  return prediction.threshold_status;
+/** Links back to the landing page are "back" navigations (see RouteTransition). */
+const BACK = [NAV_BACK];
+
+/** Fills the slider track up to the current value (CSS reads --pct). Purely visual. */
+function sliderFill(value: number, min: number, max: number): React.CSSProperties {
+  const pct = Number.isFinite(value) ? Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100)) : 0;
+  return { "--pct": `${pct}%` } as React.CSSProperties;
+}
+
+/**
+ * An error shown in the form card. "unavailable" is the API's structured containment response
+ * (predictions switched off server-side): retrying cannot help, so no retry is offered.
+ */
+interface FormError {
+  message: string;
+  kind: "unavailable" | "retryable";
 }
 
 /* Containment (Phase 10): while configs/prediction_service.json disables predictions, the page renders
    only the notice. The form, its state and its submit handler are never mounted. */
 export default function Page() {
-  if (!PREDICTION_AVAILABILITY.enabled) {
-    return <PredictionsUnavailable notice={PREDICTION_AVAILABILITY.notice} />;
-  }
-  return <AssessmentForm />;
+  return (
+    <RouteTransition>
+      {PREDICTION_AVAILABILITY.enabled ? (
+        <AssessmentForm />
+      ) : (
+        <PredictionsUnavailable notice={PREDICTION_AVAILABILITY.notice} />
+      )}
+    </RouteTransition>
+  );
 }
 
 function AssessmentForm() {
   const [formData, setFormData] = useState<PredictRequest>(initialData);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<FormError | null>(null);
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [currentStage, setCurrentStage] = useState(0); // Starts cleanly at Step 1 (Patient Profile)
   // One-screen layout: results replace the form card instead of appearing below it.
   const [showResults, setShowResults] = useState(false);
-  const [resultTab, setResultTab] = useState<"summary" | "why" | "audit">("summary");
+  const [resultTab, setResultTab] = useState<ResultTab>("summary");
+  // Direction of the last step change; the next step's fields slide in from that side.
+  const [direction, setDirection] = useState<1 | -1>(1);
+  // The first-paint entrance is CSS (it runs before hydration); once the card has swapped with the
+  // results panel, framer-motion animates every later swap, so the CSS entrance must not replay.
+  const [hasSwapped, setHasSwapped] = useState(false);
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
   /* ─── Handlers ─── */
@@ -153,9 +169,8 @@ function AssessmentForm() {
     setFormData((prev: PredictRequest) => ({ ...prev, [name]: parsedValue } as PredictRequest));
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  // Sends the current inputs. Shared by the form's submit and the error banner's "Try again".
+  const runPrediction = useCallback(async () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -174,19 +189,23 @@ function AssessmentForm() {
       setResult(response);
       setResultTab("summary");
       setShowResults(true);
+      setHasSwapped(true);
     } catch (err: unknown) {
       clearTimeout(timeoutId);
       if ((err instanceof Error && err.name === "AbortError") || err === "timeout") {
         if (err === "timeout") {
-          setError("Request timed out. Please try again.");
+          setError({ message: "Request timed out. Please try again.", kind: "retryable" });
         }
         return;
       }
 
       if (err instanceof ApiError) {
-        setError(err.message);
+        setError({ message: err.message, kind: err.code === UNAVAILABLE_CODE ? "unavailable" : "retryable" });
       } else {
-        setError("An unexpected error occurred while communicating with the backend. Please check your connection.");
+        setError({
+          message: "An unexpected error occurred while communicating with the backend. Please check your connection.",
+          kind: "retryable",
+        });
       }
     } finally {
       if (abortControllerRef.current === controller) {
@@ -194,6 +213,11 @@ function AssessmentForm() {
       }
     }
   }, [formData]);
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    void runPrediction();
+  }, [runPrediction]);
 
   const handleReset = useCallback(() => {
     if (abortControllerRef.current) {
@@ -217,19 +241,50 @@ function AssessmentForm() {
 
   const goNext = useCallback(() => {
     if (currentStage < STAGES.length - 1) {
+      setDirection(1);
       setCurrentStage((s) => s + 1);
     }
   }, [currentStage]);
 
   const goPrev = useCallback(() => {
     if (currentStage > 0) {
+      setDirection(-1);
       setCurrentStage((s) => s - 1);
     }
   }, [currentStage]);
 
   const goToStep = useCallback((idx: number) => {
+    setDirection(idx >= currentStage ? 1 : -1);
     setCurrentStage(idx);
     setShowResults(false);
+  }, [currentStage]);
+
+  // The browser checks `required` and min/max before submitting. If the first invalid field sits on
+  // another step, open that step so the browser's message appears next to a visible field instead of
+  // a hidden one. Only the first `invalid` event of a submit attempt counts. A ref callback (with
+  // React 19 cleanup) attaches the listener whenever the form mounts, including after the results
+  // panel's exit animation.
+  const attachInvalidListener = useCallback((form: HTMLFormElement | null) => {
+    if (!form) return;
+    let handled = false;
+    const onInvalid = (e: Event) => {
+      if (handled) return;
+      handled = true;
+      queueMicrotask(() => {
+        handled = false;
+      });
+      const field = e.target as HTMLInputElement | HTMLSelectElement | null;
+      const idx = STAGES.findIndex((s) => s.fieldKeys.includes(field?.name as keyof PredictRequest));
+      if (idx >= 0) {
+        // Hidden steps are inert (out of the tab order). Lift that now, synchronously, so the browser
+        // can still focus this field and show its message; the re-render below keeps it lifted.
+        field?.closest("[inert]")?.removeAttribute("inert");
+        setDirection(-1);
+        setCurrentStage(idx);
+      }
+    };
+    form.addEventListener("invalid", onInvalid, true);
+    return () => form.removeEventListener("invalid", onInvalid, true);
   }, []);
 
   /* ─── Dynamically Derived Progress & Completion Indicators ─── */
@@ -259,84 +314,12 @@ function AssessmentForm() {
   const progressRatio = (currentStage + 1) / STAGES.length;
   const donutDashoffset = donutCircumference * (1 - progressRatio);
 
-  /* ─── SHAP Explanation Renderer ─── */
-  const renderShapExplanation = (shap: PredictResponse["shap_equivalent_explanation"], probability: number) => {
-    if (!shap) return null;
-    const contributionsArray = Object.entries(shap.contributions) as [string, number][];
-    const increasing = contributionsArray.filter(([, val]) => val > 0).sort((a, b) => b[1] - a[1]);
-    const decreasing = contributionsArray.filter(([, val]) => val <= 0).sort((a, b) => a[1] - b[1]);
-    const maxAbsValue = Math.max(...contributionsArray.map(([, val]) => Math.abs(val)), 1);
-
-    const renderBar = (feature: string, value: number, isPos: boolean) => {
-      const pct = Math.min(100, Math.round((Math.abs(value) / maxAbsValue) * 100));
-      return (
-        <div key={feature} style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
-          <div style={{ flex: "0 1 110px", minWidth: "80px", fontWeight: 600, fontSize: "13px", color: "var(--ax-text-main)", textTransform: "capitalize", wordBreak: "break-word", lineHeight: 1.2 }}>
-            {feature}
-          </div>
-          <div role="progressbar" aria-label={`${feature} contribution: ${value.toFixed(3)}`} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} style={{ flex: "1 1 50px", height: "8px", backgroundColor: "#EAE3DC", borderRadius: "4px", overflow: "hidden", margin: "0 16px" }}>
-            <div style={{ width: `${pct}%`, height: "100%", backgroundColor: isPos ? "#9E1B2E" : "#4A72C8", borderRadius: "4px" }}></div>
-          </div>
-          <div style={{ flex: "0 0 auto", minWidth: "50px", textAlign: "right", fontSize: "13px", fontWeight: 600, color: isPos ? "#9E1B2E" : "#4A72C8" }}>
-            {isPos ? "+" : ""}{value.toFixed(3)}
-          </div>
-        </div>
-      );
-    };
-
-    return (
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
-        <div style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", border: "1px solid #EAE2D8" }}>
-          <h3 style={{ color: "#9E1B2E", marginBottom: "18px", fontSize: "16px", display: "flex", alignItems: "center", gap: "6px" }}>
-            <span aria-hidden="true">↑</span> Factors pushing the model toward CAD present
-          </h3>
-          {increasing.map(([f, val]) => renderBar(f, val, true))}
-          {increasing.length === 0 && <div style={{ color: "var(--ax-text-subtle)", fontSize: "13px" }}>No increasing factors</div>}
-        </div>
-        <div style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", border: "1px solid #EAE2D8" }}>
-          <h3 style={{ color: "#4A72C8", marginBottom: "18px", fontSize: "16px", display: "flex", alignItems: "center", gap: "6px" }}>
-            <span aria-hidden="true">↓</span> Factors pushing the model toward CAD absent
-          </h3>
-          {decreasing.map(([f, val]) => renderBar(f, val, false))}
-          {decreasing.length === 0 && <div style={{ color: "var(--ax-text-subtle)", fontSize: "13px" }}>No decreasing factors</div>}
-        </div>
-      </div>
-    );
-  };
-
-  /* ─── Technical Explanation Renderer ─── */
-  const renderExplanation = (explanation: PredictResponse["explanation"]) => {
-    const contributionsArray = (Object.entries(explanation.contributions) as [string, number][]).sort(
-      ([, valA], [, valB]) => Math.abs(valB) - Math.abs(valA)
-    );
-    const maxAbsValue = Math.max(...contributionsArray.map(([, val]) => Math.abs(val)), 1);
-
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        {contributionsArray.map(([feat, val]) => {
-          const pct = Math.min(50, Math.round((Math.abs(val) / maxAbsValue) * 48));
-          const isPos = val >= 0;
-          return (
-            <div key={feat} style={{ display: "flex", alignItems: "center", gap: "14px", fontSize: "13px" }}>
-              <div style={{ width: "90px", fontWeight: 600, color: "var(--ax-text-main)" }}>{feat}</div>
-              <div style={{ flex: 1, height: "6px", backgroundColor: "#EDE5DC", borderRadius: "3px", overflow: "hidden" }}>
-                <div style={{ width: `${pct * 2}%`, height: "100%", backgroundColor: isPos ? "#9E1B2E" : "#4A72C8" }}></div>
-              </div>
-              <div style={{ width: "60px", textAlign: "right", fontFamily: "monospace", fontWeight: 600, color: isPos ? "#9E1B2E" : "#4A72C8" }}>
-                {isPos ? "+" : ""}{val.toFixed(4)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
   /* ═══════════════════════════════════════════════════════════════════════════
      RENDER
      ═══════════════════════════════════════════════════════════════════════════ */
 
   return (
+    <MotionProvider>
     <div className="ax-shell">
       {/* ═══════════════════════════════════════════════════════════════════════
           1. LEFT SIDEBAR (Reference Layout + Reference Image 2 Artwork)
@@ -344,23 +327,23 @@ function AssessmentForm() {
       <aside className="ax-sidebar">
         <div className="ax-sidebar-top">
           {/* CardioVanta Logo */}
-          <a href="/" className="ax-sidebar-logo-link" title="CardioVanta Home">
+          <Link href="/" transitionTypes={BACK} className="ax-sidebar-logo-link" title="CardioVanta Home">
             <img
               src="/brand/cardiovanta-horizontal-transparent.png"
               alt="CardioVanta | Intelligent Cardiovascular Insight"
               className="ax-sidebar-logo"
             />
-          </a>
+          </Link>
 
           {/* Navigation Items */}
           <nav className="ax-nav" aria-label="Main Navigation">
-            <a href="/" className="ax-nav-item">
+            <Link href="/" transitionTypes={BACK} className="ax-nav-item">
               <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
               </svg>
               <span>Overview</span>
-            </a>
+            </Link>
 
             <div className="ax-nav-item ax-nav-active">
               <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -406,13 +389,13 @@ function AssessmentForm() {
       <main className="ax-main-col">
         {/* Top Navigation Bar */}
         <header className="ax-topbar">
-          <a href="/" className="ax-topbar-back">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <Link href="/" transitionTypes={BACK} className="ax-topbar-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />
             </svg>
             <span>Back to Overview</span>
-          </a>
+          </Link>
 
           <div className="ax-topbar-center">
             ASSESSMENT WORKFLOW
@@ -444,18 +427,18 @@ function AssessmentForm() {
             {/* Page Introduction */}
             <div className="ax-intro">
               <div className="ax-intro-left">
-                <div className="ax-intro-eyebrow">
+                <div className="ax-intro-eyebrow cv-rise" style={{ "--cv-i": 0 } as React.CSSProperties}>
                   <span className="ax-eyebrow-line">—</span> CLINICAL RESEARCH INSTRUMENT
                 </div>
-                <h1 className="ax-intro-title">Cardiovascular Assessment</h1>
-                <p className="ax-intro-sub">
+                <h1 className="ax-intro-title cv-rise" style={{ "--cv-i": 1 } as React.CSSProperties}>Cardiovascular Assessment</h1>
+                <p className="ax-intro-sub cv-rise" style={{ "--cv-i": 2 } as React.CSSProperties}>
                   Enter the available measurements to generate a modelled probability estimate from the trained diagnostic model.
                 </p>
               </div>
             </div>
 
             {/* Four-Stage Stepper Navigation */}
-            <nav className="ax-stepper" role="navigation" aria-label="Assessment steps">
+            <nav className="ax-stepper cv-rise" role="navigation" aria-label="Assessment steps" style={{ "--cv-i": 3 } as React.CSSProperties}>
               {STAGES.map((s, idx) => {
                 const state = idx === currentStage ? "active" : idx < currentStage ? "completed" : "upcoming";
                 return (
@@ -470,7 +453,7 @@ function AssessmentForm() {
                     >
                       <span className="ax-step-circle">
                         {idx < currentStage ? (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                          <svg className="ax-step-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
                         ) : (
@@ -486,19 +469,42 @@ function AssessmentForm() {
                         </span>
                       </div>
                     </button>
-                    {idx < STAGES.length - 1 && <div className="ax-step-line" aria-hidden="true" />}
+                    {idx < STAGES.length - 1 && (
+                      <div className="ax-step-line" data-done={idx < currentStage ? "true" : undefined} aria-hidden="true" />
+                    )}
                   </React.Fragment>
                 );
               })}
             </nav>
 
-            {/* Primary Assessment Form Panel Card */}
-            <form
+            {/* Primary Assessment Form Panel Card ⇄ Results Panel (one at a time; the leaving
+                panel finishes its exit before the arriving one enters) */}
+            <AnimatePresence mode="wait" initial={false}>
+            {showResults && result ? (
+              <ResultsPanel
+                key="results"
+                result={result}
+                tab={resultTab}
+                onTabChange={setResultTab}
+                onEdit={() => setShowResults(false)}
+                onNew={handleReset}
+              />
+            ) : (
+            <m.form
+              key="form"
+              ref={attachInvalidListener}
               onSubmit={handleSubmit}
-              className={showResults && result ? "ax-form-card ax-panel-off" : "ax-form-card"}
+              className={hasSwapped ? "ax-form-card" : "ax-form-card cv-rise"}
+              style={{ "--cv-i": 4 } as React.CSSProperties}
+              data-dir={direction > 0 ? "forward" : "back"}
+              aria-busy={loading}
+              variants={panelSwap}
+              initial="initial"
+              animate="animate"
+              exit="exit"
             >
-              {/* Card Header */}
-              <div className="ax-card-header">
+              {/* Card Header (re-keyed per step so its entrance replays on every step change) */}
+              <div className="ax-card-header ax-swap-in" key={stage.id}>
                 <div className="ax-card-header-left">
                   <div className="ax-card-step-eyebrow">STEP {stage.num} OF 04</div>
                   <h2 className="ax-card-title">{stage.title}</h2>
@@ -520,22 +526,31 @@ function AssessmentForm() {
 
               {/* Scrollable body: only this region scrolls when the window is too short */}
               <div className="ax-card-body">
-              {/* Error banner */}
-              {error && (
-                <div className="ax-error" role="alert">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  <div className="ax-error-text">{error}</div>
-                </div>
-              )}
+              {/* Error banner: expands into place and stays until the next attempt or reset. */}
+              <AnimatePresence initial={false}>
+                {error && (
+                  <m.div key="error" className="ax-error-wrap" variants={collapse} initial="initial" animate="animate" exit="exit">
+                    <div className={error.kind === "unavailable" ? "ax-error ax-error--paused" : "ax-error"} role="alert">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      <div className="ax-error-text">{error.message}</div>
+                      {error.kind === "retryable" && (
+                        <button type="button" className="ax-error-retry" onClick={() => void runPrediction()} disabled={loading}>
+                          Try again
+                        </button>
+                      )}
+                    </div>
+                  </m.div>
+                )}
+              </AnimatePresence>
 
               {/* ═══════════════════════════════════════════════════════════
                   STAGE 01: PATIENT PROFILE (rendered in DOM for all tests)
                   ═══════════════════════════════════════════════════════════ */}
-              <div className={currentStage === 0 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"}>
+              <div className={currentStage === 0 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"} inert={currentStage !== 0}>
                 {/* Age */}
                 <div className="ax-field-box">
                   <div className="ax-field-header">
@@ -572,6 +587,7 @@ function AssessmentForm() {
                         min="20"
                         max="90"
                         value={formData.age}
+                        style={sliderFill(formData.age, 20, 90)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -616,7 +632,7 @@ function AssessmentForm() {
               {/* ═══════════════════════════════════════════════════════════
                   STAGE 02: VITALS & LABORATORY (Exact Reference Image 1 Match)
                   ═══════════════════════════════════════════════════════════ */}
-              <div className={currentStage === 1 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"}>
+              <div className={currentStage === 1 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"} inert={currentStage !== 1}>
                 {/* Resting Blood Pressure */}
                 <div className="ax-field-box">
                   <div className="ax-field-header">
@@ -651,6 +667,7 @@ function AssessmentForm() {
                         min="90"
                         max="140"
                         value={Math.min(140, Math.max(90, formData.trestbps))}
+                        style={sliderFill(formData.trestbps, 90, 140)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -700,6 +717,7 @@ function AssessmentForm() {
                         min="100"
                         max="400"
                         value={Math.min(400, Math.max(100, formData.chol))}
+                        style={sliderFill(formData.chol, 100, 400)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -763,7 +781,7 @@ function AssessmentForm() {
               {/* ═══════════════════════════════════════════════════════════
                   STAGE 03: EXERCISE RESPONSE (rendered in DOM for all tests)
                   ═══════════════════════════════════════════════════════════ */}
-              <div className={currentStage === 2 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"}>
+              <div className={currentStage === 2 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"} inert={currentStage !== 2}>
                 {/* Maximum Heart Rate */}
                 <div className="ax-field-box">
                   <div className="ax-field-header">
@@ -797,6 +815,7 @@ function AssessmentForm() {
                         min="70"
                         max="210"
                         value={formData.thalach}
+                        style={sliderFill(formData.thalach, 70, 210)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -867,6 +886,7 @@ function AssessmentForm() {
                         max="6"
                         step="0.1"
                         value={formData.oldpeak}
+                        style={sliderFill(formData.oldpeak, 0, 6)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -907,7 +927,7 @@ function AssessmentForm() {
               {/* ═══════════════════════════════════════════════════════════
                   STAGE 04: DIAGNOSTIC MARKERS (rendered in DOM for all tests)
                   ═══════════════════════════════════════════════════════════ */}
-              <div className={currentStage === 3 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"}>
+              <div className={currentStage === 3 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"} inert={currentStage !== 3}>
                 {/* Chest Pain Type */}
                 <div className="ax-field-box">
                   <div className="ax-field-header">
@@ -995,139 +1015,38 @@ function AssessmentForm() {
                   disabled={currentStage === 0}
                   style={currentStage === 0 ? { visibility: "hidden" } : undefined}
                 >
-                  ← Previous
+                  <span className="ax-btn-arrow ax-btn-arrow--back" aria-hidden="true">←</span> Previous
                 </button>
 
                 <NextStepStrip
+                  key={currentStage}
                   stages={STAGES}
                   currentStage={currentStage}
+                  loading={loading}
                   hasResult={result != null && !loading}
                   onViewResult={() => setShowResults(true)}
                 />
 
                 {currentStage < STAGES.length - 1 && (
                   <button type="button" className="ax-btn-continue" onClick={goNext}>
-                    Continue →
+                    Continue <span className="ax-btn-arrow" aria-hidden="true">→</span>
                   </button>
                 )}
 
                 {/* Final Submission Buttons (always in DOM, styled/hidden for tests) */}
-                <div className={currentStage === STAGES.length - 1 ? "ax-final-btn-group" : "ax-final-btn-group ax-final-hidden"}>
+                <div className={currentStage === STAGES.length - 1 ? "ax-final-btn-group" : "ax-final-btn-group ax-final-hidden"} inert={currentStage !== STAGES.length - 1}>
                   <button type="button" className="ax-btn-reset" onClick={handleReset}>
                     Reset
                   </button>
-                  <button type="submit" className="ax-btn-submit" disabled={loading}>
+                  <button type="submit" className="ax-btn-submit" disabled={loading} aria-busy={loading}>
+                    {loading && <span className="ax-spinner" aria-hidden="true" />}
                     {loading ? "Analyzing Profile…" : "Generate Analysis"}
                   </button>
                 </div>
               </div>
-            </form>
-
-            {/* ═══════════════════════════════════════════════════════════
-                RESULTS PANEL (replaces the form card when predictions exist)
-                ═══════════════════════════════════════════════════════════ */}
-            {result && !loading && (
-              <section
-                id="result-section"
-                className={showResults ? "ax-results-panel" : "ax-results-panel ax-panel-off"}
-                aria-label="Analysis results"
-              >
-                <div className="ax-results-head">
-                  <button type="button" className="ax-results-back" onClick={() => setShowResults(false)}>
-                    ← Edit inputs
-                  </button>
-                  <div className="ax-results-tabs" role="tablist" aria-label="Result views">
-                    {([
-                      ["summary", "Result", true],
-                      ["why", "Why", !!result.shap_equivalent_explanation],
-                      ["audit", "Technical audit", !!result.explanation],
-                    ] as const).filter(([, , show]) => show).map(([id, label]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        role="tab"
-                        id={`ax-tab-${id}`}
-                        aria-selected={resultTab === id}
-                        aria-controls={`ax-tabpanel-${id}`}
-                        className="ax-results-tab"
-                        onClick={() => setResultTab(id)}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  <button type="button" className="ax-results-new" onClick={handleReset}>
-                    New assessment
-                  </button>
-                </div>
-
-                <div className="ax-results-body">
-                  <div
-                    role="tabpanel"
-                    id="ax-tabpanel-summary"
-                    aria-labelledby="ax-tab-summary"
-                    className={resultTab === "summary" ? "ax-result-section" : "ax-result-section ax-stage-hidden"}
-                  >
-                    <div className="ax-result-container">
-                      <div className="ax-result-prob-block">
-                        <div className="ax-result-prob-val">
-                          {result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}
-                          <span>%</span>
-                        </div>
-                        <div className="ax-result-label">Modelled probability of significant obstructive CAD</div>
-                      </div>
-                      <div>
-                        <div className="ax-result-info">
-                          Based on the provided profile, the research model estimates a{" "}
-                          <strong>{result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}%</strong> probability that significant obstructive coronary artery disease is present. This is a research estimate, not a diagnosis, and the model is not clinically validated.
-                        </div>
-                        <div className="ax-result-threshold">
-                          <strong>{describeThreshold(result.prediction)}</strong>
-                        </div>
-                        {result.development_range_warning?.outside_development_range && (
-                          <div className="ax-warning">
-                            <strong>Development Range Guardrail:</strong> Features outside observed development-data range:{" "}
-                            {(result.development_range_warning.features || []).join(", ")}.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {result.shap_equivalent_explanation && (
-                    <div
-                      role="tabpanel"
-                      id="ax-tabpanel-why"
-                      aria-labelledby="ax-tab-why"
-                      className={resultTab === "why" ? "ax-shap-section" : "ax-shap-section ax-stage-hidden"}
-                    >
-                      <div className="ax-shap-header">
-                        <h2>Why the model responded this way</h2>
-                        <p className="ax-shap-notice">
-                          <strong>Important Notice:</strong> These are model-attribution signals, not medical causes or a diagnosis. They show how the uncalibrated explanation model weighted each input toward or away from CAD presence, relative to its baseline (log-odds). They are directional signals: they do not exactly decompose the calibrated probability shown above.
-                        </p>
-                      </div>
-                      {renderShapExplanation(result.shap_equivalent_explanation, result.prediction.probability)}
-                    </div>
-                  )}
-
-                  {result.explanation && (
-                    <div
-                      role="tabpanel"
-                      id="ax-tabpanel-audit"
-                      aria-labelledby="ax-tab-audit"
-                      className={resultTab === "audit" ? "ax-audit-section" : "ax-audit-section ax-stage-hidden"}
-                    >
-                      <div className="exp-header">
-                        <h2>Technical Audit (Logistic Regression)</h2>
-                        <p>{result.explanation.note || "Linear feature contributions moving the underlying decision function log-odds."}</p>
-                      </div>
-                      {renderExplanation(result.explanation)}
-                    </div>
-                  )}
-                </div>
-              </section>
+            </m.form>
             )}
+            </AnimatePresence>
           </div>
 
           {/* ═════════════════════════════════════════════════════════════
@@ -1163,7 +1082,7 @@ function AssessmentForm() {
                   <span className="ax-donut-text">{currentStage + 1} / 4</span>
                 </div>
                 <div className="ax-progress-counts">
-                  <span className="ax-recorded-big">{recordedInputsCount} / 13</span>
+                  <span className="ax-recorded-big" key={recordedInputsCount}>{recordedInputsCount} / 13</span>
                   <span className="ax-recorded-label">inputs recorded</span>
                 </div>
               </div>
@@ -1177,17 +1096,17 @@ function AssessmentForm() {
                     <div className="ax-rail-stage-row" key={s.id}>
                       <div className="ax-rail-stage-left">
                         {isDone ? (
-                          <svg className="ax-rail-status-icon" viewBox="0 0 24 24" fill="#1A1A1A" stroke="#1A1A1A">
+                          <svg key="done" className="ax-rail-status-icon" viewBox="0 0 24 24" fill="#1A1A1A" stroke="#1A1A1A" aria-hidden="true">
                             <circle cx="12" cy="12" r="10" />
                             <polyline points="16 9 10 15 8 13" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         ) : isActive ? (
-                          <svg className="ax-rail-status-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ax-burgundy)" strokeWidth="2.5">
+                          <svg key="active" className="ax-rail-status-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ax-burgundy)" strokeWidth="2.5" aria-hidden="true">
                             <circle cx="12" cy="12" r="10" />
                             <circle cx="12" cy="12" r="4" fill="var(--ax-burgundy)" />
                           </svg>
                         ) : (
-                          <svg className="ax-rail-status-icon" viewBox="0 0 24 24" fill="none" stroke="#C8BFB5" strokeWidth="2">
+                          <svg key="todo" className="ax-rail-status-icon" viewBox="0 0 24 24" fill="none" stroke="#C8BFB5" strokeWidth="2" aria-hidden="true">
                             <circle cx="12" cy="12" r="10" />
                           </svg>
                         )}
@@ -1228,7 +1147,7 @@ function AssessmentForm() {
                     </svg>
                     <span>Age</span>
                   </div>
-                  <span className="ax-input-item-val">{formData.age} yrs</span>
+                  <span className="ax-input-item-val" key={String(formData.age)}>{formData.age} yrs</span>
                 </div>
 
                 <div className="ax-input-item">
@@ -1240,7 +1159,7 @@ function AssessmentForm() {
                     </svg>
                     <span>Sex</span>
                   </div>
-                  <span className="ax-input-item-val">{SEX_LABELS[formData.sex]}</span>
+                  <span className="ax-input-item-val" key={String(formData.sex)}>{SEX_LABELS[formData.sex]}</span>
                 </div>
 
                 {/* Stage 1 inputs: visible when currentStage >= 1 */}
@@ -1253,7 +1172,7 @@ function AssessmentForm() {
                         </svg>
                         <span>BP</span>
                       </div>
-                      <span className="ax-input-item-val">{formData.trestbps} mmHg</span>
+                      <span className="ax-input-item-val" key={String(formData.trestbps)}>{formData.trestbps} mmHg</span>
                     </div>
 
                     <div className="ax-input-item">
@@ -1263,7 +1182,7 @@ function AssessmentForm() {
                         </svg>
                         <span>Chol</span>
                       </div>
-                      <span className="ax-input-item-val">{formData.chol} mg/dl</span>
+                      <span className="ax-input-item-val" key={String(formData.chol)}>{formData.chol} mg/dl</span>
                     </div>
                   </>
                 )}
@@ -1278,7 +1197,7 @@ function AssessmentForm() {
                         </svg>
                         <span>Max HR</span>
                       </div>
-                      <span className="ax-input-item-val">{formData.thalach} bpm</span>
+                      <span className="ax-input-item-val" key={String(formData.thalach)}>{formData.thalach} bpm</span>
                     </div>
 
                     <div className="ax-input-item">
@@ -1288,7 +1207,7 @@ function AssessmentForm() {
                         </svg>
                         <span>Angina</span>
                       </div>
-                      <span className="ax-input-item-val">{EXANG_LABELS[formData.exang]}</span>
+                      <span className="ax-input-item-val" key={String(formData.exang)}>{EXANG_LABELS[formData.exang]}</span>
                     </div>
                   </>
                 )}
@@ -1303,7 +1222,7 @@ function AssessmentForm() {
                         </svg>
                         <span>Chest Pain</span>
                       </div>
-                      <span className="ax-input-item-val">{CP_LABELS[formData.cp]}</span>
+                      <span className="ax-input-item-val" key={String(formData.cp)}>{CP_LABELS[formData.cp]}</span>
                     </div>
 
                     <div className="ax-input-item">
@@ -1313,7 +1232,7 @@ function AssessmentForm() {
                         </svg>
                         <span>Vessels</span>
                       </div>
-                      <span className="ax-input-item-val">{CA_LABELS[formData.ca]}</span>
+                      <span className="ax-input-item-val" key={String(formData.ca)}>{CA_LABELS[formData.ca]}</span>
                     </div>
                   </>
                 )}
@@ -1358,5 +1277,6 @@ function AssessmentForm() {
         </div>
       </main>
     </div>
+    </MotionProvider>
   );
 }
