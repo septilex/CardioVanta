@@ -1417,7 +1417,13 @@ function AssessmentForm() {
               <div className="ax-rail-section-title">ASSESSMENT PROGRESS</div>
               <div className="ax-progress-widget">
                 <div className="ax-donut-wrap">
-                  <svg className="ax-donut-svg" viewBox="0 0 64 64">
+                  <svg className="ax-donut-svg" viewBox="0 0 64 64" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="ax-donut-grad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#C2293F" />
+                        <stop offset="100%" stopColor="#7D0A14" />
+                      </linearGradient>
+                    </defs>
                     <circle
                       className="ax-donut-bg"
                       cx="32"
@@ -1443,6 +1449,16 @@ function AssessmentForm() {
                 <div className="ax-progress-counts">
                   <span className="ax-recorded-big" key={recordedInputsCount}>{recordedInputsCount} / 13</span>
                   <span className="ax-recorded-label">inputs recorded</span>
+                  <span className="ax-rail-segments" aria-hidden="true">
+                    {Array.from({ length: 13 }, (_, i) => (
+                      <span
+                        key={i}
+                        className="ax-rail-seg"
+                        data-on={i < recordedInputsCount ? "true" : undefined}
+                        style={{ "--i": i } as React.CSSProperties}
+                      />
+                    ))}
+                  </span>
                 </div>
               </div>
 
@@ -1452,7 +1468,10 @@ function AssessmentForm() {
                   const isDone = idx < currentStage;
                   const isActive = idx === currentStage;
                   return (
-                    <div className="ax-rail-stage-row" key={s.id}>
+                    <div
+                      className={`ax-rail-stage-row ${isDone ? "is-done" : isActive ? "is-active" : "is-todo"}`}
+                      key={s.id}
+                    >
                       <div className="ax-rail-stage-left">
                         {isDone ? (
                           <svg key="done" className="ax-rail-status-icon" viewBox="0 0 24 24" fill="#1A1A1A" stroke="#1A1A1A" aria-hidden="true">
@@ -1477,7 +1496,7 @@ function AssessmentForm() {
                         </div>
                       </div>
                       <span className="ax-rail-stage-count">
-                        {isDone ? `${s.fieldCount} / ${s.fieldCount}` : `0 / ${s.fieldCount}`}
+                        {idx <= currentStage ? `${s.fieldCount} / ${s.fieldCount}` : `0 / ${s.fieldCount}`}
                       </span>
                     </div>
                   );
@@ -1492,6 +1511,10 @@ function AssessmentForm() {
               <div className="ax-inputs-header">
                 <span className="ax-rail-section-title" style={{ marginBottom: 0 }}>CURRENT INPUTS</span>
                 <button type="button" className="ax-edit-link" onClick={() => goToStep(0)}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+                  </svg>
                   Edit
                 </button>
               </div>
