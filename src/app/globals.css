@@ -914,3 +914,98 @@ select.input-control {
 .cf-item .lbl {
   font-family: var(--cv-font-syne), sans-serif;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOTION SYSTEM
+   Tokens mirror src/lib/motion.ts (kept in sync by __tests__/motion.test.ts).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --cv-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --cv-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --cv-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --cv-dur-press: 120ms;
+  --cv-dur-fast: 180ms;
+  --cv-dur-base: 280ms;
+  --cv-dur-slow: 450ms;
+  --cv-dur-reveal: 700ms;
+  --cv-dur-count: 900ms;
+  --cv-stagger: 70ms;
+  --cv-stagger-tight: 40ms;
+}
+
+/* Keyframes animate *from* a state to the element's own resting style. They use the individual
+   translate/scale properties so they compose with any transform an element already has. */
+@keyframes cv-rise {
+  from { opacity: 0; translate: 0 12px; }
+}
+@keyframes cv-fade {
+  from { opacity: 0; }
+}
+@keyframes cv-pop {
+  from { opacity: 0; scale: 0.6; }
+}
+@keyframes cv-spin {
+  to { transform: rotate(360deg); }
+}
+
+/*
+ * Staggered entrance. Runs from the first paint, before JavaScript loads, so content is never held
+ * back waiting for hydration. Set --cv-i (0, 1, 2…) on each element to sequence a group.
+ */
+.cv-rise {
+  animation: cv-rise var(--cv-dur-slow) var(--cv-ease-out) both;
+  animation-delay: calc(var(--cv-i, 0) * var(--cv-stagger));
+}
+
+/* ─── Route transitions: React <ViewTransition> classes set in RouteTransition.tsx ─── */
+
+/* The overlay must not swallow clicks made while a transition finishes. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Outgoing page leaves quickly so it never competes with the arriving one. */
+::view-transition-old(.cv-route-forward) {
+  animation: cv-route-out var(--cv-dur-fast) var(--cv-ease-in) both;
+}
+::view-transition-old(.cv-route-back) {
+  animation: cv-route-drop var(--cv-dur-fast) var(--cv-ease-in) both;
+}
+
+/* Incoming page fades in; forward navigation also rises slightly, matching the page's own entrance. */
+::view-transition-new(.cv-route-forward) {
+  animation: cv-route-in var(--cv-dur-slow) var(--cv-ease-out) both;
+}
+::view-transition-new(.cv-route-back) {
+  animation: cv-fade var(--cv-dur-slow) var(--cv-ease-out) both;
+}
+
+@keyframes cv-route-out {
+  to { opacity: 0; transform: scale(0.985); }
+}
+@keyframes cv-route-drop {
+  to { opacity: 0; transform: translateY(12px); }
+}
+@keyframes cv-route-in {
+  from { opacity: 0; transform: translateY(16px); }
+}
+
+/* ─── Reduced motion: keep every state change, drop the movement ─── */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  .cv-rise {
+    animation-name: cv-fade;
+    animation-duration: var(--cv-dur-fast);
+    animation-delay: 0ms;
+  }
+
+  .animate-pulse {
+    animation: none;
+  }
+}

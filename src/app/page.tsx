@@ -3,57 +3,37 @@
 import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  motion,
+  LazyMotion,
+  MotionConfig,
+  domAnimation,
+  m,
   useScroll,
   useTransform,
   useInView,
   animate,
 } from "framer-motion";
+import { RouteTransition } from "../components/motion/RouteTransition";
+import {
+  EASE,
+  NAV_FORWARD,
+  clipReveal,
+  fadeIn,
+  fadeUp,
+  slideLeft,
+  slideRight,
+  stagger,
+  staggerFast,
+} from "../lib/motion";
 import "./landing.css";
 
 /* ═══════════════════════════════════════════════════════
-   Animation Presets
+   Animation Presets (shared presets live in src/lib/motion.ts)
    ═══════════════════════════════════════════════════════ */
 
-const ease = [0.22, 1, 0.36, 1] as const;
+const ease = EASE.out;
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 32 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease } },
-};
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.8 } },
-};
-
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.12 } },
-};
-
-const staggerFast = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
-};
-
-const slideLeft = {
-  hidden: { opacity: 0, x: -40 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease } },
-};
-
-const slideRight = {
-  hidden: { opacity: 0, x: 40 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease } },
-};
-
-const clipReveal = {
-  hidden: { clipPath: "inset(0 100% 0 0)" },
-  visible: {
-    clipPath: "inset(0 0% 0 0)",
-    transition: { duration: 1.2, ease },
-  },
-};
+/** Every link into the assessment is a forward navigation (see RouteTransition). */
+const FORWARD = [NAV_FORWARD];
 
 const barGrow = (width: string) => ({
   hidden: { scaleX: 0 },
@@ -82,7 +62,7 @@ function Reveal({
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   return (
-    <motion.div
+    <m.div
       ref={ref}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
@@ -91,7 +71,7 @@ function Reveal({
       style={style}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -107,7 +87,7 @@ function StaggerWrap({
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   return (
-    <motion.div
+    <m.div
       ref={ref}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
@@ -115,7 +95,7 @@ function StaggerWrap({
       className={className}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -222,7 +202,10 @@ export default function LandingPage() {
 
 
   return (
-    <>
+    <LazyMotion features={domAnimation} strict>
+    <MotionConfig reducedMotion="user">
+      <RouteTransition>
+        <div className="lp-root">
       {/* ═══════════════════════════════════════════
           01 · HEADER
           ═══════════════════════════════════════════ */}
@@ -245,7 +228,7 @@ export default function LandingPage() {
             <a href="#intro" className="lp-header-link">About</a>
             <a href="#model" className="lp-header-link">Methodology</a>
             <a href="#engineering" className="lp-header-link">Engineering</a>
-            <Link href="/assessment" className="lp-header-cta">
+            <Link href="/assessment" transitionTypes={FORWARD} className="lp-header-cta">
               HEART ANALYSIS &rarr;
             </Link>
           </nav>
@@ -270,16 +253,16 @@ export default function LandingPage() {
           <div className="lp-hero-glow" />
 
           <div className="lp-hero-content">
-            <motion.span
+            <m.span
               className="lp-eyebrow"
               initial={{ opacity: 0, letterSpacing: "0.35em" }}
               animate={{ opacity: 1, letterSpacing: "0.22em" }}
               transition={{ duration: 1, delay: 0.3, ease }}
             >
               Cardiovascular Intelligence
-            </motion.span>
+            </m.span>
 
-            <motion.h1
+            <m.h1
               className="lp-hero-title"
               initial={{ opacity: 0, y: 40, scaleX: 1.12, scaleY: 0.88 }}
               animate={{ opacity: 1, y: 0, scaleX: 1.12, scaleY: 0.88 }}
@@ -287,9 +270,9 @@ export default function LandingPage() {
               transition={{ duration: 0.9, delay: 0.5, ease }}
             >
               Understand the signals behind cardiovascular risk.
-            </motion.h1>
+            </m.h1>
 
-            <motion.p
+            <m.p
               className="lp-hero-sub"
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
@@ -298,24 +281,24 @@ export default function LandingPage() {
               CardioVanta transforms structured cardiovascular measurements into
               a modelled probability estimate and a transparent explanation of
               the signals behind the prediction.
-            </motion.p>
+            </m.p>
 
-            <motion.div
+            <m.div
               className="lp-hero-actions"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 1, ease }}
             >
-              <Link href="/assessment" className="btn-primary">
+              <Link href="/assessment" transitionTypes={FORWARD} className="btn-primary">
                 HEART ANALYSIS &rarr;
               </Link>
               <a href="#pipeline" className="btn-hero-sec">
                 HOW IT WORKS &rarr;
               </a>
-            </motion.div>
+            </m.div>
           </div>
 
-          <motion.div
+          <m.div
             className="lp-hero-scroll"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -335,7 +318,7 @@ export default function LandingPage() {
             >
               <path d="M6 9l6 6 6-6" />
             </svg>
-          </motion.div>
+          </m.div>
         </section>
 
         {/* ═══════════════════════════════════════════
@@ -352,9 +335,9 @@ export default function LandingPage() {
             ].map((label, i) => (
               <React.Fragment key={label}>
                 {i > 0 && <span className="lp-strip-dot" />}
-                <motion.span className="lp-strip-item" variants={fadeUp}>
+                <m.span className="lp-strip-item" variants={fadeUp}>
                   {label}
-                </motion.span>
+                </m.span>
               </React.Fragment>
             ))}
           </StaggerWrap>
@@ -380,7 +363,7 @@ export default function LandingPage() {
                 the feature contributions that shaped the model&apos;s output&mdash;so
                 you can see exactly what the model sees.
               </p>
-              <Link href="/assessment" className="btn-secondary">
+              <Link href="/assessment" transitionTypes={FORWARD} className="btn-secondary">
                 Discover CardioVanta &rarr;
               </Link>
             </Reveal>
@@ -480,7 +463,7 @@ export default function LandingPage() {
             </Reveal>
 
             <StaggerWrap className="lp-pipeline-grid">
-              <motion.div className="lp-pipeline-step" variants={fadeUp}>
+              <m.div className="lp-pipeline-step" variants={fadeUp}>
                 <div className="lp-step-num">01</div>
                 <div className="lp-step-title">Structured Inputs</div>
                 <div className="lp-step-desc">
@@ -488,12 +471,12 @@ export default function LandingPage() {
                   model&apos;s defined feature schema. Each input is validated
                   against development-data guardrails before inference.
                 </div>
-                <Link href="/assessment" className="lp-step-link">
+                <Link href="/assessment" transitionTypes={FORWARD} className="lp-step-link">
                   Explore assessment &rarr;
                 </Link>
-              </motion.div>
+              </m.div>
 
-              <motion.div className="lp-pipeline-step" variants={fadeUp}>
+              <m.div className="lp-pipeline-step" variants={fadeUp}>
                 <div className="lp-step-num">02</div>
                 <div className="lp-step-title">Calibrated Probability</div>
                 <div className="lp-step-desc">
@@ -501,12 +484,12 @@ export default function LandingPage() {
                   probability estimate, designed to be interpretable as a
                   meaningful probability rather than a raw score.
                 </div>
-                <Link href="/assessment" className="lp-step-link">
+                <Link href="/assessment" transitionTypes={FORWARD} className="lp-step-link">
                   See the result &rarr;
                 </Link>
-              </motion.div>
+              </m.div>
 
-              <motion.div className="lp-pipeline-step" variants={fadeUp}>
+              <m.div className="lp-pipeline-step" variants={fadeUp}>
                 <div className="lp-step-num">03</div>
                 <div className="lp-step-title">Transparent Explanation</div>
                 <div className="lp-step-desc">
@@ -514,10 +497,10 @@ export default function LandingPage() {
                   feature contributions behind the underlying model
                   output&mdash;with zero external dependencies.
                 </div>
-                <Link href="/assessment" className="lp-step-link">
+                <Link href="/assessment" transitionTypes={FORWARD} className="lp-step-link">
                   Understand the explanation &rarr;
                 </Link>
-              </motion.div>
+              </m.div>
             </StaggerWrap>
           </div>
         </section>
@@ -527,7 +510,7 @@ export default function LandingPage() {
             ═══════════════════════════════════════════ */}
         <section id="model" className="lp-model" ref={modelRef}>
           <div className="lp-model-img-wrap">
-            <motion.img
+            <m.img
               src="/images/landing/bg-model-hq.png"
               alt="ML pipeline visualization"
               style={{ y: modelImgY }}
@@ -552,34 +535,34 @@ export default function LandingPage() {
             </Reveal>
 
             <StaggerWrap className="lp-model-details">
-              <motion.div className="lp-model-detail" variants={fadeUp}>
+              <m.div className="lp-model-detail" variants={fadeUp}>
                 <h4>Logistic Regression</h4>
                 <p>
                   Linear model with interpretable coefficients. No opaque
                   neural architectures.
                 </p>
-              </motion.div>
-              <motion.div className="lp-model-detail" variants={fadeUp}>
+              </m.div>
+              <m.div className="lp-model-detail" variants={fadeUp}>
                 <h4>Platt Scaling</h4>
                 <p>
                   Sigmoid calibration transforms raw scores into meaningful
                   probability estimates.
                 </p>
-              </motion.div>
-              <motion.div className="lp-model-detail" variants={fadeUp}>
+              </m.div>
+              <m.div className="lp-model-detail" variants={fadeUp}>
                 <h4>SHAP-Equivalent</h4>
                 <p>
                   Mathematical equivalence to SHAP, computed in under 1ms with
                   zero library overhead.
                 </p>
-              </motion.div>
-              <motion.div className="lp-model-detail" variants={fadeUp}>
+              </m.div>
+              <m.div className="lp-model-detail" variants={fadeUp}>
                 <h4>Strict Isolation</h4>
                 <p>
                   Locked development/test split. The test set was never used
                   for training, tuning, or calibration.
                 </p>
-              </motion.div>
+              </m.div>
             </StaggerWrap>
           </div>
         </section>
@@ -614,7 +597,7 @@ export default function LandingPage() {
 
                 <StaggerWrap fast>
                   {contributions.map((f) => (
-                    <motion.div
+                    <m.div
                       key={f.name}
                       className="lp-explain-feature"
                       variants={fadeUp}
@@ -642,7 +625,7 @@ export default function LandingPage() {
                         {f.positive ? "+" : "\u2212"}
                         {f.value.toFixed(2)}
                       </span>
-                    </motion.div>
+                    </m.div>
                   ))}
                 </StaggerWrap>
               </div>
@@ -683,7 +666,7 @@ export default function LandingPage() {
 
             <StaggerWrap className="lp-eng-grid">
               {engineeringStats.map((stat) => (
-                <motion.div
+                <m.div
                   key={stat.label}
                   className="lp-eng-card"
                   variants={fadeUp}
@@ -700,7 +683,7 @@ export default function LandingPage() {
                   </div>
                   <div className="lp-eng-label">{stat.label}</div>
                   <div className="lp-eng-desc">{stat.desc}</div>
-                </motion.div>
+                </m.div>
               ))}
             </StaggerWrap>
           </div>
@@ -764,7 +747,7 @@ export default function LandingPage() {
             </Reveal>
 
             <StaggerWrap className="lp-responsible-grid">
-              <motion.div className="lp-responsible-card" variants={fadeUp}>
+              <m.div className="lp-responsible-card" variants={fadeUp}>
                 <svg className="lp-responsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
@@ -775,9 +758,9 @@ export default function LandingPage() {
                   not been clinically validated, is not a medical device, and is
                   not intended for diagnosis, treatment, or medical advice.
                 </p>
-              </motion.div>
+              </m.div>
 
-              <motion.div className="lp-responsible-card" variants={fadeUp}>
+              <m.div className="lp-responsible-card" variants={fadeUp}>
                 <svg className="lp-responsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                   <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
@@ -789,9 +772,9 @@ export default function LandingPage() {
                   SHAP-equivalent explainability, and serverless
                   deployment&mdash;for educational and evaluation purposes.
                 </p>
-              </motion.div>
+              </m.div>
 
-              <motion.div className="lp-responsible-card" variants={fadeUp}>
+              <m.div className="lp-responsible-card" variants={fadeUp}>
                 <svg className="lp-responsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -803,9 +786,9 @@ export default function LandingPage() {
                   retention and access controls. No personally identifiable
                   information is collected or stored.
                 </p>
-              </motion.div>
+              </m.div>
 
-              <motion.div className="lp-responsible-card" variants={fadeUp}>
+              <m.div className="lp-responsible-card" variants={fadeUp}>
                 <svg className="lp-responsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="16" x2="12" y2="12" />
@@ -818,7 +801,7 @@ export default function LandingPage() {
                   reflects observed associations in the development sample and
                   does not imply medical causality.
                 </p>
-              </motion.div>
+              </m.div>
             </StaggerWrap>
           </div>
         </section>
@@ -844,7 +827,7 @@ export default function LandingPage() {
             </Reveal>
             <Reveal>
               <div className="lp-cta-actions">
-                <Link href="/assessment" className="btn-primary">
+                <Link href="/assessment" transitionTypes={FORWARD} className="btn-primary">
                   HEART ANALYSIS &rarr;
                 </Link>
                 <a href="#pipeline" className="btn-hero-sec">
@@ -876,7 +859,7 @@ export default function LandingPage() {
             <div>
               <div className="lp-footer-col-title">Navigation</div>
               <nav className="lp-footer-links">
-                <Link href="/assessment">Assessment</Link>
+                <Link href="/assessment" transitionTypes={FORWARD}>Assessment</Link>
                 <a href="#intro">About</a>
                 <a href="#pipeline">How It Works</a>
               </nav>
@@ -917,6 +900,9 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-    </>
+        </div>
+      </RouteTransition>
+    </MotionConfig>
+    </LazyMotion>
   );
 }
