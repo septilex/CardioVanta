@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { NAV_BACK, NAV_FORWARD } from "../../lib/motion";
+import { NAV_BACK, NAV_FORWARD, NAV_LATERAL } from "../../lib/motion";
 
 /*
  * React's <ViewTransition> ships in the React build that Next.js uses for the App Router (19.3 canary).
@@ -10,9 +10,29 @@ import { NAV_BACK, NAV_FORWARD } from "../../lib/motion";
  */
 const ViewTransition = (React as Partial<typeof React>).ViewTransition;
 
+/*
+ * The browser skips a view transition when the tab is hidden or the viewport changes mid-way
+ * (for example a phone's address bar collapsing) and rejects the transition's promises with an
+ * InvalidStateError. Navigation still completes; only the animation is dropped. React leaves that
+ * rejection unhandled, so it would surface as an uncaught console error. Handle exactly that case.
+ */
+if (typeof window !== "undefined") {
+  const w = window as Window & { __cvViewTransitionGuard?: boolean };
+  if (!w.__cvViewTransitionGuard) {
+    w.__cvViewTransitionGuard = true;
+    window.addEventListener("unhandledrejection", (event) => {
+      const reason = event.reason as { name?: string; message?: string } | undefined;
+      if (reason?.name === "InvalidStateError" && /^Transition was (aborted|skipped)/.test(reason.message ?? "")) {
+        event.preventDefault();
+      }
+    });
+  }
+}
+
 const ROUTE_CLASSES = {
   [NAV_FORWARD]: "cv-route-forward",
   [NAV_BACK]: "cv-route-back",
+  [NAV_LATERAL]: "cv-route-lateral",
   default: "none",
 };
 

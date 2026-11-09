@@ -1,0 +1,710 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Document pages (/research, /about)
+   Layout: app sidebar + one reading column; a dark clinical hero band (the landing
+   page's palette) opens each page, cream sections (the app shell's palette) follow.
+   Colour tokens --ax-* come from app-shell.css; motion tokens --cv-* from globals.css.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --doc-ink-dark: #12100F;
+  --doc-hero-text: #F3EEE9;
+  --doc-hero-muted: #BFB3A8;
+  --doc-hero-line: rgba(243, 238, 233, 0.14);
+  --doc-good: #2F6B3F;
+  --doc-good-soft: #E6F0E7;
+  --doc-warn: #8A4B08;
+  --doc-warn-soft: #F7EBDC;
+  --doc-info: #3E5F9E;
+  --doc-info-soft: #E8EEF8;
+  --doc-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.cv-doc-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--ax-bg);
+  color: var(--ax-text-main);
+  font-family: var(--cv-font-body), system-ui, -apple-system, sans-serif;
+}
+.ax-sidebar {
+  position: sticky;
+  top: 0;
+}
+.cv-doc-main {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Top bar ─── */
+.doc-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px clamp(16px, 4vw, 48px);
+  border-bottom: 1px solid var(--ax-topbar-border);
+  background: var(--ax-bg);
+}
+.doc-crumbs {
+  font-family: var(--doc-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ax-text-subtle);
+}
+.doc-crumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+.doc-crumbs a:hover {
+  color: var(--ax-burgundy);
+}
+.doc-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: var(--ax-burgundy);
+  color: #FFFFFF;
+  font-family: var(--cv-font-syne), sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--cv-dur-fast) var(--cv-ease-out), transform var(--cv-dur-fast) var(--cv-ease-out),
+    box-shadow var(--cv-dur-base) var(--cv-ease-out);
+}
+.doc-cta:hover {
+  background: var(--ax-burgundy-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(125, 10, 20, 0.22);
+}
+.doc-cta:active {
+  transform: scale(0.98);
+}
+
+/* ─── Hero band ─── */
+.doc-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 120% at 88% 0%, rgba(158, 27, 46, 0.38), transparent 60%),
+    radial-gradient(40% 80% at 10% 100%, rgba(125, 10, 20, 0.22), transparent 70%),
+    var(--doc-ink-dark);
+  color: var(--doc-hero-text);
+  padding: clamp(40px, 7vw, 76px) clamp(16px, 4vw, 48px) clamp(36px, 6vw, 60px);
+}
+.doc-hero-inner {
+  max-width: 980px;
+  display: grid;
+  gap: 16px;
+}
+.doc-hero-eyebrow {
+  font-family: var(--doc-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #F07A8A;
+}
+.doc-hero h1 {
+  margin: 0;
+  font-family: var(--cv-font-display), Georgia, serif;
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.doc-hero-tagline {
+  font-family: var(--cv-font-display), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(18px, 2.2vw, 23px);
+  color: #F3D9DD;
+}
+.doc-hero-lede {
+  max-width: 64ch;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--doc-hero-muted);
+}
+.doc-hero-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 0;
+  list-style: none;
+}
+.doc-hero-facts li {
+  padding: 5px 12px;
+  border: 1px solid var(--doc-hero-line);
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--doc-hero-text);
+  background: rgba(243, 238, 233, 0.04);
+}
+
+/* ─── Sections ─── */
+.doc-body {
+  display: grid;
+  gap: clamp(48px, 7vw, 76px);
+  padding: clamp(36px, 5vw, 56px) clamp(16px, 4vw, 48px) 72px;
+}
+.doc-section {
+  max-width: 980px;
+  display: grid;
+  gap: 18px;
+  scroll-margin-top: 24px;
+}
+.doc-eyebrow {
+  font-family: var(--doc-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ax-crimson);
+}
+.doc-section h2 {
+  margin: 0;
+  font-family: var(--cv-font-display), Georgia, serif;
+  font-size: clamp(25px, 3vw, 33px);
+  line-height: 1.18;
+  text-wrap: balance;
+}
+.doc-section h3 {
+  margin: 0;
+  font-family: var(--cv-font-syne), sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.doc-section p {
+  margin: 0;
+}
+.doc-prose {
+  max-width: 70ch;
+  display: grid;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ax-text-muted);
+}
+.doc-prose strong {
+  color: var(--ax-text-main);
+}
+.doc-section code,
+.doc-card code,
+.doc-timeline code {
+  font-family: var(--doc-mono);
+  font-size: 0.86em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--ax-field-bg);
+  border: 1px solid var(--ax-field-border);
+}
+
+/* ─── Cards ─── */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.doc-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 18px 18px 16px;
+  background: var(--ax-card-bg);
+  border: 1px solid var(--ax-card-border);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ax-text-muted);
+  transition: transform var(--cv-dur-base) var(--cv-ease-out), box-shadow var(--cv-dur-base) var(--cv-ease-out),
+    border-color var(--cv-dur-fast) var(--cv-ease-out);
+}
+.doc-card:hover {
+  transform: translateY(-3px);
+  border-color: #D8C9BC;
+  box-shadow: 0 10px 28px rgba(24, 21, 19, 0.07);
+}
+.doc-card h3 {
+  color: var(--ax-text-main);
+}
+.doc-card-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--ax-crimson-light);
+  color: var(--ax-crimson);
+  transition: transform var(--cv-dur-base) var(--cv-ease-out);
+}
+.doc-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.doc-card:hover .doc-card-icon {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+/* ─── Status tags (state encoded in form, not only text colour) ─── */
+.doc-tag {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-family: var(--doc-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--ax-field-bg);
+  color: var(--ax-text-muted);
+  border: 1px solid var(--ax-field-border);
+}
+.doc-tag::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.doc-tag.is-done { background: var(--doc-good-soft); color: var(--doc-good); border-color: transparent; }
+.doc-tag.is-no { background: var(--ax-field-bg); color: var(--ax-text-muted); }
+.doc-tag.is-open { background: var(--doc-warn-soft); color: var(--doc-warn); border-color: transparent; }
+.doc-tag.is-info { background: var(--doc-info-soft); color: var(--doc-info); border-color: transparent; }
+
+/* ─── Timeline ─── */
+.doc-timeline {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 30px;
+  display: grid;
+  gap: 14px;
+}
+.doc-timeline::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(var(--ax-crimson), #D9B7B9);
+  transform-origin: top center;
+}
+.doc-timeline > li {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--ax-card-bg);
+  border: 1px solid var(--ax-card-border);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ax-text-muted);
+  transition: transform var(--cv-dur-base) var(--cv-ease-out), box-shadow var(--cv-dur-base) var(--cv-ease-out);
+}
+.doc-timeline > li:hover {
+  transform: translateX(3px);
+  box-shadow: 0 8px 22px rgba(24, 21, 19, 0.06);
+}
+.doc-timeline > li::before {
+  content: "";
+  position: absolute;
+  left: -27px;
+  top: 19px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ax-card-bg);
+  border: 3px solid var(--ax-crimson);
+  box-sizing: border-box;
+}
+.doc-timeline-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.doc-date {
+  font-family: var(--doc-mono);
+  font-size: 11.5px;
+  color: var(--ax-crimson);
+  font-variant-numeric: tabular-nums;
+}
+.doc-timeline h3 {
+  color: var(--ax-text-main);
+}
+.doc-eras {
+  display: grid;
+  gap: 26px;
+}
+.doc-era-block {
+  display: grid;
+  gap: 10px;
+}
+.doc-era {
+  margin: 0;
+  font-family: var(--doc-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ax-text-subtle);
+}
+
+/* ─── Metrics ─── */
+.doc-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--ax-card-border);
+  border-radius: 12px;
+  background: var(--ax-card-bg);
+}
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.doc-table caption {
+  caption-side: bottom;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--ax-text-subtle);
+  border-top: 1px solid var(--ax-card-border);
+}
+.doc-table th,
+.doc-table td {
+  padding: 11px 14px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--ax-field-border);
+}
+.doc-table thead th {
+  font-family: var(--doc-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ax-text-subtle);
+  background: var(--ax-field-bg);
+  white-space: nowrap;
+}
+.doc-table tbody tr:last-child td,
+.doc-table tbody tr:last-child th {
+  border-bottom: 0;
+}
+.doc-table tbody th {
+  font-weight: 600;
+  color: var(--ax-text-main);
+  white-space: nowrap;
+}
+.doc-table .num {
+  text-align: right;
+  white-space: nowrap;
+  font-family: var(--doc-mono);
+  font-size: 13px;
+  color: var(--ax-text-main);
+}
+.doc-table .range {
+  display: block;
+  font-size: 11px;
+  color: var(--ax-text-subtle);
+}
+.doc-table td:last-child {
+  min-width: 260px;
+  color: var(--ax-text-muted);
+}
+
+/* ─── Callouts ─── */
+.doc-callout {
+  display: grid;
+  gap: 6px;
+  padding: 14px 18px;
+  border-radius: 0 10px 10px 0;
+  border-left: 3px solid var(--doc-warn);
+  background: var(--doc-warn-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4A3A2A;
+  max-width: 80ch;
+}
+.doc-callout strong {
+  color: var(--ax-text-main);
+}
+.doc-callout.is-info {
+  border-left-color: var(--doc-info);
+  background: var(--doc-info-soft);
+  color: #2F3F5E;
+}
+
+/* ─── Documentation links ─── */
+.doc-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+}
+.doc-links a {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  align-items: center;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 13px 16px;
+  border: 1px solid var(--ax-card-border);
+  border-radius: 10px;
+  background: var(--ax-card-bg);
+  color: var(--ax-text-main);
+  text-decoration: none;
+  transition: border-color var(--cv-dur-fast) var(--cv-ease-out), box-shadow var(--cv-dur-base) var(--cv-ease-out),
+    transform var(--cv-dur-base) var(--cv-ease-out);
+}
+.doc-links a:hover {
+  border-color: var(--ax-blush-border);
+  box-shadow: 0 6px 18px rgba(24, 21, 19, 0.06);
+  transform: translateY(-2px);
+}
+.doc-links strong {
+  font-size: 14px;
+}
+.doc-links span {
+  grid-column: 1;
+  font-size: 12.5px;
+  color: var(--ax-text-subtle);
+}
+.doc-links .doc-arrow {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: var(--ax-crimson);
+  font-size: 16px;
+  transition: transform var(--cv-dur-base) var(--cv-ease-out);
+}
+.doc-links a:hover .doc-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* ─── Workflow (About) ─── */
+.doc-flow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  counter-reset: flow;
+}
+.doc-flow > li {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 16px 14px;
+  background: var(--ax-card-bg);
+  border: 1px solid var(--ax-card-border);
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ax-text-muted);
+  counter-increment: flow;
+  transition: transform var(--cv-dur-base) var(--cv-ease-out), box-shadow var(--cv-dur-base) var(--cv-ease-out);
+}
+.doc-flow > li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 26px rgba(24, 21, 19, 0.07);
+}
+.doc-flow > li::before {
+  content: counter(flow, decimal-leading-zero);
+  font-family: var(--doc-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ax-crimson);
+}
+.doc-flow > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 26px;
+  right: -12px;
+  width: 12px;
+  height: 2px;
+  background: var(--ax-crimson);
+  opacity: 0.5;
+}
+.doc-flow h3 {
+  color: var(--ax-text-main);
+}
+
+/* ─── Disclaimer and next steps ─── */
+.doc-disclaimer {
+  display: grid;
+  gap: 10px;
+  padding: 22px 24px;
+  border-radius: 14px;
+  background: var(--doc-ink-dark);
+  color: var(--doc-hero-text);
+  max-width: 980px;
+}
+.doc-disclaimer h2 {
+  color: var(--doc-hero-text);
+}
+.doc-disclaimer p {
+  color: var(--doc-hero-muted);
+  line-height: 1.65;
+  max-width: 72ch;
+}
+.doc-disclaimer strong {
+  color: var(--doc-hero-text);
+}
+.doc-next {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.doc-next a {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--ax-card-border);
+  background: var(--ax-card-bg);
+  color: var(--ax-text-main);
+  text-decoration: none;
+  transition: transform var(--cv-dur-base) var(--cv-ease-out), box-shadow var(--cv-dur-base) var(--cv-ease-out),
+    border-color var(--cv-dur-fast) var(--cv-ease-out);
+}
+.doc-next a:hover {
+  transform: translateY(-3px);
+  border-color: var(--ax-blush-border);
+  box-shadow: 0 10px 26px rgba(24, 21, 19, 0.07);
+}
+.doc-next strong {
+  font-family: var(--cv-font-syne), sans-serif;
+  font-size: 15px;
+}
+.doc-next span {
+  font-size: 13px;
+  color: var(--ax-text-subtle);
+}
+
+.cv-doc-shell a:focus-visible {
+  outline: 2px solid var(--ax-burgundy);
+  outline-offset: 2px;
+}
+
+/* ─── Scroll reveals: CSS scroll-driven, compositor-only, opt-in ───
+   Only where the browser supports view timelines and the reader has not asked for
+   reduced motion; everywhere else content is simply there. */
+@keyframes doc-reveal {
+  from { opacity: 0; translate: 0 18px; }
+}
+@keyframes doc-line-draw {
+  from { transform: scaleY(0); }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: doc-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 18%;
+    }
+    .doc-timeline::before {
+      animation: doc-line-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 60%;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .doc-flow {
+    grid-template-columns: 1fr;
+  }
+  .doc-flow > li:not(:last-child)::after {
+    top: auto;
+    bottom: -12px;
+    right: auto;
+    left: 26px;
+    width: 2px;
+    height: 12px;
+  }
+  .doc-topbar .doc-crumbs {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-card:hover,
+  .doc-timeline > li:hover,
+  .doc-flow > li:hover,
+  .doc-links a:hover,
+  .doc-next a:hover,
+  .doc-cta:hover,
+  .doc-card:hover .doc-card-icon,
+  .doc-links a:hover .doc-arrow {
+    transform: none;
+  }
+}
+
+.doc-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+.doc-disclaimer h2 {
+  margin: 0;
+  font-family: var(--cv-font-display), Georgia, serif;
+  font-size: clamp(22px, 2.6vw, 28px);
+  line-height: 1.2;
+}
+
+/* Grid items default to min-width: auto, which let the evaluation table's min-content width
+   widen the whole page on phones (laid out at 700px instead of 390px). Pin every grid track to
+   the available width so wide content scrolls inside its own container. */
+.doc-body,
+.doc-section {
+  grid-template-columns: minmax(0, 1fr);
+}
+.doc-body > *,
+.doc-section > * {
+  min-width: 0;
+}
+
+/* globals.css styles bare headings for the legacy UI; set hero heading colours explicitly. */
+.doc-hero h1,
+.doc-disclaimer h2 {
+  color: var(--doc-hero-text);
+}
+.doc-section h2,
+.doc-section h3 {
+  color: var(--ax-text-main);
+}
+/* Section intro blocks: eyebrow, heading and lede spaced as one unit. */
+.doc-section > div:first-child {
+  display: grid;
+  gap: 10px;
+}
+
+/* Four-card groups sit as 2 × 2 instead of 3 + 1. */
+@media (min-width: 640px) {
+  .doc-grid.is-four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* The section reset above must not flatten the "continue" links into one column. */
+.doc-section.doc-next {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}

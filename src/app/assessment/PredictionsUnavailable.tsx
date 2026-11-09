@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { NAV_BACK } from "../../lib/motion";
+import { NAV_BACK, NAV_LATERAL } from "../../lib/motion";
 
 const BACK = [NAV_BACK];
+const LATERAL = [NAV_LATERAL];
 const order = (i: number) => ({ "--cv-i": i }) as CSSProperties;
 
 /**
@@ -38,6 +39,10 @@ export default function PredictionsUnavailable({ notice }: { notice: string }) {
         <Link href="/" transitionTypes={BACK} className="ax-unavailable-link cv-rise" style={order(6)}>
 <span className="ax-btn-arrow ax-btn-arrow--back" aria-hidden="true">←</span> Return to the home page
         </Link>
+        <p className="ax-unavailable-more cv-rise" style={order(7)}>
+          While you wait: <Link href="/research" transitionTypes={LATERAL}>read the research</Link> or{" "}
+          <Link href="/about" transitionTypes={LATERAL}>learn how CardioVanta works</Link>.
+        </p>
       </section>
     </main>
   );

@@ -1,0 +1,202 @@
+/* App shell shared by /assessment, /research and /about: colour tokens and the sidebar.
+   Moved here unchanged from assessment.css so every app page renders the same navigation. */
+
+/* ─── Base Color Tokens ─── */
+:root {
+  --ax-bg: #F8F4EF;
+  --ax-sidebar-bg: #F1E7E0;
+  --ax-sidebar-border: #E4D8CE;
+  --ax-card-bg: #FFFFFF;
+  --ax-card-border: #E2DAD0;
+  --ax-field-bg: #FAF7F3;
+  --ax-field-border: #EAE2D8;
+  --ax-input-bg: #FFFFFF;
+  --ax-input-border: #DCD3C7;
+  --ax-text-main: #181513;
+  --ax-text-muted: #6B6056;
+  --ax-text-subtle: #8C8075;
+  --ax-burgundy: #7D0A14;
+  --ax-burgundy-hover: #63050E;
+  --ax-crimson: #9E1B2E;
+  --ax-crimson-light: #F8EAEA;
+  --ax-blush-border: #F1D4D4;
+  --ax-slider-track: #E2D8CE;
+  --ax-topbar-border: #E8E0D6;
+  --ax-rail-border: #E8E0D6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A. LEFT SIDEBAR (Reference Image 2 Integrated Engraving)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ax-sidebar {
+  width: 255px;
+  min-width: 255px;
+  max-width: 255px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background-color: var(--ax-sidebar-bg);
+  border-right: 1px solid var(--ax-sidebar-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  z-index: 20;
+}
+
+.ax-sidebar-top {
+  position: relative;
+  z-index: 5;
+  padding: 24px 20px 8px;
+}
+
+.ax-sidebar-logo-link {
+  display: block;
+  margin-bottom: 24px;
+  text-decoration: none;
+}
+
+.ax-sidebar-logo {
+  height: 36px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.ax-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ax-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-family: var(--cv-font-syne), sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ax-text-main);
+  text-decoration: none;
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+
+.ax-nav-item:hover:not(.ax-nav-active) {
+  background-color: rgba(0, 0, 0, 0.035);
+  color: #000;
+}
+
+.ax-nav-item.ax-nav-active {
+  background-color: var(--ax-crimson-light);
+  color: var(--ax-burgundy);
+  font-weight: 600;
+}
+
+.ax-nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+/* Oversized Anatomical Heart Artwork — Starts immediately beneath About nav */
+.ax-sidebar-heart-wrap {
+  position: absolute;
+  top: 225px; /* Immediately below navigation */
+  bottom: -20px;
+  left: -25px;
+  right: -25px;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.ax-sidebar-heart-img {
+  width: 125%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left 2%;
+  mix-blend-mode: multiply;
+  opacity: 0.95;
+  filter: contrast(1.05) brightness(0.99);
+}
+
+
+/* ─── Navigation states (links, keyboard focus, active page) ─── */
+.ax-sidebar {
+  /* Anchors the sidebar during section-to-section transitions (see globals.css). */
+  view-transition-name: app-sidebar;
+}
+.ax-nav-item {
+  position: relative;
+  transition:
+    background-color var(--cv-dur-fast) var(--cv-ease-out),
+    color var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-nav-item .ax-nav-icon {
+  transition: transform var(--cv-dur-base) var(--cv-ease-out);
+}
+.ax-nav-item:hover .ax-nav-icon {
+  transform: translateX(2px);
+}
+.ax-nav-item:focus-visible,
+.ax-sidebar-logo-link:focus-visible {
+  outline: 2px solid var(--ax-burgundy);
+  outline-offset: 2px;
+}
+
+/* ─── Mobile section bar (the sidebar is hidden at 900px and below) ─── */
+.app-mnav {
+  display: none;
+}
+@media (max-width: 900px) {
+  .ax-sidebar {
+    display: none;
+  }
+  .app-mnav {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 8px max(12px, env(safe-area-inset-left, 0px));
+    background: var(--ax-sidebar-bg);
+    border-bottom: 1px solid var(--ax-sidebar-border);
+    scrollbar-width: none;
+  }
+  .app-mnav-item {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-family: var(--cv-font-syne), sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ax-text-main);
+    text-decoration: none;
+    transition: background-color var(--cv-dur-fast) var(--cv-ease-out), color var(--cv-dur-fast) var(--cv-ease-out);
+  }
+  .app-mnav-item .ax-nav-icon {
+    width: 15px;
+    height: 15px;
+  }
+  .app-mnav-item.is-active {
+    background: var(--ax-crimson-light);
+    color: var(--ax-burgundy);
+  }
+  .app-mnav-item:focus-visible {
+    outline: 2px solid var(--ax-burgundy);
+    outline-offset: 1px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-nav-item:hover .ax-nav-icon {
+    transform: none;
+  }
+}

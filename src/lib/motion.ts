@@ -139,6 +139,8 @@ export const clipReveal: Variants = {
 export const NAV_FORWARD = "nav-forward";
 /** Returning towards the landing page. */
 export const NAV_BACK = "nav-back";
+/** Moving between app sections (Heart Analysis, Research, About): content cross-fades, sidebar stays. */
+export const NAV_LATERAL = "nav-lateral";
 
 /* ─── Helpers ───────────────────────────────────────────────────────────────────────────── */
 

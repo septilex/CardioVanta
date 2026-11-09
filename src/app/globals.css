@@ -991,6 +991,28 @@ select.input-control {
   from { opacity: 0; transform: translateY(16px); }
 }
 
+/* Between app sections the content cross-fades while the sidebar (named app-sidebar in
+   app-shell.css) stays put: its group does not animate and its old snapshot is hidden. */
+::view-transition-old(.cv-route-lateral) {
+  animation: cv-route-fade-out var(--cv-dur-fast) var(--cv-ease-in) both;
+}
+::view-transition-new(.cv-route-lateral) {
+  animation: cv-fade var(--cv-dur-base) var(--cv-ease-out) both;
+}
+@keyframes cv-route-fade-out {
+  to { opacity: 0; }
+}
+::view-transition-group(app-sidebar) {
+  animation: none;
+  z-index: 50;
+}
+::view-transition-old(app-sidebar) {
+  display: none;
+}
+::view-transition-new(app-sidebar) {
+  animation: none;
+}
+
 /* ─── Reduced motion: keep every state change, drop the movement ─── */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),

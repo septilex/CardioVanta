@@ -225,7 +225,8 @@ export default function LandingPage() {
             </picture>
           </Link>
           <nav className="lp-header-nav">
-            <a href="#intro" className="lp-header-link">About</a>
+            <Link href="/about" transitionTypes={FORWARD} className="lp-header-link">About</Link>
+            <Link href="/research" transitionTypes={FORWARD} className="lp-header-link">Research</Link>
             <a href="#model" className="lp-header-link">Methodology</a>
             <a href="#engineering" className="lp-header-link">Engineering</a>
             <Link href="/assessment" transitionTypes={FORWARD} className="lp-header-cta">
@@ -860,7 +861,8 @@ export default function LandingPage() {
               <div className="lp-footer-col-title">Navigation</div>
               <nav className="lp-footer-links">
                 <Link href="/assessment" transitionTypes={FORWARD}>Assessment</Link>
-                <a href="#intro">About</a>
+                <Link href="/about" transitionTypes={FORWARD}>About</Link>
+                <Link href="/research" transitionTypes={FORWARD}>Research</Link>
                 <a href="#pipeline">How It Works</a>
               </nav>
             </div>

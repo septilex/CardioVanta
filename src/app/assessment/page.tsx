@@ -13,6 +13,7 @@ import { PREDICTION_AVAILABILITY, UNAVAILABLE_CODE } from "../../lib/predictionA
 import { MotionProvider } from "../../components/motion/MotionProvider";
 import { AnimatedNumber } from "../../components/motion/AnimatedNumber";
 import { RouteTransition } from "../../components/motion/RouteTransition";
+import { AppSidebar, MobileNav } from "../../components/shell/AppNav";
 import { NAV_BACK, TRANSITION, collapse, formatProbability, panelSwap, revealGroup, revealItem } from "../../lib/motion";
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -675,69 +676,13 @@ function AssessmentForm() {
       {/* ═══════════════════════════════════════════════════════════════════════
           1. LEFT SIDEBAR (Reference Layout + Reference Image 2 Artwork)
           ═══════════════════════════════════════════════════════════════════════ */}
-      <aside className="ax-sidebar">
-        <div className="ax-sidebar-top">
-          {/* CardioVanta Logo */}
-          <Link href="/" transitionTypes={BACK} className="ax-sidebar-logo-link" title="CardioVanta Home">
-            <img
-              src="/brand/cardiovanta-horizontal-transparent.png"
-              alt="CardioVanta | Intelligent Cardiovascular Insight"
-              className="ax-sidebar-logo"
-            />
-          </Link>
-
-          {/* Navigation Items */}
-          <nav className="ax-nav" aria-label="Main Navigation">
-            <Link href="/" transitionTypes={BACK} className="ax-nav-item">
-              <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-              <span>Overview</span>
-            </Link>
-
-            <div className="ax-nav-item ax-nav-active">
-              <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                <polyline points="3.5 12 8.5 12 10.5 8 13.5 16 15.5 12 20.5 12" />
-              </svg>
-              <span>Heart Analysis</span>
-            </div>
-
-            <div className="ax-nav-item">
-              <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-              </svg>
-              <span>Research</span>
-            </div>
-
-            <div className="ax-nav-item">
-              <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="16" x2="12" y2="12" />
-                <line x1="12" y1="8" x2="12.01" y2="8" />
-              </svg>
-              <span>About</span>
-            </div>
-          </nav>
-        </div>
-
-        {/* Oversized Anatomical Heart Engraving Artwork (Reference Image 2) */}
-        <div className="ax-sidebar-heart-wrap" aria-hidden="true">
-          <img
-            src="/images/anatomical-heart.jpg"
-            alt=""
-            className="ax-sidebar-heart-img"
-          />
-        </div>
-      </aside>
+      <AppSidebar />
 
       {/* ═══════════════════════════════════════════════════════════════════════
           2. MAIN COLUMN (Center Area + Right Summary Rail)
           ═══════════════════════════════════════════════════════════════════════ */}
       <main className="ax-main-col">
+        <MobileNav />
         {/* Top Navigation Bar */}
         <header className="ax-topbar">
           <Link href="/" transitionTypes={BACK} className="ax-topbar-back">
