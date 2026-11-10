@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AmbientEffects } from "../components/motion/AmbientEffects";
+import { TransitionLoaderGate } from "../components/loader/TransitionLoaderGate";
 
 const displayFont = localFont({
   src: [
@@ -26,7 +27,8 @@ const syneFont = localFont({
     { path: "../../public/fonts/Syne-400.woff2", weight: "400", style: "normal" },
     { path: "../../public/fonts/Syne-500.woff2", weight: "500", style: "normal" },
     { path: "../../public/fonts/Syne-600.woff2", weight: "600", style: "normal" },
-    { path: "../../public/fonts/Syne-700.woff2", weight: "700", style: "normal" }
+    { path: "../../public/fonts/Syne-700.woff2", weight: "700", style: "normal" },
+    { path: "../../public/fonts/Syne-800.woff2", weight: "800", style: "normal" }
   ],
   variable: "--cv-font-syne",
 });
@@ -42,9 +44,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body className={`${bodyFont.variable} ${displayFont.variable} ${syneFont.variable}`}>
         {children}
+        <TransitionLoaderGate />
         <AmbientEffects />
       </body>
     </html>
