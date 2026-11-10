@@ -1,0 +1,346 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CardioVanta transition loader (Overview, Heart Analysis, Research, About)
+   Composition follows the brand reference: ivory #F8F6F2, corner ribbons, glowing heart in a
+   technical halo, Syne wordmark, pill progress bar, LOADING label.
+   Everything is sized from one unit (--u, roughly 1% of the viewport height) so proportions hold
+   at any size; portrait screens get their own unit below.
+   Animated properties: opacity, transform/translate/scale/rotate; plus stroke-dashoffset on the
+   ribbon strands while they draw in. Every loop lives only as long as the loader is on screen.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ldr-root {
+  --u: min(1vh, 0.86vw);
+  --hh: min(45.7vh, 70vw); /* heart artwork box height (the artwork is 380 x 430) */
+  --ldr-ivory: #F8F6F2;
+  --ldr-ink: #6B0A12;
+  --ldr-red: #E3242B;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  overflow: hidden;
+  background-color: var(--ldr-ivory);
+  display: grid;
+  place-items: center;
+  animation: ldr-fade-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  cursor: progress;
+}
+/* The route change underneath runs a view transition, which lifts named elements (the sidebar) into
+   a layer above the page. The loader takes its own layer so it stays on top, shown live and unanimated. */
+.ldr-root {
+  view-transition-name: cv-loader;
+}
+::view-transition-group(cv-loader) {
+  animation: none;
+  z-index: 100; /* above the sidebar group (z-index 50 in globals.css) */
+}
+::view-transition-old(cv-loader) {
+  display: none;
+}
+::view-transition-new(cv-loader) {
+  animation: none;
+}
+/* Server-rendered on a direct visit: already opaque; a CSS-only failsafe removes it if scripts never run. */
+.ldr-root[data-initial="true"] {
+  animation: ldr-failsafe 400ms ease 7.5s forwards;
+}
+.ldr-root[data-phase="exit"] {
+  animation: ldr-fade-out 560ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  cursor: auto;
+}
+
+/* ─── Atmosphere ─── */
+.ldr-atmos {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(38% 42% at 50% 34%, rgba(232, 36, 46, 0.075), transparent 70%),
+    radial-gradient(30% 40% at 4% 10%, rgba(240, 60, 60, 0.07), transparent 70%),
+    radial-gradient(34% 44% at 98% 86%, rgba(240, 60, 60, 0.07), transparent 70%);
+  animation: ldr-fade 900ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+}
+
+/* ─── Corner ribbons ─── */
+.ldr-ribbon {
+  position: absolute;
+  width: max(31vw, 260px);
+  height: auto;
+  pointer-events: none;
+  animation:
+    ldr-fade 900ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both,
+    ldr-drift 5.5s ease-in-out 600ms infinite alternate;
+}
+.ldr-ribbon-tl {
+  top: 0;
+  left: 0;
+}
+.ldr-ribbon-br {
+  right: 0;
+  bottom: 0;
+  width: max(44vw, 300px);
+  rotate: 180deg;
+  animation-delay: 160ms, 900ms;
+}
+.ldr-strand {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: ldr-draw 1500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(120ms + var(--k) * 55ms);
+}
+.ldr-band {
+  animation: ldr-fade 1200ms cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
+}
+.ldr-band-b {
+  animation-delay: 480ms;
+}
+
+/* ─── Stage ─── */
+.ldr-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  translate: 0 -1.2vh;
+}
+.ldr-root[data-phase="exit"] .ldr-stage {
+  animation: ldr-stage-out 560ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Heart, its glow and the halo share the artwork box */
+.ldr-heart-box {
+  position: relative;
+  height: var(--hh);
+  aspect-ratio: 380 / 430;
+}
+.ldr-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--hh) * 1.535);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+  animation: ldr-halo-in 1100ms cubic-bezier(0.22, 1, 0.36, 1) 150ms both;
+}
+.ldr-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ldr-ticks {
+  animation: ldr-sway 3.2s ease-in-out 900ms infinite alternate;
+}
+.ldr-dots {
+  animation: ldr-spin-rev 40s linear infinite;
+}
+.ldr-arcs {
+  animation: ldr-spin 14s linear infinite;
+}
+.ldr-heart-glow {
+  position: absolute;
+  inset: 8% 4% 4%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 40, 50, 0.32), rgba(255, 40, 50, 0.1) 55%, transparent 100%);
+  animation:
+    ldr-fade 900ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both,
+    ldr-glow-pulse 1100ms ease-in-out 1000ms infinite;
+}
+.ldr-heart-in {
+  position: absolute;
+  inset: 0;
+  animation: ldr-heart-in 1000ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+.ldr-heart-beat {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 58%;
+  animation: ldr-beat 1100ms ease-in-out 1000ms infinite;
+}
+.ldr-heart {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Wordmark */
+.ldr-title {
+  margin: calc(var(--u) * -0.4) 0 0;
+  font-family: var(--cv-font-syne), "Syne", sans-serif;
+  font-weight: 800;
+  font-size: calc(var(--u) * 9.2);
+  line-height: 1;
+  letter-spacing: -0.07em;
+  padding-right: 0.07em; /* give back the trailing negative tracking so the word stays optically centred */
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ldr-ink);
+  text-shadow: 0 calc(var(--u) * 0.3) calc(var(--u) * 1.6) rgba(160, 16, 28, 0.14);
+  animation: ldr-rise 800ms cubic-bezier(0.22, 1, 0.36, 1) 360ms both;
+}
+
+/* Progress bar */
+.ldr-bar {
+  margin-top: calc(var(--u) * 6.8);
+  width: calc(var(--u) * 77);
+  height: calc(var(--u) * 3.9);
+  padding: calc(var(--u) * 0.55);
+  border-radius: 999px;
+  border: 1px solid rgba(214, 32, 44, 0.42);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 0 calc(var(--u) * 2.2) rgba(232, 36, 46, 0.16),
+    inset 0 0 calc(var(--u) * 0.8) rgba(232, 36, 46, 0.08);
+  animation: ldr-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
+}
+.ldr-track {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.ldr-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #B80F22 0%, #D81B2A 45%, #F2333A 85%, #FF4A4A 100%);
+  box-shadow: 0 0 calc(var(--u) * 1.2) rgba(240, 40, 50, 0.5);
+  transform: translateX(-100%);
+  will-change: transform;
+}
+.ldr-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 236, 236, 0.32), transparent);
+  translate: -120% 0;
+  animation: ldr-sheen 1.4s cubic-bezier(0.45, 0, 0.55, 1) 900ms infinite;
+}
+
+/* LOADING */
+.ldr-label {
+  margin: calc(var(--u) * 3.1) 0 0;
+  font-family: var(--cv-font-syne), "Syne", sans-serif;
+  font-weight: 500;
+  font-size: max(calc(var(--u) * 1.9), 11px);
+  letter-spacing: 0.62em;
+  padding-left: 0.62em;
+  color: #4E1218;
+  animation:
+    ldr-fade 700ms cubic-bezier(0.22, 1, 0.36, 1) 520ms both,
+    ldr-breathe 1.6s ease-in-out 1.3s infinite alternate;
+}
+
+/* Page arrival under the fading loader (Research/About, Heart Analysis, Overview) */
+html[data-cv-reveal] .cv-doc-main > :not(.doc-progress),
+html[data-cv-reveal] .ax-main-col,
+html[data-cv-reveal] .ax-unavailable,
+html[data-cv-reveal] .lp-root > main {
+  animation: ldr-page-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─── Keyframes ─── */
+@keyframes ldr-fade-in { from { opacity: 0; } }
+@keyframes ldr-fade-out { to { opacity: 0; } }
+@keyframes ldr-fade { from { opacity: 0; } }
+@keyframes ldr-failsafe { to { opacity: 0; visibility: hidden; } }
+@keyframes ldr-draw { from { stroke-dashoffset: 1; } }
+@keyframes ldr-drift {
+  from { translate: 0 0; }
+  to { translate: 1.2vw 0.8vh; }
+}
+@keyframes ldr-halo-in {
+  from { opacity: 0; scale: 0.94; }
+}
+@keyframes ldr-sway {
+  from { rotate: -2.5deg; }
+  to { rotate: 2.5deg; }
+}
+@keyframes ldr-spin { to { rotate: 360deg; } }
+@keyframes ldr-spin-rev { to { rotate: -360deg; } }
+@keyframes ldr-heart-in {
+  from { opacity: 0; scale: 0.92; translate: 0 calc(var(--u) * 2.4); }
+}
+/* lub-dub: a firm beat, a softer echo, then rest */
+@keyframes ldr-beat {
+  0%, 100% { scale: 1; }
+  14% { scale: 1.035; }
+  28% { scale: 1; }
+  42% { scale: 1.018; }
+  60% { scale: 1; }
+}
+@keyframes ldr-glow-pulse {
+  0%, 100% { opacity: 0.75; }
+  14% { opacity: 1; }
+  28% { opacity: 0.8; }
+  42% { opacity: 0.92; }
+  60% { opacity: 0.75; }
+}
+@keyframes ldr-rise {
+  from { opacity: 0; translate: 0 calc(var(--u) * 2); }
+}
+@keyframes ldr-sheen { to { translate: 300% 0; } }
+@keyframes ldr-breathe { to { opacity: 0.55; } }
+@keyframes ldr-stage-out {
+  to { scale: 1.025; translate: 0 -2.4vh; }
+}
+@keyframes ldr-page-in {
+  from { opacity: 0; translate: 0 22px; }
+}
+
+/* ─── Portrait phones and tablets: bigger heart, bar and label relative to the width ─── */
+@media (max-aspect-ratio: 4 / 5) {
+  .ldr-root {
+    --u: min(0.75vh, 0.84vw);
+    --hh: min(42vh, 74vw);
+  }
+  .ldr-bar {
+    width: min(78vw, 420px);
+    height: max(calc(var(--u) * 3.9), 18px);
+  }
+  .ldr-label {
+    font-size: max(calc(var(--u) * 1.9), 11px);
+  }
+}
+
+/* ─── Reduced motion: the same composition, shown with a short fade and nothing moving ─── */
+@media (prefers-reduced-motion: reduce) {
+  .ldr-root,
+  .ldr-root[data-phase="exit"] {
+    animation-duration: 160ms;
+  }
+  .ldr-root[data-initial="true"]:not([data-phase="exit"]) {
+    animation: ldr-failsafe 200ms ease 7.5s forwards;
+  }
+  .ldr-atmos,
+  .ldr-ribbon,
+  .ldr-strand,
+  .ldr-band,
+  .ldr-halo,
+  .ldr-ticks,
+  .ldr-dots,
+  .ldr-arcs,
+  .ldr-heart-glow,
+  .ldr-heart-in,
+  .ldr-heart-beat,
+  .ldr-title,
+  .ldr-bar,
+  .ldr-label,
+  .ldr-fill::after,
+  .ldr-root[data-phase="exit"] .ldr-stage {
+    animation: none;
+  }
+  html[data-cv-reveal] .cv-doc-main > :not(.doc-progress),
+  html[data-cv-reveal] .ax-main-col,
+  html[data-cv-reveal] .ax-unavailable,
+  html[data-cv-reveal] .lp-root > main {
+    animation: ldr-fade 200ms ease-out both;
+  }
+}

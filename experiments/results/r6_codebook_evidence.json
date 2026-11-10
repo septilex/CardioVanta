@@ -1,0 +1,663 @@
+{
+  "experiment": "R6: clinical feature codebook resolution (provenance only)",
+  "evidence_levels": {
+    "E1": "patient-level matching (verifying)",
+    "E2": "primary-source transformation statement (verifying)",
+    "E3": "canonical codebook definition only (non-verifying)",
+    "E4": "secondary claims / distributions / coefficients (hypothesis only)"
+  },
+  "sources": {
+    "codebook": {
+      "path": "data/external/raw/heart-disease.names",
+      "sha256": "02db618268cbe8b314137282a0a4cae6d5eb178b2e263fe94c64241f12ae4dc4"
+    },
+    "contract": {
+      "path": "cardiovanta_ml/contracts/feature_schema.v2.json",
+      "sha256": "50249533dd26a9ca30c070100a045c921182e206dca88620f4e073c8568df531"
+    },
+    "public_documentation": {
+      "uci_dataset_page": {
+        "url": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+        "retrieved": "2026-10-31",
+        "loaded": true,
+        "states_canonical_codes": {
+          "slope": "1 upsloping, 2 flat, 3 downsloping",
+          "ca": "number of major vessels (0-3)",
+          "thal": "3 = normal; 6 = fixed defect; 7 = reversable defect"
+        },
+        "has_missing_values": "Yes (variables not identified in the retrieved text)",
+        "missing_value_encoding_in_processed_files": "not stated",
+        "documents_kaggle_recoding": false,
+        "doi": "10.24432/C52P4X",
+        "licence": "CC BY 4.0"
+      },
+      "kaggle_dataset_page": {
+        "url": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+        "retrieved": "2026-10-31",
+        "loaded": false,
+        "http_status": 404,
+        "documents_kaggle_recoding": false,
+        "note": "The commonly cited Kaggle source page is unavailable; the redistribution's recoding is undocumented by its publisher."
+      }
+    },
+    "external_cohort_documented_sentinels": {
+      "Hungarian Cohort (Budapest)": {
+        "slope": {
+          "-9": 190
+        },
+        "ca": {
+          "-9": 290
+        },
+        "thal": {
+          "-9": 266
+        }
+      },
+      "Long Beach VA Cohort (California)": {
+        "slope": {
+          "-9": 101
+        },
+        "ca": {
+          "-9": 198
+        },
+        "thal": {
+          "-9": 159
+        }
+      }
+    }
+  },
+  "mappings": [
+    {
+      "feature": "slope",
+      "production_code": 0,
+      "canonical_uci_source_codes": "one of {1 upsloping, 2 flat, 3 downsloping}; correspondence unknown",
+      "contract_status": "unverified",
+      "resolved_status": "unverified",
+      "clinical_meaning": null,
+      "display_label_legacy": "Upsloping",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [
+        "Code 0..2 could be a shift of canonical 1..3 or a reordering (as happened for cp); the cp precedent shows a naive shift cannot be assumed."
+      ],
+      "resolution_path": "Pre-registered patient-level match between the 242 development rows and canonical processed.cleveland.data, using the Phase 17 matching keys; requires explicit authorisation, because the canonical file also contains the locked patients' records. Alternatively, a primary-source statement of the recoding from the dataset publisher (E2)."
+    },
+    {
+      "feature": "slope",
+      "production_code": 1,
+      "canonical_uci_source_codes": "one of {1 upsloping, 2 flat, 3 downsloping}; correspondence unknown",
+      "contract_status": "unverified",
+      "resolved_status": "unverified",
+      "clinical_meaning": null,
+      "display_label_legacy": "Flat",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [
+        "Code 0..2 could be a shift of canonical 1..3 or a reordering (as happened for cp); the cp precedent shows a naive shift cannot be assumed."
+      ],
+      "resolution_path": "Pre-registered patient-level match between the 242 development rows and canonical processed.cleveland.data, using the Phase 17 matching keys; requires explicit authorisation, because the canonical file also contains the locked patients' records. Alternatively, a primary-source statement of the recoding from the dataset publisher (E2)."
+    },
+    {
+      "feature": "slope",
+      "production_code": 2,
+      "canonical_uci_source_codes": "one of {1 upsloping, 2 flat, 3 downsloping}; correspondence unknown",
+      "contract_status": "unverified",
+      "resolved_status": "unverified",
+      "clinical_meaning": null,
+      "display_label_legacy": "Downsloping",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [
+        "Code 0..2 could be a shift of canonical 1..3 or a reordering (as happened for cp); the cp precedent shows a naive shift cannot be assumed."
+      ],
+      "resolution_path": "Pre-registered patient-level match between the 242 development rows and canonical processed.cleveland.data, using the Phase 17 matching keys; requires explicit authorisation, because the canonical file also contains the locked patients' records. Alternatively, a primary-source statement of the recoding from the dataset publisher (E2)."
+    },
+    {
+      "feature": "thal",
+      "production_code": 1,
+      "canonical_uci_source_codes": "one of {3 normal, 6 fixed defect, 7 reversable defect}; correspondence unknown",
+      "contract_status": "unverified",
+      "resolved_status": "unverified",
+      "clinical_meaning": null,
+      "display_label_legacy": "Normal",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [
+        "The 0..3 range implies a recoding of canonical {3, 6, 7}; the order is undocumented."
+      ],
+      "resolution_path": "Pre-registered patient-level match between the 242 development rows and canonical processed.cleveland.data, using the Phase 17 matching keys; requires explicit authorisation, because the canonical file also contains the locked patients' records. Alternatively, a primary-source statement of the recoding from the dataset publisher (E2)."
+    },
+    {
+      "feature": "thal",
+      "production_code": 2,
+      "canonical_uci_source_codes": "one of {3 normal, 6 fixed defect, 7 reversable defect}; correspondence unknown",
+      "contract_status": "unverified",
+      "resolved_status": "unverified",
+      "clinical_meaning": null,
+      "display_label_legacy": "Fixed Defect",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [
+        "The 0..3 range implies a recoding of canonical {3, 6, 7}; the order is undocumented."
+      ],
+      "resolution_path": "Pre-registered patient-level match between the 242 development rows and canonical processed.cleveland.data, using the Phase 17 matching keys; requires explicit authorisation, because the canonical file also contains the locked patients' records. Alternatively, a primary-source statement of the recoding from the dataset publisher (E2)."
+    },
+    {
+      "feature": "thal",
+      "production_code": 3,
+      "canonical_uci_source_codes": "one of {3 normal, 6 fixed defect, 7 reversable defect}; correspondence unknown",
+      "contract_status": "unverified",
+      "resolved_status": "unverified",
+      "clinical_meaning": null,
+      "display_label_legacy": "Reversable Defect",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [
+        "The 0..3 range implies a recoding of canonical {3, 6, 7}; the order is undocumented."
+      ],
+      "resolution_path": "Pre-registered patient-level match between the 242 development rows and canonical processed.cleveland.data, using the Phase 17 matching keys; requires explicit authorisation, because the canonical file also contains the locked patients' records. Alternatively, a primary-source statement of the recoding from the dataset publisher (E2)."
+    },
+    {
+      "feature": "thal",
+      "production_code": 0,
+      "canonical_uci_source_codes": "none defined; the canonical codebook has no thal code 0",
+      "contract_status": "undefined_in_codebook",
+      "resolved_status": "undefined_in_codebook",
+      "clinical_meaning": null,
+      "display_label_legacy": "Code 0 (not in UCI codebook)",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [
+        "Secondary sources commonly describe Kaggle thal=0 as a recoded missing value; this is not documented in any project record or in the UCI page text retrieved, so it is not evidence."
+      ],
+      "resolution_path": "Pre-registered patient-level match between the 242 development rows and canonical processed.cleveland.data, using the Phase 17 matching keys; requires explicit authorisation, because the canonical file also contains the locked patients' records. Alternatively, a primary-source statement of the recoding from the dataset publisher (E2). A match would show whether thal=0 rows correspond to missing canonical values."
+    },
+    {
+      "feature": "ca",
+      "production_code": 0,
+      "canonical_uci_source_codes": "0 (canonical ca is a vessel count 0-3)",
+      "contract_status": "codebook_and_project_contract",
+      "resolved_status": "codebook_and_project_contract",
+      "clinical_meaning": "0 major vessels",
+      "display_label_legacy": "0",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [],
+      "resolution_path": "Already supported at codebook_and_project_contract level; E1 matching would raise it to patient-matched."
+    },
+    {
+      "feature": "ca",
+      "production_code": 1,
+      "canonical_uci_source_codes": "1 (canonical ca is a vessel count 0-3)",
+      "contract_status": "codebook_and_project_contract",
+      "resolved_status": "codebook_and_project_contract",
+      "clinical_meaning": "1 major vessel",
+      "display_label_legacy": "1",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [],
+      "resolution_path": "Already supported at codebook_and_project_contract level; E1 matching would raise it to patient-matched."
+    },
+    {
+      "feature": "ca",
+      "production_code": 2,
+      "canonical_uci_source_codes": "2 (canonical ca is a vessel count 0-3)",
+      "contract_status": "codebook_and_project_contract",
+      "resolved_status": "codebook_and_project_contract",
+      "clinical_meaning": "2 major vessels",
+      "display_label_legacy": "2",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [],
+      "resolution_path": "Already supported at codebook_and_project_contract level; E1 matching would raise it to patient-matched."
+    },
+    {
+      "feature": "ca",
+      "production_code": 3,
+      "canonical_uci_source_codes": "3 (canonical ca is a vessel count 0-3)",
+      "contract_status": "codebook_and_project_contract",
+      "resolved_status": "codebook_and_project_contract",
+      "clinical_meaning": "3 major vessels",
+      "display_label_legacy": "3",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [],
+      "resolution_path": "Already supported at codebook_and_project_contract level; E1 matching would raise it to patient-matched."
+    },
+    {
+      "feature": "ca",
+      "production_code": 4,
+      "canonical_uci_source_codes": "none defined; the canonical codebook defines ca as 0-3",
+      "contract_status": "undefined_in_codebook",
+      "resolved_status": "undefined_in_codebook",
+      "clinical_meaning": null,
+      "display_label_legacy": "Code 4 (not in UCI codebook)",
+      "confidence": "unresolved: no E1/E2 evidence",
+      "evidence": [
+        {
+          "level": "E3",
+          "source": "data/external/raw/heart-disease.names",
+          "finding": {
+            "slope": "41 slope: the slope of the peak exercise ST segment -- Value 1: upsloping -- Value 2: flat -- Value 3: downsloping",
+            "ca": "44 ca: number of major vessels (0-3) colored by flourosopy",
+            "thal": "51 thal: 3 = normal; 6 = fixed defect; 7 = reversable defect",
+            "missing_values": "9. Missing Attribute Values: Several.  Distinguished with value -9.0.",
+            "cleveland_class_distribution": "Cleveland: 164  55  36  35  13   303"
+          }
+        },
+        {
+          "level": "E3",
+          "source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+          "finding": "Canonical codes match the codebook; dataset 'has missing values'; processed-file missing encoding not stated; no Kaggle recoding documented."
+        },
+        {
+          "level": "none",
+          "source": "https://www.kaggle.com/datasets/ronitf/heart-disease-uci",
+          "finding": "HTTP 404 on 2026-10-31: the redistribution's own documentation of its recoding is unavailable."
+        },
+        {
+          "level": "none",
+          "source": "reports/phase17_multicenter_validation.md; src/cardiovanta/data/validation.py",
+          "finding": "Phase 17 matched all Cleveland rows 1-to-1 on (`age`, `sex`, `trestbps`, `chol`, `thalach`) but recorded mappings only for cp and target; no slope/thal/ca cross-tabulation was documented (documented: {'cp': True, 'target': True, 'slope': False, 'thal': False, 'ca': False})."
+        },
+        {
+          "level": "none",
+          "source": "repository search",
+          "finding": "Canonical processed.cleveland.data present locally: False. Re-matching would require parsing canonical records of all 303 Cleveland patients, including the 61 locked observations, which R6 forbids."
+        }
+      ],
+      "hypotheses_not_evidence": [
+        "Secondary sources commonly describe Kaggle ca=4 as a recoded missing value; not documented in any project record, so it is not evidence."
+      ],
+      "resolution_path": "Pre-registered patient-level match between the 242 development rows and canonical processed.cleveland.data, using the Phase 17 matching keys; requires explicit authorisation, because the canonical file also contains the locked patients' records. Alternatively, a primary-source statement of the recoding from the dataset publisher (E2). A match would show whether ca=4 rows correspond to missing canonical values."
+    }
+  ],
+  "summary": {
+    "codes_reviewed": 12,
+    "newly_verified": [],
+    "unresolved": [
+      "slope=0",
+      "slope=1",
+      "slope=2",
+      "thal=1",
+      "thal=2",
+      "thal=3",
+      "thal=0",
+      "ca=4"
+    ],
+    "already_supported": [
+      "ca=0",
+      "ca=1",
+      "ca=2",
+      "ca=3"
+    ],
+    "consistent_with_contract": true,
+    "data_rows_read": 0
+  },
+  "discrepancies": [
+    {
+      "item": "Cleveland num = 0 count",
+      "codebook": "Cleveland: 164  55  36  35  13   303",
+      "phase17_report": "165 patients with canonical num == 0 and 138 with num > 0 (total 303)",
+      "status": "Unresolved one-patient difference (codebook 164 vs Phase 17 165). Not investigated, because that would require Cleveland patient rows."
+    }
+  ],
+  "hygiene_notes": [
+    {
+      "item": "Raw observation embedded in a report",
+      "location": "reports/cardio_vanta_master_audit.md",
+      "note": "An earlier audit report reproduces a raw heart.csv row (including ca=4). It was not used as evidence, and its partition was not checked."
+    }
+  ]
+}

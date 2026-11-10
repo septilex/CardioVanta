@@ -6,6 +6,7 @@ checks inspect configuration files and copy only the function bundle.
 """
 import ast
 import fnmatch
+import importlib.util
 import json
 import os
 import re
@@ -99,6 +100,17 @@ def _ignored(rel: Path, patterns) -> bool:
     return any(fnmatch.fnmatch(part, pat) for part in rel.parts for pat in patterns)
 
 
+def test_vercelignore_excludes_locked_derived_results():
+    """Locked-derived research outputs are never uploaded by the Vercel CLI: each one is either under an
+    ignored directory (e.g. reports/) or listed by its exact, root-anchored path."""
+    spec = importlib.util.spec_from_file_location("dq_policy", ROOT / "scripts" / "ci" / "data_quarantine.py")
+    dq = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(dq)
+    patterns = _ignore_patterns()
+    for rel in dq.LOCKED_DERIVED + dq.LOCKED_SOURCES:
+        assert _ignored(Path(rel), patterns) or "/" + rel in patterns, f".vercelignore would upload {rel}"
+
+
 def test_vercel_config_includes_runtime_resources():
     vercel = json.loads((ROOT / "vercel.json").read_text())
     include = vercel["functions"]["api/**/*.py"]["includeFiles"].strip("{}").split(",")
@@ -115,6 +127,7 @@ def test_vercel_config_includes_runtime_resources():
         "artifacts/model/metadata.json", "artifacts/model/feature_schema.json",
         "artifacts/model/shap_background.json", "artifacts/model/reference_predictions.csv",
         "backend/app/main.py", "backend/app/core/config.py", "src/config/config.py",
+        "configs/prediction_service.json",
     ]
     for rel in required:
         assert (ROOT / rel).is_file(), rel
@@ -148,6 +161,10 @@ _BUNDLE_PROBE = (
     "from api.index import app\n"
     "from backend.app.core.config import settings\n"
     "from fastapi.testclient import TestClient\n"
+    # serving test: open the containment gate in this probe process only (see the root conftest.py);
+    # the shipped, closed state is checked by test_shipped_bundle_refuses_predictions below
+    "import backend.app.core.prediction_availability as pa\n"
+    "pa.current_availability = lambda: pa.PredictionAvailability(enabled=True, notice=pa.DEFAULT_NOTICE)\n"
     "with TestClient(app) as c:\n"
     "    r = c.post('/api/v1/predict', json=%r)\n"
     "    eng = app.state.inference_engine\n"
@@ -181,6 +198,33 @@ def test_bundle_resolves_registry_inside_function_and_serves_pinned_model(bundle
     assert Path(probe["artifact_dir"]) == root / "artifacts" / "model"
     assert Path(probe["entry_dir"]) == root / "artifacts" / ENTRY_REL
     assert probe["legacy_imported"] is False                             # serving never touches the legacy adapter
+
+
+_CONTAINED_BUNDLE_PROBE = (
+    "import sys, os, json\n"
+    "sys.path.insert(0, os.getcwd())\n"
+    "from api.index import app\n"
+    "from fastapi.testclient import TestClient\n"
+    "with TestClient(app) as c:\n"
+    "    r = c.post('/api/v1/predict', json=%r)\n"
+    "    h = c.get('/api/v1/health')\n"
+    "    print('PROBE ' + json.dumps({'status': r.status_code, 'body': r.json(), 'health': h.status_code,\n"
+    "        'model': app.state.inference_engine.loaded.metadata.qualified_name}))\n"
+) % (HIGH_RISK,)
+
+
+@pytest.mark.prediction_containment
+def test_shipped_bundle_refuses_predictions(bundle):
+    """The simulated Vercel function, exactly as shipped, verifies the model but returns no prediction."""
+    assert json.loads((bundle / "configs" / "prediction_service.json").read_text())["predictions_enabled"] is False
+    r = _run(_CONTAINED_BUNDLE_PROBE, cwd=bundle)
+    lines = [l[6:] for l in r.stdout.splitlines() if l.startswith("PROBE ")]
+    assert r.returncode == 0 and lines, r.stderr[-2000:]
+    probe = json.loads(lines[0])
+    assert probe["status"] == 503 and probe["health"] == 200
+    assert probe["body"]["code"] == "predictions_temporarily_unavailable"
+    assert "prediction" not in probe["body"] and probe["body"]["predictions_available"] is False
+    assert probe["model"] == "cardiovanta-lr13@1.0.0"
 
 
 @pytest.mark.parametrize("env", [{"MODEL_VERSION": "1.0.1"}, {"MODEL_VERSION": "9.9.9"},
@@ -318,10 +362,19 @@ def test_ci_production_job_enforces_all_required_checks():
                      "scripts/ci/verify_wheel_install.py",
                      "--model-id cardiovanta-lr13 --model-version 1.0.0",
                      'CARDIOVANTA_RUN_INSTALL_TESTS: "1"',
-                     "pytest backend/tests/ tests/test_monitoring.py tests/test_artifact_integrity.py"):
+                     # CI data quarantine: tests run by explicit classification, never by directory
+                     "pytest $(python scripts/ci/test_classification.py --list ci_safe)",
+                     "CARDIOVANTA_DATA_QUARANTINE=1"):
         assert required in job, required
     assert "continue-on-error" not in job and "|| true" not in job
-    assert "pytest tests/\n" not in job and "pytest tests/ " not in job.replace("tests/test_", "")  # no data suites here
+    assert not re.search(r"pytest\s+(tests|backend/tests)/?(\s|$)", job)  # no directory-wide collection
+    # the backend synthetic suite, monitoring and artifact-integrity tests are all still in the ci_safe set
+    spec = importlib.util.spec_from_file_location("ci_test_classification", ROOT / "scripts" / "ci" / "test_classification.py")
+    tc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tc)
+    safe = set(tc.ci_safe())
+    assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "backend" / "tests").glob("test_*.py")} <= safe
+    assert {"tests/test_monitoring.py", "tests/test_artifact_integrity.py"} <= safe
 
 
 def test_linux_build_workflow_is_pinned_and_never_deploys():
@@ -337,12 +390,43 @@ def test_linux_build_workflow_is_pinned_and_never_deploys():
     assert (ROOT / "scripts" / "ci" / "inspect_vercel_bundle.py").is_file()
 
 
+def test_deploy_job_pins_exact_vercel_cli_matching_linux_build():
+    deploy = _job(_workflow(), "deploy")
+    m = re.search(r'VERCEL_CLI_VERSION: "([^"]+)"', deploy)
+    assert m and re.fullmatch(r"\d+\.\d+\.\d+", m.group(1)), "deploy must pin an exact x.y.z Vercel CLI"
+    assert 'npm install -g "vercel@${VERCEL_CLI_VERSION}"' in deploy
+    code = "\n".join(l for l in deploy.splitlines() if not l.lstrip().startswith("#"))
+    assert not re.search(r"npm install -g vercel(\s|$)", code) and "vercel@latest" not in code
+    assert not re.search(r"vercel@[\^~]", code)
+    linux = (ROOT / ".github" / "workflows" / "vercel-linux-build.yml").read_text(encoding="utf-8")
+    assert f'VERCEL_CLI_VERSION: "{m.group(1)}"' in linux, "deploy and Linux build workflows must use the same CLI"
+
+
+def test_pull_requests_verify_without_deploying():
+    text = _workflow()
+    on = text.split("\npermissions:", 1)[0]
+    assert re.search(r"pull_request:\n\s+branches:\n\s+- main", on), "PRs into main must run verification"
+    assert re.search(r"push:\n\s+branches:\n\s+- main\n", on) and "pull_request_target" not in text
+    for job in ("verify-backend", "quarantined-research-tests", "verify-frontend"):
+        assert "\n    if:" not in "\n" + _job(text, job), f"{job} must run unconditionally (including on PRs)"
+    deploy = _job(text, "deploy")
+    assert "if: github.event_name == 'push' && github.ref == 'refs/heads/main'" in deploy
+    assert "environment: production" in deploy
+    assert "needs: [deploy]" in _job(text, "verify-production")      # skipped whenever deploy is skipped
+    assert "--prod" not in text.replace(deploy, "")                 # production deploy only inside the gated job
+
+
 def test_ci_research_suites_are_separate_and_frontend_checks_kept():
     text = _workflow()
-    research = _job(text, "research-data-tests")
-    assert 'python-version: "3.11"' in research and "pytest tests/" in research
+    # The former broad `pytest tests/` research job read data/raw/heart.csv; it is replaced by a quarantined
+    # job that runs only explicitly classified safe modules on the research (Python 3.11) stack.
+    assert "research-data-tests:" not in text
+    research = _job(text, "quarantined-research-tests")
+    assert 'python-version: "3.11"' in research and "pip install -r requirements.txt" in research
+    assert "pytest $(python scripts/ci/test_classification.py --list ci_safe --list ci_safe_research_deps)" in research
+    assert not re.search(r"pytest\s+(tests|backend/tests)/?(\s|$)", research)
     frontend = _job(text, "verify-frontend")
     for step in ("npm ci", "npx tsc --noEmit", "npm run test", "npm run build"):
         assert step in frontend
-    assert "needs: [verify-backend, research-data-tests, verify-frontend]" in _job(text, "deploy")
+    assert "needs: [verify-backend, quarantined-research-tests, verify-frontend]" in _job(text, "deploy")
     assert "continue-on-error" not in text

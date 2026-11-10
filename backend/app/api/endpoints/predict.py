@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Query, HTTPException, Request
+from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from typing import Optional
 import logging
 from backend.app.schemas.predict import (
     PredictRequest, PredictResponse, PredictionResult,
     DevelopmentRangeWarning, ExplanationResult, MetadataResult
 )
+from backend.app.core.prediction_availability import require_predictions_available
 # ML logic lives in the cardiovanta_ml package; this module only translates HTTP <-> package results.
 from cardiovanta_ml.inference.predict import InferenceEngine
 
@@ -12,7 +13,14 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.post("/predict", response_model=PredictResponse)
+# Containment (Phase 10): the dependency runs before body validation and before any model call, so
+# while predictions are unavailable every request gets the structured 503 and no probability.
+@router.post(
+    "/predict",
+    response_model=PredictResponse,
+    dependencies=[Depends(require_predictions_available)],
+    responses={503: {"description": "Predictions are temporarily unavailable (configs/prediction_service.json)"}},
+)
 def predict_endpoint(
     request: Request,
     payload: PredictRequest,

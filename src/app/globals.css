@@ -914,3 +914,275 @@ select.input-control {
 .cf-item .lbl {
   font-family: var(--cv-font-syne), sans-serif;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOTION SYSTEM
+   Tokens mirror src/lib/motion.ts (kept in sync by __tests__/motion.test.ts).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --cv-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --cv-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --cv-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --cv-dur-press: 120ms;
+  --cv-dur-fast: 180ms;
+  --cv-dur-base: 280ms;
+  --cv-dur-slow: 450ms;
+  --cv-dur-reveal: 700ms;
+  --cv-dur-count: 900ms;
+  --cv-stagger: 70ms;
+  --cv-stagger-tight: 40ms;
+}
+
+/* Keyframes animate *from* a state to the element's own resting style. They use the individual
+   translate/scale properties so they compose with any transform an element already has. */
+@keyframes cv-rise {
+  from { opacity: 0; translate: 0 12px; }
+}
+@keyframes cv-fade {
+  from { opacity: 0; }
+}
+@keyframes cv-pop {
+  from { opacity: 0; scale: 0.6; }
+}
+@keyframes cv-spin {
+  to { transform: rotate(360deg); }
+}
+
+/*
+ * Staggered entrance. Runs from the first paint, before JavaScript loads, so content is never held
+ * back waiting for hydration. Set --cv-i (0, 1, 2…) on each element to sequence a group.
+ */
+.cv-rise {
+  animation: cv-rise var(--cv-dur-slow) var(--cv-ease-out) both;
+  animation-delay: calc(var(--cv-i, 0) * var(--cv-stagger));
+}
+
+/* ─── Route transitions: React <ViewTransition> classes set in RouteTransition.tsx ─── */
+
+/* The overlay must not swallow clicks made while a transition finishes. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Outgoing page leaves quickly so it never competes with the arriving one. */
+::view-transition-old(.cv-route-forward) {
+  animation: cv-route-out var(--cv-dur-fast) var(--cv-ease-in) both;
+}
+::view-transition-old(.cv-route-back) {
+  animation: cv-route-drop var(--cv-dur-fast) var(--cv-ease-in) both;
+}
+
+/* Incoming page fades in; forward navigation also rises slightly, matching the page's own entrance. */
+::view-transition-new(.cv-route-forward) {
+  animation: cv-route-in var(--cv-dur-slow) var(--cv-ease-out) both;
+}
+::view-transition-new(.cv-route-back) {
+  animation: cv-fade var(--cv-dur-slow) var(--cv-ease-out) both;
+}
+
+@keyframes cv-route-out {
+  to { opacity: 0; transform: scale(0.985); }
+}
+@keyframes cv-route-drop {
+  to { opacity: 0; transform: translateY(12px); }
+}
+@keyframes cv-route-in {
+  from { opacity: 0; transform: translateY(16px); }
+}
+
+/* Between app sections the content cross-fades while the sidebar (named app-sidebar in
+   app-shell.css) stays put: its group does not animate and its old snapshot is hidden. */
+::view-transition-old(.cv-route-lateral) {
+  animation: cv-route-fade-out var(--cv-dur-fast) var(--cv-ease-in) both;
+}
+::view-transition-new(.cv-route-lateral) {
+  animation: cv-fade var(--cv-dur-base) var(--cv-ease-out) both;
+}
+@keyframes cv-route-fade-out {
+  to { opacity: 0; }
+}
+::view-transition-group(app-sidebar) {
+  animation: none;
+  z-index: 50;
+}
+::view-transition-old(app-sidebar) {
+  display: none;
+}
+::view-transition-new(app-sidebar) {
+  animation: none;
+}
+
+/* ─── Reduced motion: keep every state change, drop the movement ─── */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  .cv-rise {
+    animation-name: cv-fade;
+    animation-duration: var(--cv-dur-fast);
+    animation-delay: 0ms;
+  }
+
+  .animate-pulse {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SITE-WIDE VISUAL EFFECTS (driven by AmbientEffects.tsx through CSS variables)
+   Pointer effects only exist on mouse devices without reduced motion; the controller
+   never sets data-fx-active otherwise, so these rules stay dormant.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Cards tilt toward the cursor, with a sheen that follows it. */
+:is(.doc-card, .ax-journey-card, .ax-res-card, .doc-flow > li, .doc-next a)[data-fx-active] {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px);
+  will-change: transform;
+}
+:is(.doc-card, .ax-journey-card, .ax-res-card:not(.is-action), .doc-flow > li, .doc-next a)[data-fx-active] {
+  background-image: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.7), transparent 48%);
+}
+
+/* 2. A soft crimson spotlight follows the cursor across dark hero bands. */
+.doc-hero::after,
+.lp-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(460px circle at var(--sx, 50%) var(--sy, 50%), rgba(224, 86, 106, 0.17), transparent 62%);
+  transition: opacity var(--cv-dur-slow) var(--cv-ease-out);
+}
+.doc-hero[data-fx-active]::after,
+.lp-hero[data-fx-active]::after {
+  opacity: 1;
+}
+.doc-hero-inner,
+.lp-hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* 3. Primary buttons lean toward the cursor and spring back. */
+:is(.ax-btn-continue, .ax-btn-submit, .doc-cta, .btn-primary, .lp-header-cta) {
+  transition:
+    translate var(--cv-dur-base) var(--cv-ease-out),
+    transform var(--cv-dur-fast) var(--cv-ease-out),
+    background-color var(--cv-dur-fast) var(--cv-ease-out),
+    box-shadow var(--cv-dur-base) var(--cv-ease-out),
+    opacity var(--cv-dur-fast) var(--cv-ease-out);
+}
+:is(.ax-btn-continue, .ax-btn-submit, .doc-cta, .btn-primary, .lp-header-cta)[data-fx-active] {
+  translate: var(--tx, 0) var(--ty, 0);
+  transition-duration: 90ms, var(--cv-dur-fast), var(--cv-dur-fast), var(--cv-dur-base), var(--cv-dur-fast);
+}
+
+/* 4. Heartbeat trace that draws itself once. */
+.cv-ecg {
+  display: block;
+  width: 220px;
+  height: 40px;
+  overflow: visible;
+}
+.cv-ecg path {
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+@keyframes cv-ecg-draw {
+  from { stroke-dashoffset: 1; }
+}
+
+/* 5. Landing section labels draw a short divider as they scroll in. */
+.lp-eyebrow::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 2px;
+  margin-bottom: 12px;
+  background: currentColor;
+  transform-origin: left center;
+}
+@keyframes cv-draw-x {
+  from { transform: scaleX(0); }
+}
+
+/* 8. A light sweep crosses a step the moment it becomes active (once, not looping). */
+.ax-step-btn[data-state="active"] .ax-step-circle {
+  position: relative;
+  overflow: hidden;
+}
+.ax-step-btn[data-state="active"] .ax-step-circle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+}
+@keyframes cv-sweep {
+  to { transform: translateX(120%); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cv-ecg path {
+    animation: cv-ecg-draw 1.6s var(--cv-ease-in-out) 0.35s both;
+  }
+  .ax-step-btn[data-state="active"] .ax-step-circle::after {
+    animation: cv-sweep 900ms var(--cv-ease-out) 150ms both;
+  }
+  /* 7. Smooth scrolling for the landing page's in-page links. */
+  html:has(.lp-root) {
+    scroll-behavior: smooth;
+  }
+  @supports (animation-timeline: view()) {
+    .lp-eyebrow::before {
+      animation: cv-draw-x linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 40%;
+    }
+  }
+}
+
+/* Heartbeat trace placement */
+.ax-intro-ecg {
+  flex-shrink: 0;
+  align-self: center;
+  width: 200px;
+  color: var(--ax-crimson, #9E1B2E);
+  opacity: 0.55;
+}
+.lp-hero-ecg {
+  width: 240px;
+  margin-bottom: 18px;
+  color: #E0566A;
+  opacity: 0.85;
+}
+@media (max-width: 900px) {
+  .ax-intro-ecg {
+    display: none;
+  }
+}
+
+/* Visually hidden, still read by assistive technology. Global so every page has it
+   (it was only defined in assessment.css, so count-ups on Research showed their value twice). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

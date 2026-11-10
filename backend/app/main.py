@@ -6,6 +6,7 @@ from cardiovanta_ml import InferenceEngine, load_model
 from backend.app.api.endpoints import predict
 from backend.app.core.logging import setup_logging
 from backend.app.api.middleware import MonitoringMiddleware
+from backend.app.core import prediction_availability
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi import Request
@@ -36,6 +37,9 @@ async def lifespan(app: FastAPI):
             "Startup validation complete. CardioVanta Core Runtime ready.",
             extra={"model_id": model_package.model_id, "model_version": model_package.model_version},
         )
+        if not prediction_availability.current_availability().enabled:
+            logger.warning("Predictions are temporarily unavailable: POST /api/v1/predict returns 503 "
+                           "(configs/prediction_service.json)")
     except Exception as e:
         logger.error(f"Startup validation failed: {type(e).__name__}: {e}")
         # Fail clearly on startup
@@ -103,6 +107,21 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},
+    )
+
+@app.exception_handler(prediction_availability.PredictionsUnavailableError)
+async def predictions_unavailable_handler(request: Request, exc: prediction_availability.PredictionsUnavailableError):
+    # No request body or input values are logged (the request is refused before it is parsed).
+    logger.warning("Prediction request refused: predictions temporarily unavailable", extra={
+        "event_type": "prediction_refused",
+        "request_id": getattr(request.state, "request_id", None),
+        "status_code": 503,
+        "endpoint": request.url.path,
+    })
+    return JSONResponse(
+        status_code=503,
+        content=prediction_availability.unavailable_body(exc.notice),
+        headers={"Cache-Control": "no-store"},
     )
 
 app.include_router(predict.router, prefix="/api/v1", tags=["predict"])

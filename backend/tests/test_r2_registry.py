@@ -632,6 +632,10 @@ def test_vercel_bundle_contains_package_and_serves_predictions(tmp_path):
         "sys.path.insert(0, os.getcwd())\n"
         "from api.index import app\n"
         "from fastapi.testclient import TestClient\n"
+        # serving test: open the containment gate in this probe process only (see the root conftest.py);
+        # the shipped, closed bundle is checked by test_r3_deployment.py::test_shipped_bundle_refuses_predictions
+        "import backend.app.core.prediction_availability as pa\n"
+        "pa.current_availability = lambda: pa.PredictionAvailability(enabled=True, notice=pa.DEFAULT_NOTICE)\n"
         "with TestClient(app) as c:\n"
         "    r = c.post('/api/v1/predict', json=%r)\n"
         "    print('RESULT', r.status_code, round(r.json()['prediction']['probability'], 4))\n" % (HIGH_RISK,)

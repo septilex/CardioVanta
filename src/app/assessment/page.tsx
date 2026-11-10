@@ -1,11 +1,22 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useLayoutEffect, useMemo, useRef, type CSSProperties, type KeyboardEvent } from "react";
+import Link from "next/link";
+import { AnimatePresence, m } from "framer-motion";
 import { predict, ApiError } from "../../lib/api";
 import { PredictRequest, PredictResponse } from "../../types";
-import { CATEGORICAL_LABELS, CATEGORICAL_OPTIONS, type CategoricalFeatureId } from "../../types/generated-features";
+import { CATEGORICAL_LABELS, CATEGORICAL_OPTIONS, FEATURE_METADATA, type CategoricalFeatureId } from "../../types/generated-features";
 import "./assessment.css";
-import CoronaryArteryVisual from "./CoronaryArteryVisual";
+import NextStepStrip from "./NextStepStrip";
+import { EcgTrace } from "../../components/motion/EcgTrace";
+import StepsOverview from "./StepsOverview";
+import PredictionsUnavailable from "./PredictionsUnavailable";
+import { PREDICTION_AVAILABILITY, UNAVAILABLE_CODE } from "../../lib/predictionAvailability";
+import { MotionProvider } from "../../components/motion/MotionProvider";
+import { AnimatedNumber } from "../../components/motion/AnimatedNumber";
+import { RouteTransition } from "../../components/motion/RouteTransition";
+import { AppSidebar, MobileNav } from "../../components/shell/AppNav";
+import { NAV_BACK, collapse, formatProbability, panelSwap, revealGroup, revealItem } from "../../lib/motion";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    INITIAL DATA — 13 model features, exact existing defaults & encodings
@@ -100,6 +111,40 @@ function renderOptions(feature: CategoricalFeatureId) {
   ));
 }
 
+/** Links back to the landing page are "back" navigations (see RouteTransition). */
+const BACK = [NAV_BACK];
+
+/** Fills the slider track up to the current value (CSS reads --pct). Purely visual. */
+function sliderFill(value: number, min: number, max: number): React.CSSProperties {
+  const pct = Number.isFinite(value) ? Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100)) : 0;
+  return { "--pct": `${pct}%` } as React.CSSProperties;
+}
+
+/**
+ * An error shown in the form card. "unavailable" is the API's structured containment response
+ * (predictions switched off server-side): retrying cannot help, so no retry is offered.
+ */
+interface FormError {
+  message: string;
+  kind: "unavailable" | "retryable";
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESULTS PANEL (the analysis view that replaces the form card)
+   Kept in this file on purpose: backend/tests/test_r0_outcome_semantics.py checks the
+   disease-positive outcome and threshold wording in this page source.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+type ResultTab = "summary" | "why" | "audit";
+
+/** Seconds after the panel arrives before the gauge and count-up start. */
+const COUNT_DELAY = 0.25;
+
+/** Per-frame formatter for the count-up; module-level so its identity never changes. */
+const formatPercentFrame = (n: number) => n.toFixed(1);
+
+const cx = (...names: (string | false | undefined)[]) => names.filter(Boolean).join(" ");
+
 // Human-readable threshold status. The API's class is disease-positive:
 // class 1 = P(CAD present) >= threshold, class 0 = below it. Unknown statuses fall back to the raw text.
 function describeThreshold(prediction: PredictResponse["prediction"] | undefined): string {
@@ -118,12 +163,406 @@ function describeThreshold(prediction: PredictResponse["prediction"] | undefined
   return prediction.threshold_status;
 }
 
+interface ResultsPanelProps {
+  result: PredictResponse;
+  tab: ResultTab;
+  onTabChange: (tab: ResultTab) => void;
+  onEdit: () => void;
+  onNew: () => void;
+}
+
+/**
+ * The analysis view that replaces the form card. Every value shown is read from `result`;
+ * the animations only change how those values arrive, never what they are.
+ */
+function ResultsPanel({ result, tab, onTabChange, onEdit, onNew }: ResultsPanelProps) {
+  const tabs = (
+    [
+      ["summary", "Result", true],
+      ["why", "Why", !!result.shap_equivalent_explanation],
+      ["audit", "Technical audit", !!result.explanation],
+    ] as const
+  ).filter(([, , show]) => show);
+
+  return (
+    <m.section
+      id="result-section"
+      className="ax-results-panel"
+      aria-label="Analysis results"
+      variants={panelSwap}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <div className="ax-results-head">
+        <button type="button" className="ax-results-back" onClick={onEdit}>
+          <span className="ax-btn-arrow ax-btn-arrow--back" aria-hidden="true">←</span> Edit inputs
+        </button>
+        <ResultTabs tabs={tabs.map(([id, label]) => [id, label] as const)} active={tab} onChange={onTabChange} />
+        <button type="button" className="ax-results-new" onClick={onNew}>
+          New assessment
+        </button>
+      </div>
+
+      <div className="ax-results-body">
+        <SummaryPanel result={result} active={tab === "summary"} />
+        {result.shap_equivalent_explanation && (
+          <WhyPanel shap={result.shap_equivalent_explanation} active={tab === "why"} />
+        )}
+        {result.explanation && <AuditPanel explanation={result.explanation} active={tab === "audit"} />}
+      </div>
+    </m.section>
+  );
+}
+
+/* ─── Tabs: roving tab index, arrow-key navigation, sliding indicator ─────────────────── */
+
+function ResultTabs({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: (readonly [ResultTab, string])[];
+  active: ResultTab;
+  onChange: (tab: ResultTab) => void;
+}) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const indicatorRef = useRef<HTMLSpanElement>(null);
+
+  // Position the indicator under the active tab. Written straight to the element (no state), and
+  // re-measured when the tab list resizes (web fonts loading, window resizing).
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const indicator = indicatorRef.current;
+    if (!list || !indicator) return;
+    const place = () => {
+      const el = list.querySelector<HTMLElement>(`[data-tab="${active}"]`);
+      if (!el) return;
+      indicator.style.width = `${el.offsetWidth}px`;
+      indicator.style.transform = `translateX(${el.offsetLeft}px)`;
+      indicator.dataset.ready = "true";
+    };
+    place();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(place);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [active]);
+
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const ids = tabs.map(([id]) => id);
+    const index = ids.indexOf(active);
+    let next: ResultTab | undefined;
+    if (e.key === "ArrowRight") next = ids[(index + 1) % ids.length];
+    else if (e.key === "ArrowLeft") next = ids[(index - 1 + ids.length) % ids.length];
+    else if (e.key === "Home") next = ids[0];
+    else if (e.key === "End") next = ids[ids.length - 1];
+    if (!next) return;
+    e.preventDefault();
+    onChange(next);
+    listRef.current?.querySelector<HTMLElement>(`[data-tab="${next}"]`)?.focus();
+  };
+
+  return (
+    <div className="ax-results-tabs" role="tablist" aria-label="Result views" ref={listRef} onKeyDown={onKeyDown}>
+      <span className="ax-results-tab-indicator" ref={indicatorRef} aria-hidden="true" />
+      {tabs.map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          id={`ax-tab-${id}`}
+          data-tab={id}
+          aria-selected={active === id}
+          aria-controls={`ax-tabpanel-${id}`}
+          tabIndex={active === id ? 0 : -1}
+          className="ax-results-tab"
+          onClick={() => onChange(id)}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Result: gauge, count-up and the threshold statement ─────────────────────────────── */
+
+/** Top features by contribution in one direction, named the way the form names them. */
+function topFactors(result: PredictResponse, direction: 1 | -1, count = 3): string[] {
+  const contributions = (result.shap_equivalent_explanation ?? result.explanation)?.contributions;
+  if (!contributions) return [];
+  return (Object.entries(contributions) as [keyof PredictRequest, number][])
+    .filter(([, v]) => v * direction > 0)
+    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+    .slice(0, count)
+    .map(([k]) => FEATURE_METADATA[k]?.label ?? String(k));
+}
+
+/** 100 dots, `filled` of them coloured: the easiest way to read "n in 100". Decorative. */
+function DotArray({ filled }: { filled: number }) {
+  return (
+    <div className="ax-dots" aria-hidden="true">
+      {Array.from({ length: 100 }, (_, i) => (
+        <span key={i} className={i < filled ? "ax-dot is-on" : "ax-dot"} style={{ "--d": i } as CSSProperties} />
+      ))}
+    </div>
+  );
+}
+
+function SummaryPanel({ result, active }: { result: PredictResponse; active: boolean }) {
+  const probability = result.prediction?.probability;
+  const percentText = probability != null ? formatProbability(probability) : "--";
+  const inHundred = probability != null ? Math.min(100, Math.max(0, Math.round(probability * 100))) : null;
+  const headline = inHundred === null ? "--" : inHundred === 0 ? "Fewer than 1" : `About ${inHundred}`;
+  const up = topFactors(result, 1);
+  const down = topFactors(result, -1);
+  const outside = result.development_range_warning?.outside_development_range;
+  const outsideList = (result.development_range_warning?.features || []).join(", ");
+
+  return (
+    <div
+      role="tabpanel"
+      id="ax-tabpanel-summary"
+      aria-labelledby="ax-tab-summary"
+      hidden={!active}
+      className={cx("ax-result-section", "ax-tabpanel", !active && "ax-stage-hidden")}
+    >
+      <m.div className="ax-res" variants={revealGroup} initial="hidden" animate="visible">
+        {/* The headline: one number a person can picture. */}
+        <m.section className="ax-res-hero" variants={revealItem} aria-labelledby="ax-res-headline">
+          <div className="ax-res-figure">
+            <p className="ax-res-kicker">Your estimate</p>
+            <h3 id="ax-res-headline" className="ax-res-headline">
+              <span className="ax-res-big">{headline}</span> <span className="ax-res-of">in 100</span>
+            </h3>
+            <p className="ax-res-plain">
+              In the research records this model learned from, about <strong>{inHundred ?? "--"} out of every 100</strong>{" "}
+              people with measurements like yours had a significantly narrowed heart artery.
+            </p>
+            <div className="ax-res-exact">
+              <span className="ax-result-label">Modelled probability of significant obstructive CAD</span>
+              <span className="ax-result-prob-val">
+                {probability != null ? (
+                  <>
+                    <AnimatedNumber className="ax-prob-number" value={probability * 100} format={formatPercentFrame} delay={COUNT_DELAY} />
+                    <span className="ax-prob-unit" aria-hidden="true">%</span>
+                    <span className="sr-only">{percentText}%</span>
+                  </>
+                ) : (
+                  <>
+                    --<span className="ax-prob-unit">%</span>
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
+          {inHundred !== null && <DotArray filled={inHundred} />}
+        </m.section>
+
+        {outside && (
+          <m.div className="ax-res-caution" variants={revealItem} role="note">
+            <strong>Treat this estimate with extra caution.</strong> Some of your numbers are outside the range the model
+            learned from, so it is less sure about people like you.
+            <span className="ax-res-fine">
+              Development Range Guardrail: Features outside observed development-data range: {outsideList}.
+            </span>
+          </m.div>
+        )}
+
+        <div className="ax-res-cards">
+          <m.article className="ax-res-card" variants={revealItem}>
+            <h4>What this number means</h4>
+            <p>
+              <strong>Significant obstructive coronary artery disease</strong> means at least one of the main blood vessels
+              that feed the heart muscle is noticeably narrowed. It is usually confirmed with a test such as a coronary
+              angiogram.
+            </p>
+            <p className="ax-result-info">
+              Based on the provided profile, the research model estimates a <strong>{percentText}%</strong> probability
+              that significant obstructive coronary artery disease is present. This is a research estimate, not a
+              diagnosis, and the model is not clinically validated.
+            </p>
+          </m.article>
+
+          <m.article className="ax-res-card" variants={revealItem}>
+            <h4>What moved this estimate</h4>
+            {up.length > 0 && (
+              <div className="ax-res-factors">
+                <span className="ax-res-dir is-up">Pushed it up</span>
+                <ul>{up.map((f) => <li key={f}>{f}</li>)}</ul>
+              </div>
+            )}
+            {down.length > 0 && (
+              <div className="ax-res-factors">
+                <span className="ax-res-dir is-down">Pushed it down</span>
+                <ul>{down.map((f) => <li key={f}>{f}</li>)}</ul>
+              </div>
+            )}
+            <p className="ax-res-note">
+              This shows how the model reacted to your numbers. It does not show what causes heart disease. See the
+              Why tab for the full picture.
+            </p>
+          </m.article>
+
+          <m.article className="ax-res-card is-action" variants={revealItem}>
+            <h4>What to do with it</h4>
+            <ul className="ax-res-steps">
+              <li>Use it to start a conversation with a doctor, not as an answer.</li>
+              <li>It cannot confirm or rule out heart disease on its own.</li>
+              <li>
+                <strong>Chest pain, breathlessness or fainting right now?</strong> Call your local emergency number.
+              </li>
+            </ul>
+            <p className="ax-res-fine ax-result-threshold">{describeThreshold(result.prediction)}</p>
+          </m.article>
+        </div>
+      </m.div>
+    </div>
+  );
+}
+
+
+/* ─── Why: attribution bars that grow to their real length ────────────────────────────── */
+
+function WhyPanel({
+  shap,
+  active,
+}: {
+  shap: NonNullable<PredictResponse["shap_equivalent_explanation"]>;
+  active: boolean;
+}) {
+  const contributionsArray = Object.entries(shap.contributions) as [string, number][];
+  const increasing = contributionsArray.filter(([, val]) => val > 0).sort((a, b) => b[1] - a[1]);
+  const decreasing = contributionsArray.filter(([, val]) => val <= 0).sort((a, b) => a[1] - b[1]);
+  const maxAbsValue = Math.max(...contributionsArray.map(([, val]) => Math.abs(val)), 1);
+
+  const renderBar = (feature: string, value: number, isPos: boolean, index: number) => {
+    const pct = Math.min(100, Math.round((Math.abs(value) / maxAbsValue) * 100));
+    return (
+      <div key={feature} style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+        <div style={{ flex: "0 1 110px", minWidth: "80px", fontWeight: 600, fontSize: "13px", color: "var(--ax-text-main)", textTransform: "capitalize", wordBreak: "break-word", lineHeight: 1.2 }}>
+          {feature}
+        </div>
+        <div role="progressbar" aria-label={`${feature} contribution: ${value.toFixed(3)}`} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} style={{ flex: "1 1 50px", height: "8px", backgroundColor: "#EAE3DC", borderRadius: "4px", overflow: "hidden", margin: "0 16px" }}>
+          <div
+            className="ax-bar-fill"
+            style={{ width: `${pct}%`, height: "100%", backgroundColor: isPos ? "#9E1B2E" : "#4A72C8", borderRadius: "4px", "--i": index } as CSSProperties}
+          />
+        </div>
+        <div style={{ flex: "0 0 auto", minWidth: "50px", textAlign: "right", fontSize: "13px", fontWeight: 600, color: isPos ? "#9E1B2E" : "#4A72C8" }}>
+          {isPos ? "+" : ""}{value.toFixed(3)}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div
+      role="tabpanel"
+      id="ax-tabpanel-why"
+      aria-labelledby="ax-tab-why"
+      hidden={!active}
+      className={cx("ax-shap-section", "ax-tabpanel", !active && "ax-stage-hidden")}
+    >
+      <div className="ax-shap-header">
+        <h2>Why the model responded this way</h2>
+        <p className="ax-shap-notice">
+          <strong>Important Notice:</strong> These are model-attribution signals, not medical causes or a diagnosis. They show how the uncalibrated explanation model weighted each input toward or away from CAD presence, relative to its baseline (log-odds). They are directional signals: they do not exactly decompose the calibrated probability shown above.
+        </p>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+        <div className="ax-insight-card" style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", border: "1px solid #EAE2D8" }}>
+          <h3 style={{ color: "#9E1B2E", marginBottom: "18px", fontSize: "16px", display: "flex", alignItems: "center", gap: "6px" }}>
+            <span aria-hidden="true">↑</span> Factors pushing the model toward CAD present
+          </h3>
+          {increasing.map(([f, val], i) => renderBar(f, val, true, i))}
+          {increasing.length === 0 && <div style={{ color: "var(--ax-text-subtle)", fontSize: "13px" }}>No increasing factors</div>}
+        </div>
+        <div className="ax-insight-card" style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", border: "1px solid #EAE2D8" }}>
+          <h3 style={{ color: "#4A72C8", marginBottom: "18px", fontSize: "16px", display: "flex", alignItems: "center", gap: "6px" }}>
+            <span aria-hidden="true">↓</span> Factors pushing the model toward CAD absent
+          </h3>
+          {decreasing.map(([f, val], i) => renderBar(f, val, false, i))}
+          {decreasing.length === 0 && <div style={{ color: "var(--ax-text-subtle)", fontSize: "13px" }}>No decreasing factors</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Technical audit: signed log-odds contributions ──────────────────────────────────── */
+
+function AuditPanel({ explanation, active }: { explanation: PredictResponse["explanation"]; active: boolean }) {
+  const contributionsArray = (Object.entries(explanation.contributions) as [string, number][]).sort(
+    ([, valA], [, valB]) => Math.abs(valB) - Math.abs(valA)
+  );
+  const maxAbsValue = Math.max(...contributionsArray.map(([, val]) => Math.abs(val)), 1);
+
+  return (
+    <div
+      role="tabpanel"
+      id="ax-tabpanel-audit"
+      aria-labelledby="ax-tab-audit"
+      hidden={!active}
+      className={cx("ax-audit-section", "ax-tabpanel", !active && "ax-stage-hidden")}
+    >
+      <div className="exp-header">
+        <h2>Technical Audit (Logistic Regression)</h2>
+        <p>{explanation.note || "Linear feature contributions moving the underlying decision function log-odds."}</p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {contributionsArray.map(([feat, val], i) => {
+          const pct = Math.min(50, Math.round((Math.abs(val) / maxAbsValue) * 48));
+          const isPos = val >= 0;
+          return (
+            <div key={feat} style={{ display: "flex", alignItems: "center", gap: "14px", fontSize: "13px" }}>
+              <div style={{ width: "90px", fontWeight: 600, color: "var(--ax-text-main)" }}>{feat}</div>
+              <div style={{ flex: 1, height: "6px", backgroundColor: "#EDE5DC", borderRadius: "3px", overflow: "hidden" }}>
+                <div
+                  className="ax-bar-fill"
+                  style={{ width: `${pct * 2}%`, height: "100%", backgroundColor: isPos ? "#9E1B2E" : "#4A72C8", "--i": i } as CSSProperties}
+                />
+              </div>
+              <div style={{ width: "60px", textAlign: "right", fontFamily: "monospace", fontWeight: 600, color: isPos ? "#9E1B2E" : "#4A72C8" }}>
+                {isPos ? "+" : ""}{val.toFixed(4)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* Containment (Phase 10): while configs/prediction_service.json disables predictions, the page renders
+   only the notice. The form, its state and its submit handler are never mounted. */
 export default function Page() {
+  return (
+    <RouteTransition>
+      {PREDICTION_AVAILABILITY.enabled ? (
+        <AssessmentForm />
+      ) : (
+        <PredictionsUnavailable notice={PREDICTION_AVAILABILITY.notice} />
+      )}
+    </RouteTransition>
+  );
+}
+
+function AssessmentForm() {
   const [formData, setFormData] = useState<PredictRequest>(initialData);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<FormError | null>(null);
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [currentStage, setCurrentStage] = useState(0); // Starts cleanly at Step 1 (Patient Profile)
+  // One-screen layout: results replace the form card instead of appearing below it.
+  const [showResults, setShowResults] = useState(false);
+  const [resultTab, setResultTab] = useState<ResultTab>("summary");
+  // Direction of the last step change; the next step's fields slide in from that side.
+  const [direction, setDirection] = useState<1 | -1>(1);
+  // The first-paint entrance is CSS (it runs before hydration); once the card has swapped with the
+  // results panel, framer-motion animates every later swap, so the CSS entrance must not replay.
+  const [hasSwapped, setHasSwapped] = useState(false);
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
   /* ─── Handlers ─── */
@@ -139,9 +578,8 @@ export default function Page() {
     setFormData((prev: PredictRequest) => ({ ...prev, [name]: parsedValue } as PredictRequest));
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  // Sends the current inputs. Shared by the form's submit and the error banner's "Try again".
+  const runPrediction = useCallback(async () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -158,25 +596,25 @@ export default function Page() {
       const response = await predict(formData, controller.signal);
       clearTimeout(timeoutId);
       setResult(response);
-      setTimeout(() => {
-        const el = document.getElementById("result-section");
-        if (el && typeof el.scrollIntoView === "function") {
-          el.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 100);
+      setResultTab("summary");
+      setShowResults(true);
+      setHasSwapped(true);
     } catch (err: unknown) {
       clearTimeout(timeoutId);
       if ((err instanceof Error && err.name === "AbortError") || err === "timeout") {
         if (err === "timeout") {
-          setError("Request timed out. Please try again.");
+          setError({ message: "Request timed out. Please try again.", kind: "retryable" });
         }
         return;
       }
 
       if (err instanceof ApiError) {
-        setError(err.message);
+        setError({ message: err.message, kind: err.code === UNAVAILABLE_CODE ? "unavailable" : "retryable" });
       } else {
-        setError("An unexpected error occurred while communicating with the backend. Please check your connection.");
+        setError({
+          message: "An unexpected error occurred while communicating with the backend. Please check your connection.",
+          kind: "retryable",
+        });
       }
     } finally {
       if (abortControllerRef.current === controller) {
@@ -184,6 +622,11 @@ export default function Page() {
       }
     }
   }, [formData]);
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    void runPrediction();
+  }, [runPrediction]);
 
   const handleReset = useCallback(() => {
     if (abortControllerRef.current) {
@@ -195,6 +638,7 @@ export default function Page() {
     setError(null);
     setLoading(false);
     setCurrentStage(0);
+    setShowResults(false);
     if (typeof window !== "undefined" && typeof window.scrollTo === "function") {
       try {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -206,18 +650,50 @@ export default function Page() {
 
   const goNext = useCallback(() => {
     if (currentStage < STAGES.length - 1) {
+      setDirection(1);
       setCurrentStage((s) => s + 1);
     }
   }, [currentStage]);
 
   const goPrev = useCallback(() => {
     if (currentStage > 0) {
+      setDirection(-1);
       setCurrentStage((s) => s - 1);
     }
   }, [currentStage]);
 
   const goToStep = useCallback((idx: number) => {
+    setDirection(idx >= currentStage ? 1 : -1);
     setCurrentStage(idx);
+    setShowResults(false);
+  }, [currentStage]);
+
+  // The browser checks `required` and min/max before submitting. If the first invalid field sits on
+  // another step, open that step so the browser's message appears next to a visible field instead of
+  // a hidden one. Only the first `invalid` event of a submit attempt counts. A ref callback (with
+  // React 19 cleanup) attaches the listener whenever the form mounts, including after the results
+  // panel's exit animation.
+  const attachInvalidListener = useCallback((form: HTMLFormElement | null) => {
+    if (!form) return;
+    let handled = false;
+    const onInvalid = (e: Event) => {
+      if (handled) return;
+      handled = true;
+      queueMicrotask(() => {
+        handled = false;
+      });
+      const field = e.target as HTMLInputElement | HTMLSelectElement | null;
+      const idx = STAGES.findIndex((s) => s.fieldKeys.includes(field?.name as keyof PredictRequest));
+      if (idx >= 0) {
+        // Hidden steps are inert (out of the tab order). Lift that now, synchronously, so the browser
+        // can still focus this field and show its message; the re-render below keeps it lifted.
+        field?.closest("[inert]")?.removeAttribute("inert");
+        setDirection(-1);
+        setCurrentStage(idx);
+      }
+    };
+    form.addEventListener("invalid", onInvalid, true);
+    return () => form.removeEventListener("invalid", onInvalid, true);
   }, []);
 
   /* ─── Dynamically Derived Progress & Completion Indicators ─── */
@@ -247,160 +723,32 @@ export default function Page() {
   const progressRatio = (currentStage + 1) / STAGES.length;
   const donutDashoffset = donutCircumference * (1 - progressRatio);
 
-  /* ─── SHAP Explanation Renderer ─── */
-  const renderShapExplanation = (shap: PredictResponse["shap_equivalent_explanation"], probability: number) => {
-    if (!shap) return null;
-    const contributionsArray = Object.entries(shap.contributions) as [string, number][];
-    const increasing = contributionsArray.filter(([, val]) => val > 0).sort((a, b) => b[1] - a[1]);
-    const decreasing = contributionsArray.filter(([, val]) => val <= 0).sort((a, b) => a[1] - b[1]);
-    const maxAbsValue = Math.max(...contributionsArray.map(([, val]) => Math.abs(val)), 1);
-
-    const renderBar = (feature: string, value: number, isPos: boolean) => {
-      const pct = Math.min(100, Math.round((Math.abs(value) / maxAbsValue) * 100));
-      return (
-        <div key={feature} style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
-          <div style={{ flex: "0 1 110px", minWidth: "80px", fontWeight: 600, fontSize: "13px", color: "var(--ax-text-main)", textTransform: "capitalize", wordBreak: "break-word", lineHeight: 1.2 }}>
-            {feature}
-          </div>
-          <div role="progressbar" aria-label={`${feature} contribution: ${value.toFixed(3)}`} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} style={{ flex: "1 1 50px", height: "8px", backgroundColor: "#EAE3DC", borderRadius: "4px", overflow: "hidden", margin: "0 16px" }}>
-            <div style={{ width: `${pct}%`, height: "100%", backgroundColor: isPos ? "#9E1B2E" : "#4A72C8", borderRadius: "4px" }}></div>
-          </div>
-          <div style={{ flex: "0 0 auto", minWidth: "50px", textAlign: "right", fontSize: "13px", fontWeight: 600, color: isPos ? "#9E1B2E" : "#4A72C8" }}>
-            {isPos ? "+" : ""}{value.toFixed(3)}
-          </div>
-        </div>
-      );
-    };
-
-    return (
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
-        <div style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", border: "1px solid #EAE2D8" }}>
-          <h3 style={{ color: "#9E1B2E", marginBottom: "18px", fontSize: "16px", display: "flex", alignItems: "center", gap: "6px" }}>
-            <span aria-hidden="true">↑</span> Factors pushing the model toward CAD present
-          </h3>
-          {increasing.map(([f, val]) => renderBar(f, val, true))}
-          {increasing.length === 0 && <div style={{ color: "var(--ax-text-subtle)", fontSize: "13px" }}>No increasing factors</div>}
-        </div>
-        <div style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "8px", border: "1px solid #EAE2D8" }}>
-          <h3 style={{ color: "#4A72C8", marginBottom: "18px", fontSize: "16px", display: "flex", alignItems: "center", gap: "6px" }}>
-            <span aria-hidden="true">↓</span> Factors pushing the model toward CAD absent
-          </h3>
-          {decreasing.map(([f, val]) => renderBar(f, val, false))}
-          {decreasing.length === 0 && <div style={{ color: "var(--ax-text-subtle)", fontSize: "13px" }}>No decreasing factors</div>}
-        </div>
-      </div>
-    );
-  };
-
-  /* ─── Technical Explanation Renderer ─── */
-  const renderExplanation = (explanation: PredictResponse["explanation"]) => {
-    const contributionsArray = (Object.entries(explanation.contributions) as [string, number][]).sort(
-      ([, valA], [, valB]) => Math.abs(valB) - Math.abs(valA)
-    );
-    const maxAbsValue = Math.max(...contributionsArray.map(([, val]) => Math.abs(val)), 1);
-
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        {contributionsArray.map(([feat, val]) => {
-          const pct = Math.min(50, Math.round((Math.abs(val) / maxAbsValue) * 48));
-          const isPos = val >= 0;
-          return (
-            <div key={feat} style={{ display: "flex", alignItems: "center", gap: "14px", fontSize: "13px" }}>
-              <div style={{ width: "90px", fontWeight: 600, color: "var(--ax-text-main)" }}>{feat}</div>
-              <div style={{ flex: 1, height: "6px", backgroundColor: "#EDE5DC", borderRadius: "3px", overflow: "hidden" }}>
-                <div style={{ width: `${pct * 2}%`, height: "100%", backgroundColor: isPos ? "#9E1B2E" : "#4A72C8" }}></div>
-              </div>
-              <div style={{ width: "60px", textAlign: "right", fontFamily: "monospace", fontWeight: 600, color: isPos ? "#9E1B2E" : "#4A72C8" }}>
-                {isPos ? "+" : ""}{val.toFixed(4)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
   /* ═══════════════════════════════════════════════════════════════════════════
      RENDER
      ═══════════════════════════════════════════════════════════════════════════ */
 
   return (
+    <MotionProvider>
     <div className="ax-shell">
       {/* ═══════════════════════════════════════════════════════════════════════
           1. LEFT SIDEBAR (Reference Layout + Reference Image 2 Artwork)
           ═══════════════════════════════════════════════════════════════════════ */}
-      <aside className="ax-sidebar">
-        <div className="ax-sidebar-top">
-          {/* CardioVanta Logo */}
-          <a href="/" className="ax-sidebar-logo-link" title="CardioVanta Home">
-            <img
-              src="/brand/cardiovanta-horizontal-transparent.png"
-              alt="CardioVanta | Intelligent Cardiovascular Insight"
-              className="ax-sidebar-logo"
-            />
-          </a>
-
-          {/* Navigation Items */}
-          <nav className="ax-nav" aria-label="Main Navigation">
-            <a href="/" className="ax-nav-item">
-              <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-              <span>Overview</span>
-            </a>
-
-            <div className="ax-nav-item ax-nav-active">
-              <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                <polyline points="3.5 12 8.5 12 10.5 8 13.5 16 15.5 12 20.5 12" />
-              </svg>
-              <span>Heart Analysis</span>
-            </div>
-
-            <div className="ax-nav-item">
-              <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-              </svg>
-              <span>Research</span>
-            </div>
-
-            <div className="ax-nav-item">
-              <svg className="ax-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="16" x2="12" y2="12" />
-                <line x1="12" y1="8" x2="12.01" y2="8" />
-              </svg>
-              <span>About</span>
-            </div>
-          </nav>
-        </div>
-
-        {/* Oversized Anatomical Heart Engraving Artwork (Reference Image 2) */}
-        <div className="ax-sidebar-heart-wrap" aria-hidden="true">
-          <img
-            src="/images/anatomical-heart.jpg"
-            alt=""
-            className="ax-sidebar-heart-img"
-          />
-        </div>
-      </aside>
+      <AppSidebar />
 
       {/* ═══════════════════════════════════════════════════════════════════════
           2. MAIN COLUMN (Center Area + Right Summary Rail)
           ═══════════════════════════════════════════════════════════════════════ */}
       <main className="ax-main-col">
+        <MobileNav />
         {/* Top Navigation Bar */}
         <header className="ax-topbar">
-          <a href="/" className="ax-topbar-back">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <Link href="/" transitionTypes={BACK} className="ax-topbar-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />
             </svg>
             <span>Back to Overview</span>
-          </a>
+          </Link>
 
           <div className="ax-topbar-center">
             ASSESSMENT WORKFLOW
@@ -432,36 +780,19 @@ export default function Page() {
             {/* Page Introduction */}
             <div className="ax-intro">
               <div className="ax-intro-left">
-                <div className="ax-intro-eyebrow">
+                <div className="ax-intro-eyebrow cv-rise" style={{ "--cv-i": 0 } as React.CSSProperties}>
                   <span className="ax-eyebrow-line">—</span> CLINICAL RESEARCH INSTRUMENT
                 </div>
-                <h1 className="ax-intro-title">Cardiovascular Assessment</h1>
-                <p className="ax-intro-sub">
+                <h1 className="ax-intro-title cv-rise" style={{ "--cv-i": 1 } as React.CSSProperties}>Cardiovascular Assessment</h1>
+                <p className="ax-intro-sub cv-rise" style={{ "--cv-i": 2 } as React.CSSProperties}>
                   Enter the available measurements to generate a modelled probability estimate from the trained diagnostic model.
                 </p>
               </div>
-
-              {/* Mountain/Contour Graphic with Slogan */}
-              <div className="ax-intro-right">
-                <div className="ax-contour-art" aria-hidden="true">
-                  <svg viewBox="0 0 120 60" fill="none" stroke="currentColor" className="ax-contour-svg">
-                    <path d="M 5 55 Q 35 30 65 48 T 115 40" strokeWidth="1" stroke="#D2C3B5" strokeDasharray="2 2" />
-                    <path d="M 0 45 Q 30 20 60 38 T 110 25 T 120 32" strokeWidth="1.2" stroke="#B8A799" />
-                    <path d="M 12 32 Q 45 8 78 26 T 120 18" strokeWidth="1.4" stroke="#9E1B2E" strokeOpacity="0.4" />
-                    <path d="M 25 20 Q 55 4 85 16 T 120 10" strokeWidth="1" stroke="#A89789" strokeDasharray="3 3" />
-                  </svg>
-                </div>
-                <div className="ax-intro-slogan">
-                  <span>SAME DATA.</span>
-                  <span>DEEPER INSIGHTS</span>
-                  <span>FOR A HEALTHIER</span>
-                  <span>TOMORROW.</span>
-                </div>
-              </div>
+              <EcgTrace className="ax-intro-ecg" />
             </div>
 
             {/* Four-Stage Stepper Navigation */}
-            <nav className="ax-stepper" role="navigation" aria-label="Assessment steps">
+            <nav className="ax-stepper cv-rise" role="navigation" aria-label="Assessment steps" style={{ "--cv-i": 3 } as React.CSSProperties}>
               {STAGES.map((s, idx) => {
                 const state = idx === currentStage ? "active" : idx < currentStage ? "completed" : "upcoming";
                 return (
@@ -476,7 +807,7 @@ export default function Page() {
                     >
                       <span className="ax-step-circle">
                         {idx < currentStage ? (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                          <svg className="ax-step-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
                         ) : (
@@ -492,16 +823,42 @@ export default function Page() {
                         </span>
                       </div>
                     </button>
-                    {idx < STAGES.length - 1 && <div className="ax-step-line" aria-hidden="true" />}
+                    {idx < STAGES.length - 1 && (
+                      <div className="ax-step-line" data-done={idx < currentStage ? "true" : undefined} aria-hidden="true" />
+                    )}
                   </React.Fragment>
                 );
               })}
             </nav>
 
-            {/* Primary Assessment Form Panel Card */}
-            <form onSubmit={handleSubmit} className="ax-form-card">
-              {/* Card Header */}
-              <div className="ax-card-header">
+            {/* Primary Assessment Form Panel Card ⇄ Results Panel (one at a time; the leaving
+                panel finishes its exit before the arriving one enters) */}
+            <AnimatePresence mode="wait" initial={false}>
+            {showResults && result ? (
+              <ResultsPanel
+                key="results"
+                result={result}
+                tab={resultTab}
+                onTabChange={setResultTab}
+                onEdit={() => setShowResults(false)}
+                onNew={handleReset}
+              />
+            ) : (
+            <m.form
+              key="form"
+              ref={attachInvalidListener}
+              onSubmit={handleSubmit}
+              className={hasSwapped ? "ax-form-card" : "ax-form-card cv-rise"}
+              style={{ "--cv-i": 4 } as React.CSSProperties}
+              data-dir={direction > 0 ? "forward" : "back"}
+              aria-busy={loading}
+              variants={panelSwap}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              {/* Card Header (re-keyed per step so its entrance replays on every step change) */}
+              <div className="ax-card-header ax-swap-in" key={stage.id}>
                 <div className="ax-card-header-left">
                   <div className="ax-card-step-eyebrow">STEP {stage.num} OF 04</div>
                   <h2 className="ax-card-title">{stage.title}</h2>
@@ -521,22 +878,33 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* Error banner */}
-              {error && (
-                <div className="ax-error" role="alert">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  <div className="ax-error-text">{error}</div>
-                </div>
-              )}
+              {/* Scrollable body: only this region scrolls when the window is too short */}
+              <div className="ax-card-body">
+              {/* Error banner: expands into place and stays until the next attempt or reset. */}
+              <AnimatePresence initial={false}>
+                {error && (
+                  <m.div key="error" className="ax-error-wrap" variants={collapse} initial="initial" animate="animate" exit="exit">
+                    <div className={error.kind === "unavailable" ? "ax-error ax-error--paused" : "ax-error"} role="alert">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      <div className="ax-error-text">{error.message}</div>
+                      {error.kind === "retryable" && (
+                        <button type="button" className="ax-error-retry" onClick={() => void runPrediction()} disabled={loading}>
+                          Try again
+                        </button>
+                      )}
+                    </div>
+                  </m.div>
+                )}
+              </AnimatePresence>
 
               {/* ═══════════════════════════════════════════════════════════
                   STAGE 01: PATIENT PROFILE (rendered in DOM for all tests)
                   ═══════════════════════════════════════════════════════════ */}
-              <div className={currentStage === 0 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"}>
+              <div className={currentStage === 0 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"} inert={currentStage !== 0}>
                 {/* Age */}
                 <div className="ax-field-box">
                   <div className="ax-field-header">
@@ -573,6 +941,7 @@ export default function Page() {
                         min="20"
                         max="90"
                         value={formData.age}
+                        style={sliderFill(formData.age, 20, 90)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -617,7 +986,7 @@ export default function Page() {
               {/* ═══════════════════════════════════════════════════════════
                   STAGE 02: VITALS & LABORATORY (Exact Reference Image 1 Match)
                   ═══════════════════════════════════════════════════════════ */}
-              <div className={currentStage === 1 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"}>
+              <div className={currentStage === 1 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"} inert={currentStage !== 1}>
                 {/* Resting Blood Pressure */}
                 <div className="ax-field-box">
                   <div className="ax-field-header">
@@ -652,6 +1021,7 @@ export default function Page() {
                         min="90"
                         max="140"
                         value={Math.min(140, Math.max(90, formData.trestbps))}
+                        style={sliderFill(formData.trestbps, 90, 140)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -701,6 +1071,7 @@ export default function Page() {
                         min="100"
                         max="400"
                         value={Math.min(400, Math.max(100, formData.chol))}
+                        style={sliderFill(formData.chol, 100, 400)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -764,7 +1135,7 @@ export default function Page() {
               {/* ═══════════════════════════════════════════════════════════
                   STAGE 03: EXERCISE RESPONSE (rendered in DOM for all tests)
                   ═══════════════════════════════════════════════════════════ */}
-              <div className={currentStage === 2 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"}>
+              <div className={currentStage === 2 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"} inert={currentStage !== 2}>
                 {/* Maximum Heart Rate */}
                 <div className="ax-field-box">
                   <div className="ax-field-header">
@@ -798,6 +1169,7 @@ export default function Page() {
                         min="70"
                         max="210"
                         value={formData.thalach}
+                        style={sliderFill(formData.thalach, 70, 210)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -868,6 +1240,7 @@ export default function Page() {
                         max="6"
                         step="0.1"
                         value={formData.oldpeak}
+                        style={sliderFill(formData.oldpeak, 0, 6)}
                         onChange={handleChange}
                         aria-hidden="true"
                         tabIndex={-1}
@@ -908,7 +1281,7 @@ export default function Page() {
               {/* ═══════════════════════════════════════════════════════════
                   STAGE 04: DIAGNOSTIC MARKERS (rendered in DOM for all tests)
                   ═══════════════════════════════════════════════════════════ */}
-              <div className={currentStage === 3 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"}>
+              <div className={currentStage === 3 ? "ax-fields-grid" : "ax-fields-grid ax-stage-hidden"} inert={currentStage !== 3}>
                 {/* Chest Pain Type */}
                 <div className="ax-field-box">
                   <div className="ax-field-header">
@@ -985,8 +1358,9 @@ export default function Page() {
                   <div className="ax-field-helper">Thallium scintigraphy myocardial perfusion evaluation. Category labels for this field are not yet verified against the training encoding.</div>
                 </div>
               </div>
+              </div>
 
-              {/* ─── Card Actions (Previous / Continue / Submit) ─── */}
+              {/* ─── Card Actions (Previous / Up-next strip / Continue / Submit) ─── */}
               <div className="ax-card-actions">
                 <button
                   type="button"
@@ -995,82 +1369,42 @@ export default function Page() {
                   disabled={currentStage === 0}
                   style={currentStage === 0 ? { visibility: "hidden" } : undefined}
                 >
-                  ← Previous
+                  <span className="ax-btn-arrow ax-btn-arrow--back" aria-hidden="true">←</span> Previous
                 </button>
+
+                <NextStepStrip
+                  key={currentStage}
+                  stages={STAGES}
+                  currentStage={currentStage}
+                  loading={loading}
+                  hasResult={result != null && !loading}
+                  onViewResult={() => setShowResults(true)}
+                />
 
                 {currentStage < STAGES.length - 1 && (
                   <button type="button" className="ax-btn-continue" onClick={goNext}>
-                    Continue →
+                    Continue <span className="ax-btn-arrow" aria-hidden="true">→</span>
                   </button>
                 )}
 
                 {/* Final Submission Buttons (always in DOM, styled/hidden for tests) */}
-                <div className={currentStage === STAGES.length - 1 ? "ax-final-btn-group" : "ax-final-btn-group ax-final-hidden"}>
+                <div className={currentStage === STAGES.length - 1 ? "ax-final-btn-group" : "ax-final-btn-group ax-final-hidden"} inert={currentStage !== STAGES.length - 1}>
                   <button type="button" className="ax-btn-reset" onClick={handleReset}>
                     Reset
                   </button>
-                  <button type="submit" className="ax-btn-submit" disabled={loading}>
+                  <button type="submit" className="ax-btn-submit" disabled={loading} aria-busy={loading}>
+                    {loading && <span className="ax-spinner" aria-hidden="true" />}
                     {loading ? "Analyzing Profile…" : "Generate Analysis"}
                   </button>
                 </div>
               </div>
-            </form>
-
-            {/* Scientific Coronary Artery Longitudinal Cutaway Visual */}
-            <CoronaryArteryVisual />
-
-            {/* ═══════════════════════════════════════════════════════════
-                RESULTS SECTION (Displayed when predictions exist)
-                ═══════════════════════════════════════════════════════════ */}
-            {result && !loading && (
-              <section id="result-section" className="ax-result-section">
-                <div className="ax-result-container">
-                  <div className="ax-result-prob-block">
-                    <div className="ax-result-prob-val">
-                      {result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}
-                      <span>%</span>
-                    </div>
-                    <div className="ax-result-label">Modelled probability of significant obstructive CAD</div>
-                  </div>
-                  <div>
-                    <div className="ax-result-info">
-                      Based on the provided profile, the research model estimates a{" "}
-                      <strong>{result.prediction?.probability != null ? (result.prediction.probability * 100).toFixed(1) : "--"}%</strong> probability that significant obstructive coronary artery disease is present. This is a research estimate, not a diagnosis, and the model is not clinically validated.
-                    </div>
-                    <div className="ax-result-threshold">
-                      <strong>{describeThreshold(result.prediction)}</strong>
-                    </div>
-                    {result.development_range_warning?.outside_development_range && (
-                      <div className="ax-warning">
-                        <strong>Development Range Guardrail:</strong> Features outside observed development-data range:{" "}
-                        {(result.development_range_warning.features || []).join(", ")}.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </section>
+            </m.form>
             )}
+            </AnimatePresence>
 
-            {result && !loading && result.shap_equivalent_explanation && (
-              <section className="ax-shap-section">
-                <div className="ax-shap-header">
-                  <h2>Why the model responded this way</h2>
-                  <p className="ax-shap-notice">
-                    <strong>Important Notice:</strong> These are model-attribution signals, not medical causes or a diagnosis. They show how the uncalibrated explanation model weighted each input toward or away from CAD presence, relative to its baseline (log-odds). They are directional signals: they do not exactly decompose the calibrated probability shown above.
-                  </p>
-                </div>
-                {renderShapExplanation(result.shap_equivalent_explanation, result.prediction.probability)}
-              </section>
-            )}
-
-            {result && !loading && result.explanation && (
-              <section className="ax-audit-section">
-                <div className="exp-header">
-                  <h2>Technical Audit (Logistic Regression)</h2>
-                  <p>{result.explanation.note || "Linear feature contributions moving the underlying decision function log-odds."}</p>
-                </div>
-                {renderExplanation(result.explanation)}
-              </section>
+            {/* Step overview: fills the space below the card while the form is shown */}
+            {!(showResults && result) && (
+              <StepsOverview stages={STAGES} currentStage={currentStage} formData={formData} onJump={goToStep} />
             )}
           </div>
 
@@ -1083,7 +1417,13 @@ export default function Page() {
               <div className="ax-rail-section-title">ASSESSMENT PROGRESS</div>
               <div className="ax-progress-widget">
                 <div className="ax-donut-wrap">
-                  <svg className="ax-donut-svg" viewBox="0 0 64 64">
+                  <svg className="ax-donut-svg" viewBox="0 0 64 64" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="ax-donut-grad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#C2293F" />
+                        <stop offset="100%" stopColor="#7D0A14" />
+                      </linearGradient>
+                    </defs>
                     <circle
                       className="ax-donut-bg"
                       cx="32"
@@ -1107,8 +1447,18 @@ export default function Page() {
                   <span className="ax-donut-text">{currentStage + 1} / 4</span>
                 </div>
                 <div className="ax-progress-counts">
-                  <span className="ax-recorded-big">{recordedInputsCount} / 13</span>
+                  <span className="ax-recorded-big" key={recordedInputsCount}>{recordedInputsCount} / 13</span>
                   <span className="ax-recorded-label">inputs recorded</span>
+                  <span className="ax-rail-segments" aria-hidden="true">
+                    {Array.from({ length: 13 }, (_, i) => (
+                      <span
+                        key={i}
+                        className="ax-rail-seg"
+                        data-on={i < recordedInputsCount ? "true" : undefined}
+                        style={{ "--i": i } as React.CSSProperties}
+                      />
+                    ))}
+                  </span>
                 </div>
               </div>
 
@@ -1118,20 +1468,23 @@ export default function Page() {
                   const isDone = idx < currentStage;
                   const isActive = idx === currentStage;
                   return (
-                    <div className="ax-rail-stage-row" key={s.id}>
+                    <div
+                      className={`ax-rail-stage-row ${isDone ? "is-done" : isActive ? "is-active" : "is-todo"}`}
+                      key={s.id}
+                    >
                       <div className="ax-rail-stage-left">
                         {isDone ? (
-                          <svg className="ax-rail-status-icon" viewBox="0 0 24 24" fill="#1A1A1A" stroke="#1A1A1A">
+                          <svg key="done" className="ax-rail-status-icon" viewBox="0 0 24 24" fill="#1A1A1A" stroke="#1A1A1A" aria-hidden="true">
                             <circle cx="12" cy="12" r="10" />
                             <polyline points="16 9 10 15 8 13" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         ) : isActive ? (
-                          <svg className="ax-rail-status-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ax-burgundy)" strokeWidth="2.5">
+                          <svg key="active" className="ax-rail-status-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ax-burgundy)" strokeWidth="2.5" aria-hidden="true">
                             <circle cx="12" cy="12" r="10" />
                             <circle cx="12" cy="12" r="4" fill="var(--ax-burgundy)" />
                           </svg>
                         ) : (
-                          <svg className="ax-rail-status-icon" viewBox="0 0 24 24" fill="none" stroke="#C8BFB5" strokeWidth="2">
+                          <svg key="todo" className="ax-rail-status-icon" viewBox="0 0 24 24" fill="none" stroke="#C8BFB5" strokeWidth="2" aria-hidden="true">
                             <circle cx="12" cy="12" r="10" />
                           </svg>
                         )}
@@ -1143,7 +1496,7 @@ export default function Page() {
                         </div>
                       </div>
                       <span className="ax-rail-stage-count">
-                        {isDone ? `${s.fieldCount} / ${s.fieldCount}` : `0 / ${s.fieldCount}`}
+                        {idx <= currentStage ? `${s.fieldCount} / ${s.fieldCount}` : `0 / ${s.fieldCount}`}
                       </span>
                     </div>
                   );
@@ -1158,6 +1511,10 @@ export default function Page() {
               <div className="ax-inputs-header">
                 <span className="ax-rail-section-title" style={{ marginBottom: 0 }}>CURRENT INPUTS</span>
                 <button type="button" className="ax-edit-link" onClick={() => goToStep(0)}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+                  </svg>
                   Edit
                 </button>
               </div>
@@ -1172,7 +1529,7 @@ export default function Page() {
                     </svg>
                     <span>Age</span>
                   </div>
-                  <span className="ax-input-item-val">{formData.age} yrs</span>
+                  <span className="ax-input-item-val" key={String(formData.age)}>{formData.age} yrs</span>
                 </div>
 
                 <div className="ax-input-item">
@@ -1184,7 +1541,7 @@ export default function Page() {
                     </svg>
                     <span>Sex</span>
                   </div>
-                  <span className="ax-input-item-val">{SEX_LABELS[formData.sex]}</span>
+                  <span className="ax-input-item-val" key={String(formData.sex)}>{SEX_LABELS[formData.sex]}</span>
                 </div>
 
                 {/* Stage 1 inputs: visible when currentStage >= 1 */}
@@ -1197,7 +1554,7 @@ export default function Page() {
                         </svg>
                         <span>BP</span>
                       </div>
-                      <span className="ax-input-item-val">{formData.trestbps} mmHg</span>
+                      <span className="ax-input-item-val" key={String(formData.trestbps)}>{formData.trestbps} mmHg</span>
                     </div>
 
                     <div className="ax-input-item">
@@ -1207,7 +1564,7 @@ export default function Page() {
                         </svg>
                         <span>Chol</span>
                       </div>
-                      <span className="ax-input-item-val">{formData.chol} mg/dl</span>
+                      <span className="ax-input-item-val" key={String(formData.chol)}>{formData.chol} mg/dl</span>
                     </div>
                   </>
                 )}
@@ -1222,7 +1579,7 @@ export default function Page() {
                         </svg>
                         <span>Max HR</span>
                       </div>
-                      <span className="ax-input-item-val">{formData.thalach} bpm</span>
+                      <span className="ax-input-item-val" key={String(formData.thalach)}>{formData.thalach} bpm</span>
                     </div>
 
                     <div className="ax-input-item">
@@ -1232,7 +1589,7 @@ export default function Page() {
                         </svg>
                         <span>Angina</span>
                       </div>
-                      <span className="ax-input-item-val">{EXANG_LABELS[formData.exang]}</span>
+                      <span className="ax-input-item-val" key={String(formData.exang)}>{EXANG_LABELS[formData.exang]}</span>
                     </div>
                   </>
                 )}
@@ -1247,7 +1604,7 @@ export default function Page() {
                         </svg>
                         <span>Chest Pain</span>
                       </div>
-                      <span className="ax-input-item-val">{CP_LABELS[formData.cp]}</span>
+                      <span className="ax-input-item-val" key={String(formData.cp)}>{CP_LABELS[formData.cp]}</span>
                     </div>
 
                     <div className="ax-input-item">
@@ -1257,7 +1614,7 @@ export default function Page() {
                         </svg>
                         <span>Vessels</span>
                       </div>
-                      <span className="ax-input-item-val">{CA_LABELS[formData.ca]}</span>
+                      <span className="ax-input-item-val" key={String(formData.ca)}>{CA_LABELS[formData.ca]}</span>
                     </div>
                   </>
                 )}
@@ -1302,5 +1659,6 @@ export default function Page() {
         </div>
       </main>
     </div>
+    </MotionProvider>
   );
 }
