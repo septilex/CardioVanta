@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AmbientEffects } from "../components/motion/AmbientEffects";
+import { SmoothScroll } from "../components/motion/SmoothScroll";
 import { TransitionLoaderGate } from "../components/loader/TransitionLoaderGate";
 
 const displayFont = localFont({
@@ -49,6 +50,7 @@ export default function RootLayout({
         {children}
         <TransitionLoaderGate />
         <AmbientEffects />
+        <SmoothScroll />
       </body>
     </html>
   );
