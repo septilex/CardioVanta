@@ -4,8 +4,10 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { usePathname, useRouter } from "next/navigation";
 import { CardioVantaTransitionLoader, HEART_SRC, type LoaderPhase } from "./CardioVantaTransitionLoader";
 
-/** Routes that open with the brand loader. Overview and Heart Analysis never show it. */
+/** Routes that open with the brand loader: every section of the app. */
 export const LOADER_ROUTES: Record<string, string> = {
+  "/": "Overview",
+  "/assessment": "Heart Analysis",
   "/research": "Research",
   "/about": "About",
 };
@@ -43,19 +45,20 @@ const prefersReducedMotion = () =>
     : false;
 
 /**
- * Plays the CardioVanta loader whenever the user moves to Research or About, however they get there:
+ * Plays the CardioVanta loader whenever the user moves to another section (Overview, Heart Analysis,
+ * Research or About), however they get there:
  * a link anywhere in the app (sidebar, mobile bar, landing header and footer, in-page links), the
  * browser's back and forward buttons, or opening the URL directly.
  *
  * Link clicks are intercepted so the loader is on screen *before* the route changes; the route is then
  * pushed underneath, and the loader leaves only once that route is actually showing (never a blank
- * page), or after a failsafe. Other routes are untouched.
+ * page), or after a failsafe. Links within the current page (e.g. #hash links) and unknown routes are untouched.
  */
 export function TransitionLoaderGate() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Server render on a direct visit to /research or /about already includes the loader, so the page
+  // Server render on a direct visit to any of these routes already includes the loader, so the page
   // never flashes before hydration.
   const [phase, setPhase] = useState<Phase>(() => (loaderDestination(pathname) ? "enter" : "idle"));
   const [destination, setDestination] = useState(() => loaderDestination(pathname) ?? "");
@@ -165,7 +168,7 @@ export function TransitionLoaderGate() {
     return () => clearTimeout(t);
   }, []);
 
-  // Intercept link activation (mouse or keyboard Enter) to Research/About before Next's <Link> sees it.
+  // Intercept link activation (mouse or keyboard Enter) to a section before Next's <Link> sees it.
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -233,7 +236,7 @@ export function TransitionLoaderGate() {
       }
       return;
     }
-    if (loaderDestination(path)) begin(path); // back/forward or a programmatic push into Research/About
+    if (loaderDestination(path)) begin(path); // back/forward or a programmatic push into a section
   }, [pathname, begin, finish, later, tryComplete]);
 
   useEffect(

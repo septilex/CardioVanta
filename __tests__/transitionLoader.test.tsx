@@ -1,7 +1,8 @@
 /**
- * The CardioVanta transition loader plays only when moving to Research or About (link click, keyboard,
- * back/forward, direct visit), never for Overview or Heart Analysis, never twice for one navigation,
- * and always leaves: on arrival, when the user goes elsewhere, or after the failsafe.
+ * The CardioVanta transition loader plays whenever the user moves to a section (Overview, Heart Analysis,
+ * Research, About) by link click, keyboard, back/forward or direct visit; never for links outside the
+ * sections, never twice for one navigation; and always leaves: on arrival, when the user goes elsewhere,
+ * or after the failsafe.
  */
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
@@ -12,7 +13,9 @@ import {
   loaderDestination,
 } from '../src/components/loader/TransitionLoaderGate';
 
-let mockPath = '/assessment';
+/** A page outside the four sections (stands in for e.g. the 404 page). */
+const ELSEWHERE = '/privacy';
+let mockPath = ELSEWHERE;
 const push = jest.fn();
 const prefetch = jest.fn();
 jest.mock('next/navigation', () => ({
@@ -33,6 +36,7 @@ function App() {
       <a href="/assessment">Heart Analysis</a>
       <a href="/research">Research</a>
       <a href="/about">About</a>
+      <a href={ELSEWHERE}>Privacy</a>
       <a href="/research" target="_blank">Research (new tab)</a>
       <TransitionLoaderGate />
     </>
@@ -67,7 +71,8 @@ function settle() {
 
 beforeEach(() => {
   jest.useFakeTimers();
-  mockPath = '/assessment';
+  mockPath = ELSEWHERE;
+  window.history.pushState({}, '', ELSEWHERE); // the browser URL matches the starting route
   push.mockClear();
   prefetch.mockClear();
   setReducedMotion(false);
@@ -80,17 +85,36 @@ afterEach(() => {
 });
 
 describe('which routes use the loader', () => {
-  it('is limited to Research and About', () => {
-    expect(Object.keys(LOADER_ROUTES).sort()).toEqual(['/about', '/research']);
+  it('covers all four sections and nothing else', () => {
+    expect(Object.keys(LOADER_ROUTES).sort()).toEqual(['/', '/about', '/assessment', '/research']);
+    expect(loaderDestination('/')).toBe('Overview');
+    expect(loaderDestination('/assessment')).toBe('Heart Analysis');
     expect(loaderDestination('/research')).toBe('Research');
     expect(loaderDestination('/about/')).toBe('About');
-    expect(loaderDestination('/')).toBeNull();
-    expect(loaderDestination('/assessment')).toBeNull();
+    expect(loaderDestination(ELSEWHERE)).toBeNull();
+    expect(loaderDestination('/research/extra')).toBeNull();
   });
 
-  it.each(['Overview', 'Heart Analysis'])('does not appear for %s', (name) => {
-    render(<App />);
+  it.each([
+    ['Overview', '/'],
+    ['Heart Analysis', '/assessment'],
+    ['Research', '/research'],
+    ['About', '/about'],
+  ])('plays for %s', (name, path) => {
+    const { rerender } = render(<App />);
     fireEvent.click(screen.getByRole('link', { name }));
+    expect(loader()).toHaveTextContent(`Loading ${name}`);
+    advance(LOADER_TIMING.pushDelay);
+    expect(push).toHaveBeenCalledWith(path);
+    arrive(rerender, path);
+    settle();
+    expect(loader()).toBeNull();
+  });
+
+  it('does not appear for links outside the sections', () => {
+    mockPath = '/terms';
+    render(<App />);
+    fireEvent.click(screen.getByRole('link', { name: 'Privacy' }));
     advance(500);
     expect(loader()).toBeNull();
     expect(push).not.toHaveBeenCalled();
@@ -167,7 +191,6 @@ describe('navigating by link', () => {
     advance(500);
     expect(loader()).toBeNull();
     expect(push).not.toHaveBeenCalled();
-    window.history.pushState({}, '', '/');
   });
 
   it('never stays up: leaves after the failsafe even if the route never arrives', () => {
@@ -183,7 +206,7 @@ describe('navigating by link', () => {
     const { rerender } = render(<App />);
     fireEvent.click(screen.getByRole('link', { name: 'About' }));
     advance(300);
-    arrive(rerender, '/'); // e.g. Back pressed before About arrived
+    arrive(rerender, '/terms'); // e.g. Back pressed onto a non-section page before About arrived
     expect(loader()).toHaveAttribute('data-phase', 'exit');
     advance(LOADER_TIMING.exit);
     expect(loader()).toBeNull();
@@ -199,7 +222,12 @@ describe('back, forward and direct visits', () => {
     settle();
     expect(loader()).toBeNull();
 
-    arrive(rerender, '/assessment');
+    arrive(rerender, ELSEWHERE);
+    expect(loader()).toBeNull();
+
+    arrive(rerender, '/assessment'); // Back to Heart Analysis
+    expect(loader()).toHaveTextContent('Loading Heart Analysis');
+    settle();
     expect(loader()).toBeNull();
   });
 
@@ -212,8 +240,16 @@ describe('back, forward and direct visits', () => {
     expect(loader()).toBeNull();
   });
 
-  it('renders nothing on a direct visit to other pages', () => {
-    mockPath = '/';
+  it.each(['/', '/assessment'])('is also part of the first render on a direct visit to %s', (path) => {
+    mockPath = path;
+    render(<App />);
+    expect(loader()).toHaveAttribute('data-initial', 'true');
+    settle();
+    expect(loader()).toBeNull();
+  });
+
+  it('renders nothing on a direct visit to a page outside the sections', () => {
+    mockPath = ELSEWHERE;
     render(<App />);
     expect(loader()).toBeNull();
   });

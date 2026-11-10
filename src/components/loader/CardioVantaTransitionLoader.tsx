@@ -11,7 +11,7 @@ export type LoaderPhase = "enter" | "complete" | "exit";
 
 interface LoaderProps {
   phase: LoaderPhase;
-  /** Destination name, read to assistive technology ("Loading Research"). */
+  /** Destination name, read to assistive technology ("Loading Heart Analysis"). */
   destination: string;
   /** Rendered by the server on a direct page load: start fully opaque so the page never flashes. */
   initial?: boolean;
@@ -154,7 +154,8 @@ function Halo() {
 }
 
 /**
- * The CardioVanta brand screen shown while moving to Research or About: ivory backdrop with corner
+ * The CardioVanta brand screen shown while moving between sections (Overview, Heart Analysis,
+ * Research, About): ivory backdrop with corner
  * ribbons, the glowing anatomical heart inside its technical halo, the wordmark, a progress bar and a
  * LOADING label. The bar tracks the page transition only; it has nothing to do with model computation.
  */
