@@ -162,7 +162,7 @@ _BUNDLE_PROBE = (
     "from backend.app.core.config import settings\n"
     "from fastapi.testclient import TestClient\n"
     # serving test: open the containment gate in this probe process only (see the root conftest.py);
-    # the shipped, closed state is checked by test_shipped_bundle_refuses_predictions below
+    # the shipped state is checked by test_shipped_bundle_serves_corrected_predictions below
     "import backend.app.core.prediction_availability as pa\n"
     "pa.current_availability = lambda: pa.PredictionAvailability(enabled=True, notice=pa.DEFAULT_NOTICE)\n"
     "with TestClient(app) as c:\n"
@@ -214,16 +214,16 @@ _CONTAINED_BUNDLE_PROBE = (
 
 
 @pytest.mark.prediction_containment
-def test_shipped_bundle_refuses_predictions(bundle):
-    """The simulated Vercel function, exactly as shipped, verifies the model but returns no prediction."""
-    assert json.loads((bundle / "configs" / "prediction_service.json").read_text())["predictions_enabled"] is False
+def test_shipped_bundle_serves_corrected_predictions(bundle):
+    """The simulated Vercel function, exactly as shipped (switch open), serves the R0.3 golden value."""
+    assert json.loads((bundle / "configs" / "prediction_service.json").read_text())["predictions_enabled"] is True
     r = _run(_CONTAINED_BUNDLE_PROBE, cwd=bundle)
     lines = [l[6:] for l in r.stdout.splitlines() if l.startswith("PROBE ")]
     assert r.returncode == 0 and lines, r.stderr[-2000:]
     probe = json.loads(lines[0])
-    assert probe["status"] == 503 and probe["health"] == 200
-    assert probe["body"]["code"] == "predictions_temporarily_unavailable"
-    assert "prediction" not in probe["body"] and probe["body"]["predictions_available"] is False
+    assert probe["status"] == 200 and probe["health"] == 200
+    assert abs(probe["body"]["prediction"]["probability"] - 0.985790929) < 1e-6
+    assert probe["body"]["prediction"]["outcome"] == "significant_obstructive_cad_present"
     assert probe["model"] == "cardiovanta-lr13@1.0.0"
 
 

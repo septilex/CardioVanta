@@ -1,6 +1,7 @@
 /**
- * Phase 10 production-incident containment: the web app with the real, shipped switch
- * (configs/prediction_service.json has predictions_enabled: false).
+ * Phase 10 production-incident containment. Predictions were re-enabled after the corrected (R0.3)
+ * serving code was deployed, so the shipped switch (configs/prediction_service.json) is open. The
+ * contained behaviour is still tested here with the switch closed for this file only.
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -16,6 +17,15 @@ import {
 import serviceConfig from '../configs/prediction_service.json';
 import type { PredictRequest } from '../src/types';
 
+jest.mock('../src/lib/predictionAvailability', () => ({
+  ...jest.requireActual('../src/lib/predictionAvailability'),
+  PREDICTION_AVAILABILITY: {
+    enabled: false,
+    notice:
+      'CardioVanta predictions are temporarily unavailable while we verify the prediction service. No risk estimate can currently be generated.',
+  },
+}));
+
 const NOTICE =
   'CardioVanta predictions are temporarily unavailable while we verify the prediction service. No risk estimate can currently be generated.';
 
@@ -24,7 +34,15 @@ const HIGH: PredictRequest = {
   thalach: 108, exang: 1, oldpeak: 3, slope: 1, ca: 3, thal: 3,
 };
 
-describe('Prediction containment (shipped switch)', () => {
+describe('Shipped switch', () => {
+  it('ships with predictions enabled and the agreed notice', () => {
+    const actual = jest.requireActual('../src/lib/predictionAvailability');
+    expect(serviceConfig.predictions_enabled).toBe(true);
+    expect(actual.PREDICTION_AVAILABILITY).toEqual({ enabled: true, notice: NOTICE });
+  });
+});
+
+describe('Prediction containment (switch closed)', () => {
   const realFetch = global.fetch;
   let fetchMock: jest.Mock;
 
@@ -37,8 +55,7 @@ describe('Prediction containment (shipped switch)', () => {
     global.fetch = realFetch;
   });
 
-  it('ships with predictions disabled and the agreed notice', () => {
-    expect(serviceConfig.predictions_enabled).toBe(false);
+  it('uses the agreed notice while closed', () => {
     expect(PREDICTION_AVAILABILITY).toEqual({ enabled: false, notice: NOTICE });
   });
 

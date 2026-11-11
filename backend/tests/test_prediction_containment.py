@@ -1,9 +1,10 @@
 """
 Phase 10 production-incident containment: regression tests for the prediction-availability switch.
 
-These tests use the real, shipped switch ``configs/prediction_service.json`` (the root conftest opens
-the gate only for tests without the ``prediction_containment`` marker). They prove that while
-predictions are unavailable:
+Predictions were re-enabled after the corrected (R0.3) serving code was deployed and contained in
+production. The shipped switch is now open; ``test_shipped_switch_enables_predictions`` checks that the
+shipped state serves the golden values. The remaining tests close the switch in-process (``closed``
+fixture) and prove that, should containment be needed again, while predictions are unavailable:
 - every direct ``POST /api/v1/predict`` gets the structured 503, before body validation;
 - no probability is returned and the model is never called;
 - health, startup model verification and unrelated routes are unaffected;
@@ -42,6 +43,13 @@ def client():
         yield c
 
 
+@pytest.fixture
+def closed(monkeypatch):
+    """Close the gate in-process, exactly as a shipped ``predictions_enabled: false`` would."""
+    monkeypatch.setattr(pa, "current_availability",
+                        lambda: pa.PredictionAvailability(enabled=False, notice=NOTICE))
+
+
 def _keys(obj):
     if isinstance(obj, dict):
         for k, v in obj.items():
@@ -54,12 +62,18 @@ def _keys(obj):
 
 # ---- the shipped state ------------------------------------------------------------------------------
 
-def test_shipped_switch_disables_predictions():
+def test_shipped_switch_enables_predictions(client):
     raw = json.loads(SWITCH.read_text(encoding="utf-8"))
-    assert raw["predictions_enabled"] is False
+    assert raw["predictions_enabled"] is True
     assert raw["notice"] == NOTICE
     assert pa.AVAILABILITY_FILE == SWITCH
-    assert pa.current_availability() == pa.PredictionAvailability(enabled=False, notice=NOTICE)
+    assert pa.current_availability() == pa.PredictionAvailability(enabled=True, notice=NOTICE)
+    # the shipped state serves the corrected (R0.3) orientation
+    hi, lo = (client.post("/api/v1/predict", json=p) for p in (HIGH, LOW))
+    assert hi.status_code == lo.status_code == 200
+    assert hi.json()["prediction"]["probability"] == pytest.approx(0.985790929, abs=1e-6)
+    assert lo.json()["prediction"]["probability"] == pytest.approx(0.016065906, abs=1e-6)
+    assert hi.json()["prediction"]["outcome"] == "significant_obstructive_cad_present"
 
 
 # ---- direct API requests are blocked ------------------------------------------------------------------
@@ -73,14 +87,14 @@ def test_shipped_switch_disables_predictions():
     ("no body", {}),
     ("non-JSON body", {"content": b"age=67", "headers": {"Content-Type": "text/plain"}}),
 ])
-def test_direct_predict_requests_get_structured_503(client, label, kwargs):
+def test_direct_predict_requests_get_structured_503(closed, client, label, kwargs):
     r = client.post("/api/v1/predict", **kwargs)
     assert r.status_code == 503, label
     assert r.json() == UNAVAILABLE
     assert r.headers["cache-control"] == "no-store"
 
 
-def test_no_probability_or_prediction_fields_while_disabled(client):
+def test_no_probability_or_prediction_fields_while_disabled(closed, client):
     for profile in (HIGH, LOW):
         r = client.post("/api/v1/predict", json=profile)
         body = r.json()
@@ -92,7 +106,7 @@ def test_no_probability_or_prediction_fields_while_disabled(client):
             assert value not in r.text
 
 
-def test_model_is_never_called_while_disabled(client, monkeypatch):
+def test_model_is_never_called_while_disabled(closed, client, monkeypatch):
     engine = app.state.inference_engine
     calls = []
     for name in ("predict", "explain", "explain_shap_equivalent"):
@@ -101,7 +115,7 @@ def test_model_is_never_called_while_disabled(client, monkeypatch):
     assert calls == []
 
 
-def test_refusal_is_logged_without_input_values(client, caplog):
+def test_refusal_is_logged_without_input_values(closed, client, caplog):
     with caplog.at_level(logging.WARNING):
         client.post("/api/v1/predict", json=HIGH)
     refused = [r for r in caplog.records if getattr(r, "event_type", None) == "prediction_refused"]
