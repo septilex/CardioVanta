@@ -1,0 +1,144 @@
+{
+    "target_column": "target",
+    "target_type": "binary",
+    "target_values": [
+        0,
+        1
+    ],
+    "feature_count": 13,
+    "missing_value_policy": "report",
+    "duplicate_policy": "report",
+    "features": [
+        {
+            "name": "age",
+            "type": "continuous",
+            "min": 29.0,
+            "max": 77.0,
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "sex",
+            "type": "binary",
+            "allowed_values": [
+                0,
+                1
+            ],
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "cp",
+            "type": "categorical",
+            "allowed_values": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "trestbps",
+            "type": "continuous",
+            "min": 94.0,
+            "max": 200.0,
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "chol",
+            "type": "continuous",
+            "min": 126.0,
+            "max": 564.0,
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "fbs",
+            "type": "binary",
+            "allowed_values": [
+                0,
+                1
+            ],
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "restecg",
+            "type": "categorical",
+            "allowed_values": [
+                0,
+                1,
+                2
+            ],
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "thalach",
+            "type": "continuous",
+            "min": 71.0,
+            "max": 202.0,
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "exang",
+            "type": "binary",
+            "allowed_values": [
+                0,
+                1
+            ],
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "oldpeak",
+            "type": "continuous",
+            "min": 0.0,
+            "max": 6.2,
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "slope",
+            "type": "categorical",
+            "allowed_values": [
+                0,
+                1,
+                2
+            ],
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "ca",
+            "type": "categorical",
+            "allowed_values": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "expected_dtype": "numeric"
+        },
+        {
+            "name": "thal",
+            "type": "categorical",
+            "allowed_values": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "expected_dtype": "numeric"
+        }
+    ],
+    "feature_order": [
+        "age",
+        "sex",
+        "cp",
+        "trestbps",
+        "chol",
+        "fbs",
+        "restecg",
+        "thalach",
+        "exang",
+        "oldpeak",
+        "slope",
+        "ca",
+        "thal"
+    ]
+}

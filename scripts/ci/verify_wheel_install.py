@@ -34,7 +34,8 @@ HIGH = dict(age=67.0, sex=1, cp=0, trestbps=160.0, chol=286.0, fbs=0, restecg=0,
             thalach=108.0, exang=1, oldpeak=3.0, slope=1, ca=3, thal=3)
 LOW = dict(age=37.0, sex=0, cp=2, trestbps=120.0, chol=200.0, fbs=0, restecg=1,
            thalach=187.0, exang=0, oldpeak=0.0, slope=2, ca=0, thal=2)
-GOLDEN = {"high": 0.985790929, "low": 0.016065906}
+GOLDEN_BY_VERSION = {"1.0.0": {"high": 0.985790929, "low": 0.016065906},
+                     "1.1.0": {"high": 0.994343297, "low": 0.007331075}}
 
 
 def main() -> int:
@@ -85,8 +86,8 @@ def main() -> int:
 
     engine = InferenceEngine(m)
     ph, pl = engine.predict(HIGH, 0.5), engine.predict(LOW, 0.5)
-    check("golden_high", abs(ph["probability"] - GOLDEN["high"]) < 1e-6, f"{ph['probability']:.6f}")
-    check("golden_low", abs(pl["probability"] - GOLDEN["low"]) < 1e-6, f"{pl['probability']:.6f}")
+    check("golden_high", abs(ph["probability"] - GOLDEN_BY_VERSION[args.model_version]["high"]) < 1e-6, f"{ph['probability']:.6f}")
+    check("golden_low", abs(pl["probability"] - GOLDEN_BY_VERSION[args.model_version]["low"]) < 1e-6, f"{pl['probability']:.6f}")
     check("threshold_classes", (ph["class"], pl["class"]) == (1, 0), f"{ph['class']},{pl['class']}")
     lin, shap = engine.explain(HIGH), engine.explain_shap_equivalent(HIGH)
     check("explanation_direction",

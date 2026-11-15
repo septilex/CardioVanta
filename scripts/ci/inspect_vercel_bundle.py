@@ -12,7 +12,7 @@ Reports, and exits 1 if any required check fails:
   * Whether dependencies were externalized to runtime installation (/tmp/_vc_deps) or bundled.
   * Presence of the registry entry, the six model artifacts, the canonical contract and the
     cardiovanta_ml package resources inside the function.
-  * That cardiovanta-lr13@1.0.0 loads from the bundle's own registry root with golden
+  * That the served model (SERVED_VERSION, currently cardiovanta-lr13@1.1.0) loads from the bundle's own registry root with golden
     probabilities, and that an unregistered version is rejected (no fallback).
 
 Never reads .vercel/.env* files (they contain pulled environment variables).
@@ -25,12 +25,17 @@ import subprocess
 import sys
 from pathlib import Path
 
-ENTRY = "artifacts/models/cardiovanta-lr13/1.0.0"
+SERVED_VERSION = "1.1.0"  # keep in sync with backend/app/core/config.py and backend/tests/served_model.py
+GOLDEN = {"1.0.0": (0.985790929, 0.016065906), "1.1.0": (0.994343297, 0.007331075)}
+ENTRY = f"artifacts/models/cardiovanta-lr13/{SERVED_VERSION}"
 REQUIRED = [
     f"{ENTRY}/metadata.json", f"{ENTRY}/checksums.sha256", f"{ENTRY}/model_card.md",
     "artifacts/model/model.joblib", "artifacts/model/explanation_model.joblib", "artifacts/model/metadata.json",
     "artifacts/model/feature_schema.json", "artifacts/model/shap_background.json",
     "artifacts/model/reference_predictions.csv",
+    "artifacts/model-1.1.0/model.joblib", "artifacts/model-1.1.0/explanation_model.joblib",
+    "artifacts/model-1.1.0/metadata.json", "artifacts/model-1.1.0/feature_schema.json",
+    "artifacts/model-1.1.0/shap_background.json", "artifacts/model-1.1.0/reference_predictions.csv",
     "cardiovanta_ml/contracts/feature_schema.v2.json", "cardiovanta_ml/contracts/generated_features.py",
     "cardiovanta_ml/registry/loader.py", "cardiovanta_ml/registry/integrity.py", "cardiovanta_ml/inference/predict.py",
     "api/index.py", "backend/app/main.py", "configs/prediction_service.json",
@@ -60,7 +65,7 @@ def find_project_root(func: Path) -> Path:
     hits = list(func.rglob(f"{ENTRY}/metadata.json"))
     if len(hits) != 1:
         raise SystemExit(f"Registry entry {ENTRY} found {len(hits)} times in the function bundle")
-    return hits[0].parents[4]  # .../<root>/artifacts/models/cardiovanta-lr13/1.0.0/metadata.json
+    return hits[0].parents[4]  # .../<root>/artifacts/models/cardiovanta-lr13/<version>/metadata.json
 
 
 def probe(root: Path, func: Path, version: str) -> dict:
@@ -138,18 +143,19 @@ def main() -> int:
                                      for top in ("artifacts", "cardiovanta_ml", "backend", "src", "configs", "api")
                                      if (root / top).exists()}
 
-    ok_probe = probe(root, func, "1.0.0")
+    ok_probe = probe(root, func, SERVED_VERSION)
     res = ok_probe["result"] or {}
-    check("loads_cardiovanta_lr13_1_0_0", ok_probe["returncode"] == 0 and res.get("model") == "cardiovanta-lr13@1.0.0",
+    g_high, g_low = GOLDEN[SERVED_VERSION]
+    check("loads_served_model", ok_probe["returncode"] == 0 and res.get("model") == f"cardiovanta-lr13@{SERVED_VERSION}",
           res or ok_probe["stderr_tail"])
     check("registry_root_inside_bundle", str(res.get("root", "")).startswith(str(root)), res.get("root"))
-    check("golden_probabilities", abs(res.get("p_high", 0) - 0.985790929) < 1e-6 and abs(res.get("p_low", 1) - 0.016065906) < 1e-6,
+    check("golden_probabilities", abs(res.get("p_high", 0) - g_high) < 1e-6 and abs(res.get("p_low", 1) - g_low) < 1e-6,
           {k: res.get(k) for k in ("p_high", "p_low")})
     # Containment (configs/prediction_service.json): the bundled API must do exactly what the switch says.
     if res.get("predictions_enabled") is True:
         api_ok = res.get("api_status") == [200, 200] and all(
             p is not None and abs(p - g) < 1e-6 for p, g in zip(res.get("api_probability") or [None, None],
-                                                                  (0.985790929, 0.016065906)))
+                                                                  (g_high, g_low)))
     else:
         api_ok = (res.get("api_status") == [503, 503]
                   and res.get("api_code") == ["predictions_temporarily_unavailable"] * 2

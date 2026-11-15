@@ -137,7 +137,7 @@ def test_public_api(model):
 def test_contract_resource_is_bundled_and_consistent():
     assert bundled_contract_sha256() == contract.CONTRACT_SHA256
     assert load_contract()["contract_version"] == contract.CONTRACT_VERSION == "2.1.0"
-    assert contract.CONTRACT_SHA256 == "a548a9b74b62e96e23ddcab83c610d500dc077ce0c1490e99cc630696eb14655"
+    assert contract.CONTRACT_SHA256 == "3446456282df00af43ba8ceec29cc54b58edb34fc9fb866b83e50bd3c347e980"
     assert list(contract.FEATURE_ORDER) == ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg",
                                             "thalach", "exang", "oldpeak", "slope", "ca", "thal"]
 
@@ -475,6 +475,9 @@ def test_explanation_association_mismatch_rejected(registry):
 # =============================================================================
 
 def test_single_load_per_process(fresh_cache, monkeypatch):
+    # This module pins the registry behaviour of 1.0.0; serve that version for the app part of the test.
+    from backend.app.core.config import settings
+    monkeypatch.setattr(settings, "MODEL_VERSION", MODEL_VERSION)
     real = joblib.load
     calls = []
     monkeypatch.setattr(joblib, "load", lambda *a, **k: calls.append(Path(a[0]).name) or real(*a, **k))
@@ -495,7 +498,8 @@ def test_backend_startup_uses_registry_not_legacy_loader():
     src = (ROOT / "backend" / "app" / "main.py").read_text(encoding="utf-8")
     assert "load_model(" in src and "ModelLoader" not in src
     from backend.app.core.config import settings
-    assert (settings.MODEL_ID, settings.MODEL_VERSION) == (MODEL_ID, MODEL_VERSION)
+    from backend.tests.served_model import SERVED_VERSION
+    assert (settings.MODEL_ID, settings.MODEL_VERSION) == (MODEL_ID, SERVED_VERSION)
 
 
 # =============================================================================
@@ -517,7 +521,10 @@ def _assert_close(a, b, path="body"):
         assert a == b, path
 
 
-def test_api_responses_match_pre_r2_snapshot():
+def test_api_responses_match_pre_r2_snapshot(monkeypatch):
+    # The snapshot records the 1.0.0 API; serve 1.0.0 so the comparison stays byte-exact.
+    from backend.app.core.config import settings
+    monkeypatch.setattr(settings, "MODEL_VERSION", MODEL_VERSION)
     snapshot = json.loads((Path(__file__).parent / "fixtures" / "pre_r2_api_snapshot.json").read_text())
     from backend.app.main import app
     with TestClient(app) as c:
@@ -643,4 +650,5 @@ def test_vercel_bundle_contains_package_and_serves_predictions(tmp_path):
     r = _run_isolated(code, cwd=bundle)
     assert r.returncode == 0, r.stderr[-2000:]
     results = [line for line in r.stdout.splitlines() if line.startswith("RESULT ")]  # app logs JSON to stdout too
-    assert results == ["RESULT 200 0.9858"]
+    from backend.tests.served_model import SERVED_GOLDEN
+    assert results == [f"RESULT 200 {round(SERVED_GOLDEN['HIGH'], 4)}"]

@@ -18,7 +18,7 @@
   "feature_contract": {
     "name": "cardiovanta.clinical_feature_and_outcome_contract",
     "version": "2.1.0",
-    "sha256": "a548a9b74b62e96e23ddcab83c610d500dc077ce0c1490e99cc630696eb14655"
+    "sha256": "3446456282df00af43ba8ceec29cc54b58edb34fc9fb866b83e50bd3c347e980"
   },
   "feature_order": ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal"],
   "model_classes": [0, 1],

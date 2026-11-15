@@ -50,7 +50,14 @@ def _build_calibration_splits(X, y, groups, cal_cv):
     sgkf = StratifiedGroupKFold(n_splits=cal_cv)
     return list(sgkf.split(X, y, groups=groups))
 
-def build_production_package(output_dir=None):
+def build_production_package(output_dir=None, package_version="1.0.0", calibration_ensemble=True):
+    """Build a production model package.
+
+    ``package_version="1.0.0", calibration_ensemble=True`` reproduces the original Phase 5 package.
+    ``calibration_ensemble=False`` is the H2.1-confirmed recipe (cardiovanta-lr13@1.1.0): one sigmoid fitted on
+    the pooled out-of-fold decision values of the same 5 duplicate-aware splits, applied to one model refitted
+    on all 242 development rows (reports/h2_1_calibration_confirmation.md).
+    """
     print("Starting Phase 5: Final Model Packaging...")
     
     req_version = verify_sklearn_version()
@@ -82,7 +89,7 @@ def build_production_package(output_dir=None):
     ])
     
     splits = _build_calibration_splits(X_train, y_train, dev_groups, 5)
-    cal_clf = CalibratedClassifierCV(estimator=base_pipe, method='sigmoid', cv=splits)
+    cal_clf = CalibratedClassifierCV(estimator=base_pipe, method='sigmoid', cv=splits, ensemble=calibration_ensemble)
     
     print("Fitting final production model on full development set...")
     cal_clf.fit(X_train, y_train)
@@ -145,8 +152,8 @@ def build_production_package(output_dir=None):
 
     # 4. Metadata
     metadata = {
-        "package_version": "1.0.0",
-        "model_version": "Phase5-Final",
+        "package_version": package_version,
+        "model_version": "Phase5-Final" if calibration_ensemble else "H2.1-pooled-calibration",
         "training_data_provenance": {
             "source_dataset_name": "heart.csv",
             "raw_dataset_sha256": get_file_hash(RAW_DATA_PATH),
@@ -170,7 +177,8 @@ def build_production_package(output_dir=None):
         "calibration_configuration": {
             "method": "sigmoid",
             "cv": 5,
-            "duplicate_aware_grouping": True
+            "duplicate_aware_grouping": True,
+            **({} if calibration_ensemble else {"ensemble": False})
         },
         "threshold_policy": {
             "note": "A statistically selected threshold is NOT automatically a clinically validated decision threshold. Production inference must return calibrated probability. Applying a threshold is optional. Any threshold is a mathematical operating point, not a clinical diagnosis.",
@@ -195,5 +203,9 @@ def build_production_package(output_dir=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Phase 5 Model Packaging")
     parser.add_argument("--output-dir", type=str, help="Output directory for artifacts")
+    parser.add_argument("--package-version", type=str, default="1.0.0")
+    parser.add_argument("--pooled-calibration", action="store_true",
+                        help="H2.1 recipe: CalibratedClassifierCV(ensemble=False)")
     args = parser.parse_args()
-    build_production_package(output_dir=args.output_dir)
+    build_production_package(output_dir=args.output_dir, package_version=args.package_version,
+                             calibration_ensemble=not args.pooled_calibration)

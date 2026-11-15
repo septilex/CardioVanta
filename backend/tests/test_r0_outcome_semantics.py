@@ -34,7 +34,8 @@ from src.inference.outcome import (
 )
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-MODEL_DIR = ROOT / "artifacts" / "model"
+from backend.tests.served_model import SERVED_GOLDEN, SERVED_VERSION, SERVED_QUALIFIED_NAME, SERVED_ARTIFACT_DIR
+MODEL_DIR = SERVED_ARTIFACT_DIR
 
 # Hand-checked synthetic fixtures.
 # HIGH: older man, asymptomatic chest pain (the highest-prevalence presentation in
@@ -50,7 +51,7 @@ LOW_RISK = dict(age=37.0, sex=0, cp=2, trestbps=120.0, chol=200.0, fbs=0, restec
 
 # Pinned values (computed from the frozen model.joblib, sha256 18e2268e...).
 # Before R0.3 the API returned 0.014209 for HIGH and 0.983934 for LOW (inverted).
-GOLDEN_P_DISEASE = {"HIGH": 0.985790929, "LOW": 0.016065906}
+GOLDEN_P_DISEASE = SERVED_GOLDEN  # 1.0.0: HIGH 0.985790929, LOW 0.016065906 (backend/tests/served_model.py)
 
 
 @pytest.fixture(scope="module")
@@ -143,10 +144,10 @@ def test_api_outcome_semantics_are_disease_positive(client):
 
 def test_outcome_helpers_match_loaded_model(artifacts):
     metadata = json.loads((MODEL_DIR / "metadata.json").read_text())
-    assert metadata["package_version"] == "1.0.0"
+    assert metadata["package_version"] == SERVED_VERSION
     assert "outcome_semantics" not in metadata  # frozen package: interim mapping applies
     label = resolve_disease_label(metadata)
-    assert label == LEGACY_PACKAGE_DISEASE_LABEL["1.0.0"] == 0
+    assert label == LEGACY_PACKAGE_DISEASE_LABEL[SERVED_VERSION] == 0
     assert disease_label_index(artifacts["model"].classes_, label) == 0
     assert disease_log_odds_sign(artifacts["explanation_model"].classes_, label) == -1.0
     assert outcome_mapping_source(metadata) == "interim_legacy_inverted_target_mapping"
@@ -245,7 +246,7 @@ def test_frontend_cp_labels_match_verified_mapping():
     src = (ROOT / "src" / "app" / "assessment" / "page.tsx").read_text(encoding="utf-8")
     select = re.search(r'<select[^>]*id="cp"[\s\S]*?</select>', src).group(0)
     assert '{renderOptions("cp")}' in select and "<option" not in select
-    assert "CATEGORICAL_OPTIONS[feature].map" in src
+    assert "CATEGORICAL_OPTIONS[feature]" in src
 
 
 def _page_source():

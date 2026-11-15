@@ -1,6 +1,10 @@
 artifacts/model/*.json text eol=lf
 artifacts/model/*.csv text eol=lf
 artifacts/model/*.joblib binary
+# cardiovanta-lr13@1.1.0 artifacts (hashed byte-for-byte by the registry manifest).
+artifacts/model-1.1.0/*.json text eol=lf
+artifacts/model-1.1.0/*.csv text eol=lf
+artifacts/model-1.1.0/*.joblib binary
 configs/artifact_hashes.json text eol=lf
 # R2 model registry: checksum manifests are hashed byte-for-byte, so line endings must never be converted.
 artifacts/models/**/checksums.sha256 text eol=lf

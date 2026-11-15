@@ -23,6 +23,7 @@ from fastapi.testclient import TestClient
 from backend.app.core import prediction_availability as pa
 from backend.app.main import app
 
+from backend.tests.served_model import SERVED_GOLDEN, SERVED_VERSION, SERVED_QUALIFIED_NAME, SERVED_ARTIFACT_DIR
 pytestmark = pytest.mark.prediction_containment
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -71,8 +72,8 @@ def test_shipped_switch_enables_predictions(client):
     # the shipped state serves the corrected (R0.3) orientation
     hi, lo = (client.post("/api/v1/predict", json=p) for p in (HIGH, LOW))
     assert hi.status_code == lo.status_code == 200
-    assert hi.json()["prediction"]["probability"] == pytest.approx(0.985790929, abs=1e-6)
-    assert lo.json()["prediction"]["probability"] == pytest.approx(0.016065906, abs=1e-6)
+    assert hi.json()["prediction"]["probability"] == pytest.approx(SERVED_GOLDEN["HIGH"], abs=1e-6)
+    assert lo.json()["prediction"]["probability"] == pytest.approx(SERVED_GOLDEN["LOW"], abs=1e-6)
     assert hi.json()["prediction"]["outcome"] == "significant_obstructive_cad_present"
 
 
@@ -102,7 +103,7 @@ def test_no_probability_or_prediction_fields_while_disabled(closed, client):
         assert not found & {"prediction", "probability", "explanation", "shap_equivalent_explanation",
                             "development_range_warning", "metadata", "outcome"}
         # neither the correct nor the inverted golden value appears anywhere in the response
-        for value in ("0.98579", "0.01606", "0.01420", "0.98393"):
+        for value in ("0.98579", "0.01606", "0.01420", "0.98393", "0.99434", "0.00733"):
             assert value not in r.text
 
 
@@ -133,8 +134,8 @@ def test_health_and_verified_model_load_unaffected(client):
     assert r.json() == {"status": "ok", "service": "CardioVanta"}
     # startup still loads and SHA-256-verifies the unchanged registered model; the engine itself is correct
     engine = app.state.inference_engine
-    assert engine.loaded.metadata.qualified_name == "cardiovanta-lr13@1.0.0"
-    assert engine.predict(dict(HIGH))["probability"] == pytest.approx(0.985790929, abs=1e-6)
+    assert engine.loaded.metadata.qualified_name == SERVED_QUALIFIED_NAME
+    assert engine.predict(dict(HIGH))["probability"] == pytest.approx(SERVED_GOLDEN["HIGH"], abs=1e-6)
 
 
 def test_unrelated_routes_unaffected(client):
@@ -148,8 +149,8 @@ def test_reenabling_the_switch_restores_the_unchanged_prediction_path(client, mo
     monkeypatch.setattr(pa, "current_availability", lambda: pa.PredictionAvailability(enabled=True, notice=NOTICE))
     hi, lo = (client.post("/api/v1/predict", json=p) for p in (HIGH, LOW))
     assert hi.status_code == lo.status_code == 200
-    assert hi.json()["prediction"]["probability"] == pytest.approx(0.985790929, abs=1e-6)
-    assert lo.json()["prediction"]["probability"] == pytest.approx(0.016065906, abs=1e-6)
+    assert hi.json()["prediction"]["probability"] == pytest.approx(SERVED_GOLDEN["HIGH"], abs=1e-6)
+    assert lo.json()["prediction"]["probability"] == pytest.approx(SERVED_GOLDEN["LOW"], abs=1e-6)
     assert hi.json()["prediction"]["outcome"] == "significant_obstructive_cad_present"
 
 

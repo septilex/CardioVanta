@@ -24,7 +24,8 @@ from cardiovanta_ml.registry import IntegrityError, RegistryError
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 REGISTRY_ROOT = ROOT / "artifacts"
-ENTRY_REL = Path("models") / "cardiovanta-lr13" / "1.0.0"
+from backend.tests.served_model import SERVED_GOLDEN, SERVED_VERSION, SERVED_QUALIFIED_NAME, SERVED_ARTIFACT_DIR
+ENTRY_REL = Path("models") / "cardiovanta-lr13" / SERVED_VERSION
 VERCEL_SUPPORTED_PYTHON = {"3.12", "3.13", "3.14"}  # vercel.com/docs/functions/runtimes/python (2026-08-12)
 HIGH_RISK = dict(age=67.0, sex=1, cp=0, trestbps=160.0, chol=286.0, fbs=0, restecg=0,
                  thalach=108.0, exang=1, oldpeak=3.0, slope=1, ca=3, thal=3)
@@ -126,6 +127,9 @@ def test_vercel_config_includes_runtime_resources():
         "artifacts/model/model.joblib", "artifacts/model/explanation_model.joblib",
         "artifacts/model/metadata.json", "artifacts/model/feature_schema.json",
         "artifacts/model/shap_background.json", "artifacts/model/reference_predictions.csv",
+        *(f"{SERVED_ARTIFACT_DIR.relative_to(ROOT).as_posix()}/{name}" for name in (
+            "model.joblib", "explanation_model.joblib", "metadata.json", "feature_schema.json",
+            "shap_background.json", "reference_predictions.csv")),
         "backend/app/main.py", "backend/app/core/config.py", "src/config/config.py",
         "configs/prediction_service.json",
     ]
@@ -192,10 +196,10 @@ def test_bundle_resolves_registry_inside_function_and_serves_pinned_model(bundle
     r, probe = _probe(bundle)
     assert r.returncode == 0, r.stderr[-2000:]
     root = bundle.resolve()
-    assert probe["status"] == 200 and probe["p"] == 0.9858
-    assert probe["model"] == "cardiovanta-lr13@1.0.0"
+    assert probe["status"] == 200 and probe["p"] == round(SERVED_GOLDEN["HIGH"], 4)
+    assert probe["model"] == SERVED_QUALIFIED_NAME
     assert Path(probe["root"]) == root / "artifacts"                    # registry root inside the bundle
-    assert Path(probe["artifact_dir"]) == root / "artifacts" / "model"
+    assert Path(probe["artifact_dir"]) == root / "artifacts" / SERVED_ARTIFACT_DIR.name
     assert Path(probe["entry_dir"]) == root / "artifacts" / ENTRY_REL
     assert probe["legacy_imported"] is False                             # serving never touches the legacy adapter
 
@@ -222,9 +226,9 @@ def test_shipped_bundle_serves_corrected_predictions(bundle):
     assert r.returncode == 0 and lines, r.stderr[-2000:]
     probe = json.loads(lines[0])
     assert probe["status"] == 200 and probe["health"] == 200
-    assert abs(probe["body"]["prediction"]["probability"] - 0.985790929) < 1e-6
+    assert abs(probe["body"]["prediction"]["probability"] - SERVED_GOLDEN["HIGH"]) < 1e-6
     assert probe["body"]["prediction"]["outcome"] == "significant_obstructive_cad_present"
-    assert probe["model"] == "cardiovanta-lr13@1.0.0"
+    assert probe["model"] == SERVED_QUALIFIED_NAME
 
 
 @pytest.mark.parametrize("env", [{"MODEL_VERSION": "1.0.1"}, {"MODEL_VERSION": "9.9.9"},
@@ -238,9 +242,9 @@ def test_bundle_never_falls_back_to_another_model(bundle, env):
 def test_environment_config_pins_explicit_model():
     env_example = (ROOT / ".env.example").read_text(encoding="utf-8")
     assert re.search(r"^MODEL_ID=cardiovanta-lr13$", env_example, re.M)
-    assert re.search(r"^MODEL_VERSION=1\.0\.0$", env_example, re.M)
+    assert re.search(r"^MODEL_VERSION=" + re.escape(SERVED_VERSION) + r"$", env_example, re.M)
     from backend.app.core.config import settings
-    assert (settings.MODEL_ID, settings.MODEL_VERSION) == ("cardiovanta-lr13", "1.0.0")
+    assert (settings.MODEL_ID, settings.MODEL_VERSION) == ("cardiovanta-lr13", SERVED_VERSION)
 
 
 # =============================================================================
@@ -298,7 +302,8 @@ def test_legacy_loader_delegates_to_verified_registry(fresh_cache):
 def tmp_registry(tmp_path, fresh_cache):
     root = tmp_path / "artifacts"
     shutil.copytree(REGISTRY_ROOT / "model", root / "model")
-    shutil.copytree(REGISTRY_ROOT / ENTRY_REL, root / ENTRY_REL)
+    legacy_entry = Path("models") / "cardiovanta-lr13" / "1.0.0"  # the legacy loader serves artifacts/model (1.0.0)
+    shutil.copytree(REGISTRY_ROOT / legacy_entry, root / legacy_entry)
     return root
 
 

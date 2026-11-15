@@ -58,6 +58,18 @@
           "target_harmonisation",
           "R0.3 coefficient-sign and synthetic-profile verification (backend/tests/test_r0_outcome_semantics.py)"
         ]
+      },
+      {
+        "model_id": "cardiovanta-lr13",
+        "package_version": "1.1.0",
+        "artifact": "artifacts/model-1.1.0/model.joblib",
+        "disease_present_label": 0,
+        "status": "interim_legacy",
+        "reason": "Same training data, target column and recipe as 1.0.0 (src/experiment/phase5.py), with pooled out-of-fold sigmoid calibration (ensemble=False) confirmed by H2.1. The raw target encoding is inverted relative to UCI num, exactly as for 1.0.0.",
+        "evidence": [
+          "target_harmonisation",
+          "R0.3 coefficient-sign and synthetic-profile verification (backend/tests/test_r0_outcome_semantics.py)"
+        ]
       }
     ]
   },

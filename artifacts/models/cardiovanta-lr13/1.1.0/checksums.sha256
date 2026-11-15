@@ -1,0 +1,9 @@
+# SHA-256 manifest for cardiovanta-lr13@1.1.0 (sha256sum format).
+# Files live in the registry's artifact_directory: artifacts/model-1.1.0/ (immutable once registered).
+# explanation_model.joblib, feature_schema.json and shap_background.json are byte-identical to 1.0.0.
+da66de612a2bb2d45ecf1319bb2e07708c76688da2b54c2e529c6f6d7186aecc  explanation_model.joblib
+eeb6c2bd8383628de1de552219f8c4add628277292ea5815f4f384f2ba4b44a2  feature_schema.json
+044b331503c101b400c9dcf62a89c7eebabb09de42f406ddad9d89aa389774d1  metadata.json
+a513fcf90ef7e56f685dfd3aeb0cd4ea05664db1cd4a10a238337ca6a43c8c51  model.joblib
+8ded5ecf7b1ca484b1a42fa764037a7cb67b64587e5a92cfeba322430d5925b7  reference_predictions.csv
+f5964e2a42527ea770e7037120f355a403e0916b326ae44fad5a2c8f31339e1d  shap_background.json

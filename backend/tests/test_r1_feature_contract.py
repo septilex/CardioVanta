@@ -24,6 +24,7 @@ from backend.app.schemas.predict import FeatureContributions, PredictRequest
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 CONTRACT_PATH = ROOT / "cardiovanta_ml" / "contracts" / "feature_schema.v2.json"
+from backend.tests.served_model import SERVED_GOLDEN, SERVED_VERSION, SERVED_QUALIFIED_NAME, SERVED_ARTIFACT_DIR
 ARTIFACT_SCHEMA_PATH = ROOT / "artifacts" / "model" / "feature_schema.json"
 PRODUCTION_FEATURES = ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg",
                        "thalach", "exang", "oldpeak", "slope", "ca", "thal"]
@@ -185,7 +186,7 @@ def test_legacy_model_label_mapping_is_separate_from_outcome(contract):
     assert legacy["package_version"] == "1.0.0" and legacy["status"] == "interim_legacy"
     # Clinical positive value is 1; the legacy artifact's disease label is 0. Two different concepts.
     assert contract["outcome"]["positive"]["value"] == 1 and legacy["disease_present_label"] == 0
-    assert gen.LEGACY_PACKAGE_DISEASE_LABELS == {"1.0.0": 0}
+    assert gen.LEGACY_PACKAGE_DISEASE_LABELS == {"1.0.0": 0, "1.1.0": 0}
     from src.inference import outcome
     assert outcome.LEGACY_PACKAGE_DISEASE_LABEL == gen.LEGACY_PACKAGE_DISEASE_LABELS
     assert outcome.OUTCOME_ID == gen.OUTCOME_ID
@@ -430,8 +431,8 @@ def test_r03_disease_positive_semantics_intact():
     with TestClient(app) as c:
         h = c.post("/api/v1/predict?threshold=0.5", json=high).json()
         lo = c.post("/api/v1/predict?threshold=0.5", json=low).json()
-    assert h["prediction"]["probability"] == pytest.approx(0.985790929, abs=1e-6)
-    assert lo["prediction"]["probability"] == pytest.approx(0.016065906, abs=1e-6)
+    assert h["prediction"]["probability"] == pytest.approx(SERVED_GOLDEN["HIGH"], abs=1e-6)
+    assert lo["prediction"]["probability"] == pytest.approx(SERVED_GOLDEN["LOW"], abs=1e-6)
     assert (h["prediction"]["class"], lo["prediction"]["class"]) == (1, 0)
     assert h["prediction"]["outcome"] == gen.OUTCOME_ID
     assert h["prediction"]["probability_definition"] == gen.PROBABILITY_DEFINITION

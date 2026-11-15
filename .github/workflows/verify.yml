@@ -97,6 +97,10 @@ jobs:
             --registry-root "$GITHUB_WORKSPACE/artifacts" \
             --model-id cardiovanta-lr13 --model-version 1.0.0 \
             --repo-root "$GITHUB_WORKSPACE"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -I "$GITHUB_WORKSPACE/scripts/ci/verify_wheel_install.py" \
+            --registry-root "$GITHUB_WORKSPACE/artifacts" \
+            --model-id cardiovanta-lr13 --model-version 1.1.0 \
+            --repo-root "$GITHUB_WORKSPACE"
 
       - name: Run Classified Safe Tests (backend synthetic suite and ci_safe research tests)
         env:
