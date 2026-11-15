@@ -293,7 +293,7 @@
   max-width: 44px;
   min-width: 18px;
   height: 1px;
-  background-color: #D8D0C5;
+  background-color: #D9707C;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -571,7 +571,7 @@
   appearance: none;
   width: 100%;
   height: 4px;
-  background: #E4DAD0;
+  background: #E8939C;
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -790,7 +790,7 @@
 }
 
 .ax-donut-bg {
-  stroke: #EAE1D6;
+  stroke: #E8939C;
 }
 
 .ax-donut-fg {
@@ -1887,7 +1887,7 @@
   background: linear-gradient(
     to right,
     var(--ax-burgundy) 0 var(--pct, 0%),
-    #E4DAD0 var(--pct, 0%) 100%
+    #E8939C var(--pct, 0%) 100%
   );
 }
 .ax-slider-range::-webkit-slider-thumb {
@@ -2019,7 +2019,7 @@
 }
 .ax-gauge-track {
   fill: none;
-  stroke: #EAE1D6;
+  stroke: #E8939C;
   stroke-width: 8;
 }
 .ax-gauge-fill {
@@ -2787,7 +2787,7 @@
 
 /* Donut: gradient arc with a soft glow */
 .ax-donut-bg {
-  stroke: #EFE6DB;
+  stroke: #E8939C;
 }
 .ax-donut-fg {
   stroke: url(#ax-donut-grad);
@@ -2811,7 +2811,7 @@
   flex: 1;
   height: 5px;
   border-radius: 3px;
-  background-color: #EBE2D7;
+  background-color: #E8939C;
   transition:
     background-color var(--cv-dur-base) var(--cv-ease-out),
     transform var(--cv-dur-base) var(--cv-ease-out);
@@ -3078,4 +3078,56 @@
   .ax-edit-link:hover svg {
     transform: none;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ROSE FIELD CARDS
+   Measurement cards carry a soft tint of the brand crimson with a crimson accent
+   edge, instead of the neutral off-white. Inputs stay white; the slider runs
+   crimson on a rose track.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ax-fields-grid > .ax-field-box {
+  background-color: #FBF0F1;
+  background-image: linear-gradient(160deg, #FDF5F6 0%, #F8E6E8 100%);
+  border-color: #EFCFD4;
+  box-shadow: inset 3px 0 0 var(--ax-crimson);
+  overflow: hidden;
+}
+.ax-fields-grid > .ax-field-box:hover {
+  border-color: #E4B3BA;
+  box-shadow: inset 3px 0 0 var(--ax-crimson), 0 4px 14px rgba(158, 27, 46, 0.08);
+}
+.ax-fields-grid > .ax-field-box:focus-within {
+  background-color: #FBF0F1;
+  border-color: #D98C97;
+  box-shadow: inset 4px 0 0 var(--ax-burgundy), 0 6px 18px rgba(158, 27, 46, 0.12);
+}
+.ax-fields-grid > .ax-field-box .ax-field-label {
+  color: var(--ax-burgundy);
+}
+.ax-fields-grid > .ax-field-box .ax-field-code {
+  color: #B4747E;
+}
+.ax-fields-grid > .ax-field-box .ax-field-helper,
+.ax-fields-grid > .ax-field-box .ax-slider-labels {
+  color: #8A5A61;
+}
+.ax-fields-grid > .ax-field-box .ax-input-row,
+.ax-fields-grid > .ax-field-box .ax-select-wrap {
+  border-color: #EBC9CE;
+}
+.ax-fields-grid > .ax-field-box .ax-input-row:hover,
+.ax-fields-grid > .ax-field-box .ax-select-wrap:hover {
+  border-color: #D9A0A9;
+}
+.ax-fields-grid > .ax-field-box .ax-unit-badge {
+  background-color: #FCF3F4;
+  border-left-color: #EFCFD4;
+}
+.ax-fields-grid > .ax-field-box .ax-slider-range {
+  background: linear-gradient(
+    to right,
+    var(--ax-crimson) 0 var(--pct, 0%),
+    #EBC2C8 var(--pct, 0%) 100%
+  );
 }
