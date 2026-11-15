@@ -13,6 +13,7 @@ jest.mock('../src/lib/predictionAvailability', () => ({
 
 jest.mock('../src/lib/api', () => ({
   predict: jest.fn(),
+  warmUpPredictionService: jest.fn(),
   ApiError: class ApiError extends Error {
     status?: number;
     constructor(msg: string, status?: number) {
@@ -201,7 +202,7 @@ describe('CardioVanta Page Skeleton', () => {
     fireEvent.click(screen.getByRole('button', { name: /Generate Analysis/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Request timed out. Please try again./i)).toBeInTheDocument();
+      expect(screen.getByText(/took too long to respond/i)).toBeInTheDocument();
     });
   });
 });

@@ -17,8 +17,8 @@
   "model_card": "model_card.md",
   "feature_contract": {
     "name": "cardiovanta.clinical_feature_and_outcome_contract",
-    "version": "2.0.0",
-    "sha256": "ec8918e717a892c1c14a820b4df03cd64fb8bf8810e55a7a73b9823065c5431b"
+    "version": "2.1.0",
+    "sha256": "a548a9b74b62e96e23ddcab83c610d500dc077ce0c1490e99cc630696eb14655"
   },
   "feature_order": ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal"],
   "model_classes": [0, 1],
@@ -28,7 +28,7 @@
   },
   "outcome_semantics": {
     "outcome": "significant_obstructive_cad_present",
-    "contract_version": "2.0.0",
+    "contract_version": "2.1.0",
     "disease_present_label": 0,
     "mapping_status": "interim_legacy",
     "evidence": [

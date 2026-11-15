@@ -120,29 +120,41 @@ def test_chest_pain_mapping(features):
     assert all(v["verification"] == "verified_patient_matched" for v in cp.values())
 
 
+# Contract 2.1.0: restecg, slope and thal were patient-matched 1-to-1 against UCI processed.cleveland.data
+# (docs/reports/CATEGORICAL_ENCODING_VERIFICATION_2026-11-15.md). The training encoding differs from the
+# UCI codebook for all three, and the 2.0.0 labels were wrong. These assertions pin the verified meaning.
+
 def test_resting_ecg_mapping(features):
     ecg = _options(features, "restecg")
     assert {k: v["display_label"] for k, v in ecg.items()} == {
-        0: "Normal", 1: "ST-T Wave Abnormality", 2: "Left Ventricular Hypertrophy"}
-    assert all(v["verification"] == "codebook_and_project_contract" for v in ecg.values())
+        0: "Left Ventricular Hypertrophy", 1: "Normal", 2: "ST-T Wave Abnormality"}
+    assert {k: v["canonical_uci_code"] for k, v in ecg.items()} == {0: 2, 1: 0, 2: 1}
+    assert all(v["verification"] == "verified_patient_matched" for v in ecg.values())
 
 
-def test_unverified_mappings_remain_explicitly_unverified(features):
-    for fid in ("slope", "thal"):
-        for code, o in _options(features, fid).items():
-            if fid == "thal" and code == 0:
-                continue
-            assert o["verification"] == "unverified", (fid, code)
-            assert o["clinical_meaning"] is None, (fid, code)
+def test_slope_mapping(features):
+    slope = _options(features, "slope")
+    assert {k: v["display_label"] for k, v in slope.items()} == {0: "Downsloping", 1: "Flat", 2: "Upsloping"}
+    assert {k: v["canonical_uci_code"] for k, v in slope.items()} == {0: 3, 1: 2, 2: 1}
+    assert all(v["verification"] == "verified_patient_matched" for v in slope.values())
+
+
+def test_thal_mapping(features):
+    thal = _options(features, "thal")
+    assert {k: v["display_label"] for k, v in thal.items()} == {
+        0: "Not recorded", 1: "Fixed Defect", 2: "Normal", 3: "Reversible Defect"}
+    assert {k: v.get("canonical_uci_code") for k, v in thal.items() if k} == {1: 6, 2: 3, 3: 7}
+    assert all(v["verification"] == "verified_patient_matched" for v in thal.values())
+
+
+def test_missing_value_codes_are_labelled_as_not_recorded(features):
     for fid, code in (("ca", 4), ("thal", 0)):
         o = _options(features, fid)[code]
-        assert o["verification"] == "undefined_in_codebook"
-        assert o["clinical_meaning"] is None
-        assert "not in UCI codebook" in o["display_label"]
-        assert "missing" not in o["display_label"].lower()  # not converted into a fabricated category
-    assert gen.FEATURES["slope"]["mapping_fully_verified"] is False
-    assert gen.FEATURES["thal"]["mapping_fully_verified"] is False
-    assert gen.FEATURES["cp"]["mapping_fully_verified"] is True
+        assert o["display_label"] == "Not recorded"
+        assert "missing" in o["clinical_meaning"]
+        assert "canonical_uci_code" not in o
+    for fid in ("cp", "restecg", "slope", "thal", "ca"):
+        assert gen.FEATURES[fid]["mapping_fully_verified"] is True, fid
 
 
 def test_accepted_code_is_distinct_from_verified_label(features):
@@ -310,7 +322,7 @@ def _mutated(mutate):
     (lambda c: c["features"][0].update(type="ordinal"), "unsupported type"),
     (lambda c: c["features"][0].update(colour="red"), "unsupported key"),
     (lambda c: c["features"][1].update(required=False), "optional features are not supported"),
-    (lambda c: c["features"][10]["options"][0].update(clinical_meaning="upsloping"), "must not assert a clinical_meaning"),
+    (lambda c: c["features"][10]["options"][0].update(verification="unverified"), "must not assert a clinical_meaning"),
     (lambda c: c["features"][2]["options"][0].update(verification="probably"), "unknown verification"),
     (lambda c: c["features"][1]["options"].append({"code": 2, "display_label": "x", "clinical_meaning": "x", "verification": "codebook_and_project_contract"}), "binary features must have codes"),
     (lambda c: c["outcome"]["positive"].update(meaning="healthy"), "disease_present"),

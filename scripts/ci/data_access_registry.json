@@ -145,6 +145,14 @@
         "long-beach-va.data"
       ]
     },
+    "scripts/research/verify_categorical_encoding.py": {
+      "role": "research_data_access",
+      "reason": "contract 2.1.0 categorical-encoding verification: matches the 242 development rows to UCI processed.cleveland.data (manual research tooling, never run in CI)",
+      "tokens": [
+        "cleveland.data",
+        "processed.cleveland.data"
+      ]
+    },
     "src/cardiovanta/data/external_loader.py": {
       "role": "research_data_access",
       "reason": "loads Cleveland and external cohort raw files",

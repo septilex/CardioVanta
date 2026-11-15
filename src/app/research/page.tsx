@@ -93,7 +93,7 @@ const ERAS: { name: string; items: Milestone[] }[] = [
         status: "done",
         body: (
           <>
-            One JSON contract (v2.0.0) defines the 13 inputs, codes, units, ranges and per-code evidence. Python and
+            One JSON contract (v2.1.0) defines the 13 inputs, codes, units, ranges and per-code evidence. Python and
             TypeScript definitions are generated from it, and CI rejects stale generated code.
           </>
         ),
@@ -164,11 +164,13 @@ const ERAS: { name: string; items: Milestone[] }[] = [
       {
         date: "R6",
         title: "Feature codebook resolution",
-        status: "open",
+        status: "done",
         body: (
           <>
-            The meanings of <code>slope</code>, <code>thal</code>, <code>ca = 4</code> and <code>thal = 0</code> could
-            not be verified from available records. No clinical meaning is assigned to them.
+            Resolved in contract 2.1.0. All 242 development rows were matched one-to-one to the UCI Cleveland
+            records: <code>restecg</code>, <code>slope</code> and <code>thal</code> use a different code order from
+            the UCI codebook, and <code>ca = 4</code> and <code>thal = 0</code> are missing values. The form now
+            shows the verified meanings.
           </>
         ),
       },
@@ -269,7 +271,7 @@ const DOCS: { href: string; title: string; note: string }[] = [
   { href: "reports/r7_unverified_feature_ablation.md", title: "R7 Unverified feature ablation", note: "Dependence on ca, thal, slope" },
   { href: "reports/phase17_multicenter_validation.md", title: "Phase 17 Multicenter validation", note: "Cross-cohort research" },
   { href: "artifacts/models/cardiovanta-lr13/1.0.0/model_card.md", title: "Model card: cardiovanta-lr13 1.0.0", note: "The deployed model" },
-  { href: "cardiovanta_ml/contracts/feature_schema.v2.json", title: "Clinical feature contract v2.0.0", note: "Inputs, codes and evidence levels" },
+  { href: "cardiovanta_ml/contracts/feature_schema.v2.json", title: "Clinical feature contract v2.1.0", note: "Inputs, codes and evidence levels" },
   { href: "docs/reports/PRODUCTION_VERIFICATION_2026-11-03.md", title: "Production verification", note: "3 Nov 2026 blocker" },
   { href: "docs/reports/PREDICTION_CONTAINMENT_2026-11-04.md", title: "Prediction containment", note: "Why predictions are paused" },
   { href: "docs/reports/CARDIOVANTA_ULTIMATE_MASTER_ENGINEERING_REPORT.md", title: "Master engineering report", note: "Full history and evidence levels" },
@@ -429,7 +431,7 @@ export default function ResearchPage() {
               <h3>Why they are not causes</h3>
               <p>
                 They describe statistical association in historical records. A feature pushing the estimate up is not
-                evidence that it causes disease, and inputs with unverified codes carry no clinical meaning here.
+                evidence that it causes disease, and the code of every input is now matched to its clinical meaning (contract 2.1.0).
               </p>
             </article>
           </div>
@@ -456,10 +458,10 @@ export default function ResearchPage() {
             </article>
             <article className="doc-card reveal">
               <span className="doc-tag is-open">Features</span>
-              <h3>Unresolved feature codes</h3>
+              <h3>Missing values in two inputs</h3>
               <p>
-                The meanings of <code>slope</code>, <code>thal</code>, <code>ca = 4</code> and <code>thal = 0</code> remain
-                unverified (R6), and the model depends on two of them (R7).
+                In the training data <code>ca = 4</code> and <code>thal = 0</code> stand for a missing measurement (R6,
+                contract 2.1.0). The model learned from only six such rows, so the form does not offer them.
               </p>
             </article>
             <article className="doc-card reveal">

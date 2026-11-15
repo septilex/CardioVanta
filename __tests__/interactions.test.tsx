@@ -18,6 +18,7 @@ jest.mock('../src/lib/predictionAvailability', () => ({
 
 jest.mock('../src/lib/api', () => ({
   predict: jest.fn(),
+  warmUpPredictionService: jest.fn(),
   ApiError: class ApiError extends Error {
     status?: number;
     code?: string;

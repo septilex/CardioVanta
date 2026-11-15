@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useCallback, useLayoutEffect, useMemo, useRef, type CSSProperties, type KeyboardEvent } from "react";
+import React, { useState, useCallback, useEffect, useLayoutEffect, useMemo, useRef, type CSSProperties, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { AnimatePresence, m } from "framer-motion";
-import { predict, ApiError } from "../../lib/api";
+import { predict, ApiError, warmUpPredictionService } from "../../lib/api";
 import { PredictRequest, PredictResponse } from "../../types";
 import { CATEGORICAL_LABELS, CATEGORICAL_OPTIONS, FEATURE_METADATA, type CategoricalFeatureId } from "../../types/generated-features";
 import "./assessment.css";
@@ -32,8 +32,8 @@ export const initialData: PredictRequest = {
   restecg: 1,
   thalach: 150,
   exang: 0,
-  oldpeak: 1.0,
-  slope: 1,
+  oldpeak: 0.0,
+  slope: 2,
   ca: 0,
   thal: 2,
 };
@@ -105,8 +105,23 @@ const SEX_LABELS = CATEGORICAL_LABELS.sex;
 const EXANG_LABELS = CATEGORICAL_LABELS.exang;
 const CA_LABELS = CATEGORICAL_LABELS.ca;
 
+// Contract 2.1.0 (patient-matched): the training codes are not in clinical order, so a few selects list
+// their options in the usual clinical order (normal finding first). Codes themselves are unchanged.
+const CLINICAL_ORDER: Partial<Record<CategoricalFeatureId, readonly number[]>> = {
+  restecg: [1, 2, 0], // Normal, ST-T wave abnormality, LVH
+  slope: [2, 1, 0], // Upsloping, Flat, Downsloping
+  thal: [2, 1, 3], // Normal, Fixed defect, Reversible defect
+};
+
+// Codes that patient matching identified as missing values in the source data (ca 4, thal 0).
+// They are valid API inputs, but they are not clinical findings, so the form does not offer them.
+const isNotRecorded = (meaning: string | null) => meaning != null && meaning.startsWith("missing in the source data");
+
 function renderOptions(feature: CategoricalFeatureId) {
-  return CATEGORICAL_OPTIONS[feature].map((o) => (
+  const options = CATEGORICAL_OPTIONS[feature].filter((o) => !isNotRecorded(o.clinical_meaning));
+  const order = CLINICAL_ORDER[feature];
+  const sorted = order ? [...options].sort((a, b) => order.indexOf(a.code) - order.indexOf(b.code)) : options;
+  return sorted.map((o) => (
     <option key={o.code} value={o.code}>{o.display_label}</option>
   ));
 }
@@ -564,6 +579,13 @@ function AssessmentForm() {
   // results panel, framer-motion animates every later swap, so the CSS entrance must not replay.
   const [hasSwapped, setHasSwapped] = useState(false);
   const abortControllerRef = React.useRef<AbortController | null>(null);
+  // True once a request has been pending long enough that the service is probably cold-starting.
+  const [slow, setSlow] = useState(false);
+
+  // Start the serverless model as soon as the page opens (no clinical data is sent).
+  useEffect(() => {
+    warmUpPredictionService();
+  }, []);
 
   /* ─── Handlers ─── */
 
@@ -590,20 +612,29 @@ function AssessmentForm() {
     setError(null);
     setResult(null);
 
-    const timeoutId = setTimeout(() => controller.abort("timeout"), 15000);
+    // A cold start of the serverless model can take up to ~40 s, so allow 75 s before giving up,
+    // and tell the person what is happening after a few seconds instead of leaving a silent spinner.
+    setSlow(false);
+    const slowId = setTimeout(() => setSlow(true), 5000);
+    const timeoutId = setTimeout(() => controller.abort("timeout"), 75000);
 
     try {
       const response = await predict(formData, controller.signal);
       clearTimeout(timeoutId);
+      clearTimeout(slowId);
       setResult(response);
       setResultTab("summary");
       setShowResults(true);
       setHasSwapped(true);
     } catch (err: unknown) {
       clearTimeout(timeoutId);
+      clearTimeout(slowId);
       if ((err instanceof Error && err.name === "AbortError") || err === "timeout") {
         if (err === "timeout") {
-          setError({ message: "Request timed out. Please try again.", kind: "retryable" });
+          setError({
+            message: "The prediction service took too long to respond. It may still be starting up, so please try again.",
+            kind: "retryable",
+          });
         }
         return;
       }
@@ -619,6 +650,7 @@ function AssessmentForm() {
     } finally {
       if (abortControllerRef.current === controller) {
         setLoading(false);
+        setSlow(false);
       }
     }
   }, [formData]);
@@ -1394,8 +1426,14 @@ function AssessmentForm() {
                   </button>
                   <button type="submit" className="ax-btn-submit" disabled={loading} aria-busy={loading}>
                     {loading && <span className="ax-spinner" aria-hidden="true" />}
-                    {loading ? "Analyzing Profile…" : "Generate Analysis"}
+                    {loading ? (slow ? "Starting the model…" : "Analyzing Profile…") : "Generate Analysis"}
                   </button>
+                  {loading && slow && (
+                    <p className="ax-slow-note" role="status">
+                      The prediction service is waking up after a quiet period. The first result can take up to a
+                      minute; later ones are almost instant.
+                    </p>
+                  )}
                 </div>
               </div>
             </m.form>

@@ -3131,3 +3131,17 @@
     #EBC2C8 var(--pct, 0%) 100%
   );
 }
+
+/* Cold-start note under the submit button (shown only after a few seconds of waiting). */
+.ax-slow-note {
+  flex-basis: 100%;
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ax-text-muted);
+  text-align: right;
+}
+.ax-final-btn-group:has(.ax-slow-note) {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}

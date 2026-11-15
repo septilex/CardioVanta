@@ -136,8 +136,8 @@ def test_public_api(model):
 
 def test_contract_resource_is_bundled_and_consistent():
     assert bundled_contract_sha256() == contract.CONTRACT_SHA256
-    assert load_contract()["contract_version"] == contract.CONTRACT_VERSION == "2.0.0"
-    assert contract.CONTRACT_SHA256 == "ec8918e717a892c1c14a820b4df03cd64fb8bf8810e55a7a73b9823065c5431b"
+    assert load_contract()["contract_version"] == contract.CONTRACT_VERSION == "2.1.0"
+    assert contract.CONTRACT_SHA256 == "a548a9b74b62e96e23ddcab83c610d500dc077ce0c1490e99cc630696eb14655"
     assert list(contract.FEATURE_ORDER) == ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg",
                                             "thalach", "exang", "oldpeak", "slope", "ca", "thal"]
 

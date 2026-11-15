@@ -253,14 +253,15 @@ def _page_source():
 
 
 def test_out_of_codebook_codes_are_not_presented_as_clinical_values():
-    """UCI codebook: ca = 0-3 vessels, thal = 3/6/7. Kaggle ca=4 / thal=0 are undefined there."""
+    """UCI codebook: ca = 0-3 vessels, thal = 3/6/7. Patient matching (contract 2.1.0) shows Kaggle ca=4 and
+    thal=0 are the source data's missing values ('?'), so they are labelled as not recorded, never as a value."""
     opts = _generated_ts_options()
     ca = {o["code"]: o for o in opts["ca"]}
     thal = {o["code"]: o for o in opts["thal"]}
-    assert ca[4]["display_label"] == "Code 4 (not in UCI codebook)"   # not shown as "4 vessels"
-    assert ca[4]["clinical_meaning"] is None and ca[4]["verification"] == "undefined_in_codebook"
-    assert thal[0]["display_label"] == "Code 0 (not in UCI codebook)"  # not "Unknown"
-    assert thal[0]["clinical_meaning"] is None and thal[0]["verification"] == "undefined_in_codebook"
+    assert ca[4]["display_label"] == "Not recorded"   # not shown as "4 vessels"
+    assert "missing" in ca[4]["clinical_meaning"]
+    assert thal[0]["display_label"] == "Not recorded"
+    assert "missing" in thal[0]["clinical_meaning"]
     # Input encodings themselves are unchanged (values 0..4 and 0..3 still offered).
     assert sorted(ca) == [0, 1, 2, 3, 4] and sorted(thal) == [0, 1, 2, 3]
     src = _page_source()
