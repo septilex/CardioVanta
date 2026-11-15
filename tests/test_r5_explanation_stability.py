@@ -63,9 +63,10 @@ def test_metric_helpers_on_known_vectors():
 
 def test_verification_levels_reported_without_meanings():
     assert r5.verification_level("cp", 0) == "verified_patient_matched"
-    assert r5.verification_level("slope", 1) == "unverified"
-    assert r5.verification_level("ca", 4) == "undefined_in_codebook"
-    assert r5.verification_level("thal", 0) == "undefined_in_codebook"
+    # Contract 2.1.0 patient-matched the codes R5 reported as unverified/undefined.
+    assert r5.verification_level("slope", 1) == "verified_patient_matched"
+    assert r5.verification_level("ca", 4) == "verified_patient_matched"
+    assert r5.verification_level("thal", 0) == "verified_patient_matched"
 
 
 @pytest.fixture(scope="module")

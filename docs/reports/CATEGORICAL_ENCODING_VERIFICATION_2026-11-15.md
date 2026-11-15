@@ -13,6 +13,12 @@
   `src/cardiovanta/data/external_loader.py`. File used: `processed.cleveland.data` (303 records).
 - Rows: the 242 development rows only (`data/processed/dev_indices.json`, via `parse_cleveland_dev_cohort`).
   The 61 locked rows were not used.
+- Disclosure: R6 named this patient-level match as its resolution path and noted that it needs explicit
+  authorisation, because `processed.cleveland.data` also contains the canonical records of the 61 locked patients.
+  The project owner authorised the work on 2026-11-15. The canonical file was loaded whole as a lookup table; only
+  the 242 development rows were looked up, no locked row was matched, tabulated or used for any model decision, and
+  no outcome or metric was computed on the locked partition. R6's documentary finding (no E1/E2 evidence in the
+  documentation) is unchanged; the R5/R6 tests now record that contract 2.1.0 resolved these codes.
 - Matching key: `age, sex, trestbps, chol, thalach, oldpeak`. Every development row matched exactly one UCI
   record (242/242), and every training code maps to exactly one UCI code.
 - Reproduce: `python scripts/research/verify_categorical_encoding.py PATH/TO/heart+disease.zip` (exit 0 = all

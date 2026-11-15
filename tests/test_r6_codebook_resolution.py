@@ -15,7 +15,10 @@ spec = importlib.util.spec_from_file_location("r6", ROOT / "experiments" / "r6_c
 r6 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(r6)
 
-CONTRACT_SHA256 = "50249533dd26a9ca30c070100a045c921182e206dca88620f4e073c8568df531"   # file bytes, unchanged since R1
+# Contract file bytes. R1-R6: 50249533dd26a9ca30c070100a045c921182e206dca88620f4e073c8568df531 (contract 2.0.0).
+# Contract 2.1.0 (2026-11-15) resolved the codes R6 left open by patient matching
+# (docs/reports/CATEGORICAL_ENCODING_VERIFICATION_2026-11-15.md), so the file changed.
+CONTRACT_SHA256 = "780506840b5bceb95463c4ba320250eb61be9a830b9229f24fb7cc5745e4b278"
 
 
 @pytest.fixture(scope="module")
@@ -45,26 +48,31 @@ def test_cp_patient_matched_mapping_is_canonical_and_verified(contract):
         assert o["clinical_meaning"] == canonical[canon]
 
 
-@pytest.mark.parametrize("feature,code", [("ca", 0), ("ca", 1), ("ca", 2), ("ca", 3),
-                                          ("restecg", 0), ("restecg", 1), ("restecg", 2)])
+@pytest.mark.parametrize("feature,code", [("ca", 0), ("ca", 1), ("ca", 2), ("ca", 3)])
 def test_codebook_supported_codes_keep_their_meaning(contract, feature, code):
     o = _opt(contract, feature, code)
     assert o["verification"] == "codebook_and_project_contract" and o["clinical_meaning"]
 
 
-# --- Unresolved mappings remain unresolved, with no clinical meaning --------------
+@pytest.mark.parametrize("code,canonical", [(0, 2), (1, 0), (2, 1)])
+def test_restecg_follows_patient_matching_not_the_codebook(contract, code, canonical):
+    """Contract 2.1.0: the training encoding of restecg differs from the codebook's (0 normal, 1 ST-T, 2 LVH)."""
+    o = _opt(contract, "restecg", code)
+    assert o["verification"] == "verified_patient_matched" and o["canonical_uci_code"] == canonical
 
-@pytest.mark.parametrize("feature,code,status", [
-    ("slope", 0, "unverified"), ("slope", 1, "unverified"), ("slope", 2, "unverified"),
-    ("thal", 1, "unverified"), ("thal", 2, "unverified"), ("thal", 3, "unverified"),
-    ("thal", 0, "undefined_in_codebook"), ("ca", 4, "undefined_in_codebook"),
+
+# --- Codes R6 left unresolved were resolved later by its own resolution path -------
+# R6 found no documentary (E1/E2) evidence for these codes and named a patient-level match against the canonical
+# Cleveland records as the resolution path. That match was run for contract 2.1.0; R6's documentary finding stands.
+
+@pytest.mark.parametrize("feature,code", [
+    ("slope", 0), ("slope", 1), ("slope", 2), ("thal", 1), ("thal", 2), ("thal", 3), ("thal", 0), ("ca", 4),
 ])
-def test_unresolved_codes_keep_status_and_no_meaning(record, contract, feature, code, status):
+def test_r6_unresolved_codes_are_now_patient_matched(record, contract, feature, code):
     o = _opt(contract, feature, code)
-    assert o["verification"] == status and o["clinical_meaning"] is None
+    assert o["verification"] == "verified_patient_matched" and o["clinical_meaning"]
     m = next(x for x in record["mappings"] if x["feature"] == feature and x["production_code"] == code)
-    assert m["resolved_status"] == m["contract_status"] == status
-    assert m["clinical_meaning"] is None and m["confidence"].startswith("unresolved")
+    assert m["confidence"].startswith("unresolved")      # R6's documentary evidence alone did not resolve them
     assert m["resolution_path"]
 
 
@@ -83,7 +91,8 @@ def test_hypotheses_are_labelled_and_never_used_as_evidence(record):
         assert all(e["level"] != "E4" for e in m["evidence"])   # secondary claims appear only as hypotheses
     ca4 = next(x for x in record["mappings"] if x["feature"] == "ca" and x["production_code"] == 4)
     assert any("missing" in h for h in ca4["hypotheses_not_evidence"])
-    assert ca4["resolved_status"] == "undefined_in_codebook"     # the hypothesis did not change the status
+    # R6's "missing value" hypothesis was later confirmed by patient matching (contract 2.1.0), not by R6 itself.
+    assert ca4["resolved_status"] == ca4["contract_status"] == "verified_patient_matched"
 
 
 # --- Source vs production codes and documented provenance ---------------------------
