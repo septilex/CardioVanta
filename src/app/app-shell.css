@@ -4,7 +4,7 @@
 /* ─── Base Color Tokens ─── */
 :root {
   --ax-bg: #F8F4EF;
-  --ax-sidebar-bg: #F6EEE3; /* the paper colour of /images/anatomical-heart.jpg, so the artwork blends in */
+  --ax-sidebar-bg: #F6EEE3; /* the paper colour of /images/anatomical-heart.webp, so the artwork blends in */
   --ax-sidebar-border: #E4D8CE;
   --ax-card-bg: #FFFFFF;
   --ax-card-border: #E2DAD0;

@@ -398,6 +398,12 @@ function SummaryPanel({ result, active }: { result: PredictResponse; active: boo
               that significant obstructive coronary artery disease is present. This is a research estimate, not a
               diagnosis, and the model is not clinically validated.
             </p>
+            <p className="ax-res-note">
+              <strong>Who the model learned from:</strong> 242 patients from a 1980s study at one US hospital, all of
+              whom were sent for a coronary angiogram, usually because of symptoms. About 46 in 100 of them had the
+              disease, far more than in the general population, so the estimate describes people like them rather than
+              everyone.
+            </p>
           </m.article>
 
           <m.article className="ax-res-card" variants={revealItem}>

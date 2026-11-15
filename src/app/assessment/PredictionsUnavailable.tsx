@@ -17,7 +17,9 @@ export default function PredictionsUnavailable({ notice }: { notice: string }) {
       <section className="ax-unavailable-card cv-rise" style={order(0)}>
         <Link href="/" transitionTypes={BACK} className="ax-unavailable-logo-link cv-rise" style={order(1)} title="CardioVanta Home">
           <img
-            src="/brand/cardiovanta-horizontal-transparent.png"
+            src="/brand/cardiovanta-horizontal-transparent.webp"
+            width={640}
+            height={192}
             alt="CardioVanta | Intelligent Cardiovascular Insight"
             className="ax-unavailable-logo"
           />

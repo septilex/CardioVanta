@@ -216,10 +216,13 @@ export default function LandingPage() {
             <picture>
               <source
                 media="(max-width: 600px)"
-                srcSet="/brand/cardiovanta-icon-transparent.png"
+                srcSet="/brand/cardiovanta-icon-transparent.webp"
               />
               <img
-                src="/brand/cardiovanta-horizontal-transparent.png"
+                src="/brand/cardiovanta-horizontal-transparent.webp"
+                width={640}
+                height={192}
+                decoding="async"
                 alt="CardioVanta"
                 className="lp-header-logo"
               />
@@ -248,7 +251,8 @@ export default function LandingPage() {
             muted
             loop
             playsInline
-            poster="/images/landing/hero-cardiovascular.jpg"
+            poster="/images/landing/hero-cardiovascular.webp"
+            preload="metadata"
             className="lp-hero-video"
           />
           <div className="lp-hero-overlay" />
@@ -514,8 +518,12 @@ export default function LandingPage() {
         <section id="model" className="lp-model" ref={modelRef}>
           <div className="lp-model-img-wrap">
             <m.img
-              src="/images/landing/bg-model-hq.png"
+              src="/images/landing/bg-model-hq.webp"
               alt="ML pipeline visualization"
+              width={1024}
+              height={530}
+              loading="lazy"
+              decoding="async"
               style={{ y: modelImgY }}
             />
           </div>
@@ -642,8 +650,12 @@ export default function LandingPage() {
         <div className="lp-showcase">
           <Reveal variants={fadeIn}>
             <img
-              src="/images/landing/assessment-transition.jpg"
+              src="/images/landing/assessment-transition.webp"
               alt="Cardiovascular research"
+              width={1376}
+              height={768}
+              loading="lazy"
+              decoding="async"
               className="lp-showcase-img"
             />
           </Reveal>
@@ -850,7 +862,10 @@ export default function LandingPage() {
           <div className="lp-footer-top">
             <div>
               <img
-                src="/brand/cardiovanta-horizontal-transparent.png"
+                src="/brand/cardiovanta-horizontal-transparent.webp"
+                width={640}
+                height={192}
+                decoding="async"
                 alt="CardioVanta"
                 className="lp-footer-brand-logo"
               />

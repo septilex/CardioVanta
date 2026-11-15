@@ -843,7 +843,7 @@
   position: relative;
   padding: 140px 0;
   background-color: var(--cv-dark);
-  background-image: linear-gradient(rgba(18, 16, 15, 0.70), rgba(18, 16, 15, 0.80)), url('/images/landing/bg-production-v2.jpg');
+  background-image: linear-gradient(rgba(18, 16, 15, 0.70), rgba(18, 16, 15, 0.80)), url('/images/landing/bg-production-v2.webp');
   background-size: cover;
   background-position: center;
   overflow: hidden;

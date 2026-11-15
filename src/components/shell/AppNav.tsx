@@ -88,7 +88,10 @@ export function AppSidebar() {
       <div className="ax-sidebar-top">
         <Link href="/" transitionTypes={[NAV_BACK]} className="ax-sidebar-logo-link" title="CardioVanta Home">
           <img
-            src="/brand/cardiovanta-horizontal-transparent.png"
+            src="/brand/cardiovanta-horizontal-transparent.webp"
+            width={640}
+            height={192}
+            decoding="async"
             alt="CardioVanta | Intelligent Cardiovascular Insight"
             className="ax-sidebar-logo"
           />
@@ -112,7 +115,7 @@ export function AppSidebar() {
         </nav>
       </div>
       <div className="ax-sidebar-heart-wrap" aria-hidden="true">
-        <img src="/images/anatomical-heart.jpg" alt="" className="ax-sidebar-heart-img" />
+        <img src="/images/anatomical-heart.webp" alt="" width={576} height={1024} decoding="async" className="ax-sidebar-heart-img" />
       </div>
     </aside>
   );
