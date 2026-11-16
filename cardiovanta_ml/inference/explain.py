@@ -16,7 +16,6 @@ Ported unchanged from the pre-R2 ``src/inference/predict.py`` (R0.3 semantics).
 from typing import Any, Dict, Mapping, Sequence
 
 import numpy as np
-import pandas as pd
 
 from cardiovanta_ml.inference.outcome import disease_log_odds_sign
 
@@ -46,7 +45,7 @@ def _aggregate(feature_names: Sequence[str], contributions: np.ndarray, feature_
     return raw
 
 
-def linear_contributions(explanation_model: Any, df_input: pd.DataFrame, feature_order: Sequence[str],
+def linear_contributions(explanation_model: Any, df_input: Any, feature_order: Sequence[str],
                          disease_label: int) -> Dict[str, Any]:
     """Exact additive decomposition of the explanation model's disease log-odds: intercept + sum(coef * x)."""
     preprocessor = explanation_model.named_steps["preprocessor"]
@@ -70,7 +69,7 @@ def linear_contributions(explanation_model: Any, df_input: pd.DataFrame, feature
     }
 
 
-def shap_equivalent_contributions(explanation_model: Any, shap_background: Mapping[str, Any], df_input: pd.DataFrame,
+def shap_equivalent_contributions(explanation_model: Any, shap_background: Mapping[str, Any], df_input: Any,
                                   feature_order: Sequence[str], disease_label: int) -> Dict[str, Any]:
     """Closed-form linear SHAP of the explanation model, coef * (x - E[x]), against the frozen background means."""
     preprocessor = explanation_model.named_steps["preprocessor"]

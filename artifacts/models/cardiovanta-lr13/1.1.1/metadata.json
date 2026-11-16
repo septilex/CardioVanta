@@ -1,0 +1,93 @@
+{
+  "registry_schema_version": "1.0",
+  "model_id": "cardiovanta-lr13",
+  "model_version": "1.1.1",
+  "model_package_name": "CardioVanta production package 1.1.1: portable (NumPy-only) export of cardiovanta-lr13@1.1.0, identical predictions",
+  "artifact_directory": "model-1.1.1",
+  "artifacts": {
+    "model": "model.json",
+    "explanation_model": "explanation_model.json",
+    "package_metadata": "metadata.json",
+    "input_schema": "feature_schema.json",
+    "shap_background": "shap_background.json",
+    "reference_predictions": "reference_predictions.csv"
+  },
+  "checksum_manifest": "checksums.sha256",
+  "checksum_manifest_sha256": "be9019fd066ce122cd607b63365a761c548020f63b9fb3490b3efc9e73ee1edf",
+  "model_card": "model_card.md",
+  "feature_contract": {
+    "name": "cardiovanta.clinical_feature_and_outcome_contract",
+    "version": "2.1.0",
+    "sha256": "4de4502061e859f8bef72a8f53f4437b64d23eece29cc2886146766cc0de74a2"
+  },
+  "feature_order": [
+    "age",
+    "sex",
+    "cp",
+    "trestbps",
+    "chol",
+    "fbs",
+    "restecg",
+    "thalach",
+    "exang",
+    "oldpeak",
+    "slope",
+    "ca",
+    "thal"
+  ],
+  "model_classes": [
+    0,
+    1
+  ],
+  "class_label_semantics": {
+    "0": "disease_present",
+    "1": "disease_absent"
+  },
+  "outcome_semantics": {
+    "outcome": "significant_obstructive_cad_present",
+    "contract_version": "2.1.0",
+    "disease_present_label": 0,
+    "mapping_status": "interim_legacy",
+    "evidence": [
+      "Trained by src/experiment/phase5.py on the raw target column of data/raw/heart.csv, which is inverted relative to UCI num (target 1 = num == 0; target 0 = num > 0): reports/phase17_multicenter_validation.md section 3; src/cardiovanta/data/external_loader.py parse_cleveland_dev_cohort.",
+      "R0.3 coefficient-sign and synthetic-profile verification: backend/tests/test_r0_outcome_semantics.py.",
+      "Recorded in the clinical contract: cardiovanta_ml/contracts/feature_schema.v2.json model_label_mappings (cardiovanta-lr13 1.1.1, disease_present_label 0, interim_legacy)."
+    ]
+  },
+  "calibration": {
+    "estimator": "cardiovanta_ml.inference.portable.PortableSigmoidCalibratedClassifier",
+    "method": "sigmoid",
+    "cv": "5 StratifiedGroupKFold splits on duplicate-row groups of the 242 development rows; one sigmoid fitted on the pooled out-of-fold decision values (ensemble=False), applied to one pipeline refitted on all 242 rows",
+    "ensemble": false,
+    "n_calibrated_members": 1,
+    "base_estimator": "Pipeline(ColumnTransformer[StandardScaler(5 continuous), passthrough(3 binary), OneHotEncoder(handle_unknown='ignore', 5 categorical)] -> LogisticRegression(C=0.1, class_weight='balanced', solver='lbfgs', random_state=42))",
+    "probability_semantics": "predict_proba[:, index of label 0] = P(disease present) = 1 - P(label 1); exact for a binary sigmoid-calibrated classifier"
+  },
+  "explanation": {
+    "artifact_role": "explanation_model",
+    "background_role": "shap_background",
+    "associated_model": "cardiovanta-lr13@1.1.1",
+    "description": "Uncalibrated LogisticRegression parameters exported from the cardiovanta-lr13@1.1.0 explanation model; explains its own log-odds exactly."
+  },
+  "runtime": {
+    "serialization": "portable_json",
+    "format": "cardiovanta.portable_linear.v1",
+    "sklearn_version": "1.9.1",
+    "note": "Served with NumPy only. sklearn_version is the version the parameters were exported from."
+  },
+  "provenance": {
+    "training_script": "src/experiment/phase5.py (python -m src.experiment.phase5 --package-version 1.1.0 --pooled-calibration --output-dir artifacts/model-1.1.0)",
+    "package_metadata_model_version": "H2.1-pooled-calibration",
+    "source_dataset_name": "heart.csv",
+    "raw_dataset_sha256": "7c3014365675306819510a49ff289efbec1d1a6a666a2dc7652f1547b383d859",
+    "development_indices_sha256": "382f0f524cca62b2222338809d1acaa7f629f116ca804e42f0d225ee76e885e6",
+    "development_sample_count": 242,
+    "locked_test_sample_count_provenance_only": 61,
+    "git_commit_recorded_in_package_metadata": "ba010efc2faa6b71c2b85547c404e7c301e0df72",
+    "random_seed": 42,
+    "registered": "2026-11-16. Portable export of cardiovanta-lr13@1.1.0; same fitted parameters, served without scikit-learn, SciPy or pandas.",
+    "exported_from": "cardiovanta-lr13@1.1.0",
+    "export_script": "scripts/research/export_portable_model.py",
+    "parity_max_abs_probability_difference": 2.220446049250313e-16
+  }
+}

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # MODEL_ID / MODEL_VERSION / MODEL_REGISTRY_ROOT (absolute path).
     MODEL_REGISTRY_ROOT: Path = BASE_DIR / "artifacts"
     MODEL_ID: str = "cardiovanta-lr13"
-    MODEL_VERSION: str = "1.1.0"
+    MODEL_VERSION: str = "1.1.1"
 
     CORS_ORIGINS: List[str] = []
     ENABLE_DOCS: bool = False

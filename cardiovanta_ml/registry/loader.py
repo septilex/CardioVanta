@@ -14,8 +14,9 @@ order, and fails closed (raises a ``RegistryError`` subclass) at the first probl
 5. Resolve the artifact directory and every artifact path inside the registry root.
 6. Verify the checksum manifest's own SHA-256, that the manifest lists exactly the
    declared artifacts, and every artifact's SHA-256.
-7. Check the runtime scikit-learn version equals the registered one.
-8. Only now deserialize: JSON artifacts, then the two joblib models.
+7. For joblib models, check the runtime scikit-learn version equals the registered one.
+8. Only now deserialize: JSON artifacts, then the two models (joblib pickles, or
+   portable JSON parameters served with NumPy only, by ``runtime.serialization``).
 9. Validate the loaded objects: class labels, disease label, feature order of both
    models, input schema, package metadata version, explanation/background association.
 
@@ -163,6 +164,8 @@ def _check_contract(meta: RegistryMetadata) -> None:
 
 
 def _check_runtime(meta: RegistryMetadata) -> None:
+    if meta.serialization == "portable_json":
+        return  # NumPy-only parameters; scikit-learn is not needed (and not imported) to serve them
     import sklearn
 
     if sklearn.__version__ != meta.sklearn_version:
@@ -259,11 +262,19 @@ def _load_uncached(root: Path, model_id: str, model_version: str) -> LoadedModel
     package_metadata = _read_json(path("package_metadata"), "package_metadata")
     shap_background = _read_json(path("shap_background"), "shap_background")
 
-    import joblib  # deserialization only after every integrity check above has passed
-
     try:
-        model = joblib.load(path("model"))
-        explanation_model = joblib.load(path("explanation_model"))
+        if meta.serialization == "portable_json":
+            from cardiovanta_ml.inference.portable import load_portable
+
+            model = load_portable(_read_json(path("model"), "model"))
+            explanation_model = load_portable(_read_json(path("explanation_model"), "explanation_model"))
+        else:
+            import joblib  # deserialization only after every integrity check above has passed
+
+            model = joblib.load(path("model"))
+            explanation_model = joblib.load(path("explanation_model"))
+    except MetadataError:
+        raise
     except Exception as e:
         raise ModelCompatibilityError(f"Failed to deserialize verified artifacts for {meta.qualified_name}: {e}") from e
 

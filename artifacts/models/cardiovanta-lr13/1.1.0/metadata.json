@@ -18,7 +18,7 @@
   "feature_contract": {
     "name": "cardiovanta.clinical_feature_and_outcome_contract",
     "version": "2.1.0",
-    "sha256": "3446456282df00af43ba8ceec29cc54b58edb34fc9fb866b83e50bd3c347e980"
+    "sha256": "4de4502061e859f8bef72a8f53f4437b64d23eece29cc2886146766cc0de74a2"
   },
   "feature_order": [
     "age",

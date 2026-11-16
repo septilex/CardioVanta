@@ -25,6 +25,9 @@ MODEL_VERSION_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 REQUIRED_ARTIFACT_ROLES = ("model", "explanation_model", "package_metadata", "input_schema", "shap_background")
 OPTIONAL_ARTIFACT_ROLES = ("reference_predictions",)
 MAPPING_STATUSES = ("explicit", "interim_legacy")
+# How the model artifacts are stored. "joblib": scikit-learn pickles (needs the registered scikit-learn version).
+# "portable_json": fitted parameters as JSON, served with NumPy only (cardiovanta_ml.inference.portable).
+SERIALIZATIONS = ("joblib", "portable_json")
 CLASS_SEMANTICS = ("disease_present", "disease_absent")
 
 _TOP_LEVEL = {
@@ -93,6 +96,7 @@ class RegistryMetadata:
     sklearn_version: str
     provenance: Dict[str, Any]
     raw: Dict[str, Any]
+    serialization: str = "joblib"
 
     @property
     def qualified_name(self) -> str:
@@ -243,6 +247,9 @@ def parse_metadata(raw: Any) -> RegistryMetadata:
     rt = raw["runtime"]
     if not isinstance(rt.get("sklearn_version"), str) or not rt["sklearn_version"]:
         raise MetadataError("metadata.runtime.sklearn_version is required")
+    serialization = rt.get("serialization", "joblib")
+    if serialization not in SERIALIZATIONS:
+        raise MetadataError(f"metadata.runtime.serialization must be one of {SERIALIZATIONS}")
 
     return RegistryMetadata(
         model_id=model_id,
@@ -264,6 +271,7 @@ def parse_metadata(raw: Any) -> RegistryMetadata:
         sklearn_version=rt["sklearn_version"],
         provenance=dict(raw["provenance"]),
         raw=raw,
+        serialization=serialization,
     )
 
 

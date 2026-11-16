@@ -25,8 +25,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-SERVED_VERSION = "1.1.0"  # keep in sync with backend/app/core/config.py and backend/tests/served_model.py
-GOLDEN = {"1.0.0": (0.985790929, 0.016065906), "1.1.0": (0.994343297, 0.007331075)}
+SERVED_VERSION = "1.1.1"  # keep in sync with backend/app/core/config.py and backend/tests/served_model.py
+GOLDEN = {"1.0.0": (0.985790929, 0.016065906), "1.1.0": (0.994343297, 0.007331075),
+          "1.1.1": (0.994343297, 0.007331075)}
 ENTRY = f"artifacts/models/cardiovanta-lr13/{SERVED_VERSION}"
 REQUIRED = [
     f"{ENTRY}/metadata.json", f"{ENTRY}/checksums.sha256", f"{ENTRY}/model_card.md",
@@ -36,6 +37,9 @@ REQUIRED = [
     "artifacts/model-1.1.0/model.joblib", "artifacts/model-1.1.0/explanation_model.joblib",
     "artifacts/model-1.1.0/metadata.json", "artifacts/model-1.1.0/feature_schema.json",
     "artifacts/model-1.1.0/shap_background.json", "artifacts/model-1.1.0/reference_predictions.csv",
+    "artifacts/model-1.1.1/model.json", "artifacts/model-1.1.1/explanation_model.json",
+    "artifacts/model-1.1.1/metadata.json", "artifacts/model-1.1.1/feature_schema.json",
+    "artifacts/model-1.1.1/shap_background.json", "artifacts/model-1.1.1/reference_predictions.csv",
     "cardiovanta_ml/contracts/feature_schema.v2.json", "cardiovanta_ml/contracts/generated_features.py",
     "cardiovanta_ml/registry/loader.py", "cardiovanta_ml/registry/integrity.py", "cardiovanta_ml/inference/predict.py",
     "api/index.py", "backend/app/main.py", "configs/prediction_service.json",

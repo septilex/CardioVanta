@@ -186,7 +186,7 @@ def test_legacy_model_label_mapping_is_separate_from_outcome(contract):
     assert legacy["package_version"] == "1.0.0" and legacy["status"] == "interim_legacy"
     # Clinical positive value is 1; the legacy artifact's disease label is 0. Two different concepts.
     assert contract["outcome"]["positive"]["value"] == 1 and legacy["disease_present_label"] == 0
-    assert gen.LEGACY_PACKAGE_DISEASE_LABELS == {"1.0.0": 0, "1.1.0": 0}
+    assert gen.LEGACY_PACKAGE_DISEASE_LABELS == {"1.0.0": 0, "1.1.0": 0, "1.1.1": 0}
     from src.inference import outcome
     assert outcome.LEGACY_PACKAGE_DISEASE_LABEL == gen.LEGACY_PACKAGE_DISEASE_LABELS
     assert outcome.OUTCOME_ID == gen.OUTCOME_ID

@@ -70,6 +70,18 @@
           "target_harmonisation",
           "R0.3 coefficient-sign and synthetic-profile verification (backend/tests/test_r0_outcome_semantics.py)"
         ]
+      },
+      {
+        "model_id": "cardiovanta-lr13",
+        "package_version": "1.1.1",
+        "artifact": "artifacts/model-1.1.1/model.json",
+        "disease_present_label": 0,
+        "status": "interim_legacy",
+        "reason": "Portable (NumPy-only) export of cardiovanta-lr13@1.1.0 with identical fitted parameters; same raw-target orientation as 1.0.0 and 1.1.0.",
+        "evidence": [
+          "target_harmonisation",
+          "R0.3 coefficient-sign and synthetic-profile verification (backend/tests/test_r0_outcome_semantics.py)"
+        ]
       }
     ]
   },

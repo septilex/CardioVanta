@@ -13,10 +13,9 @@ declared in the registry metadata, never hard-coded.
 """
 from typing import Any, Dict, Mapping, Optional
 
-import pandas as pd
-
 from cardiovanta_ml.inference.explain import linear_contributions, shap_equivalent_contributions
 from cardiovanta_ml.inference.outcome import OUTCOME_ID, PROBABILITY_DEFINITION, disease_label_index
+from cardiovanta_ml.inference.portable import is_portable
 from cardiovanta_ml.registry.loader import LoadedModel
 
 # Value exposed as metadata.outcome_mapping in the API, by registry mapping_status (R0.3-compatible strings).
@@ -37,6 +36,9 @@ class InferenceEngine:
         self.metadata = loaded.package_metadata
         self.shap_background = loaded.shap_background
         self.model_dir = loaded.artifact_dir
+        # Portable (NumPy-only) models take a plain mapping of feature -> [value]; scikit-learn pipelines need a
+        # pandas DataFrame with named columns. pandas is imported only for the latter.
+        self._portable = is_portable(self.model) and is_portable(self.explanation_model)
 
     @property
     def disease_label(self) -> int:
@@ -90,6 +92,10 @@ class InferenceEngine:
     def _frame(self, raw_input: Mapping[str, Any]):
         validated_input, outside_range = self._validate_input(raw_input)
         ordered_input = {k: [validated_input[k]] for k in self.schema["feature_order"]}
+        if self._portable:
+            return ordered_input, outside_range
+        import pandas as pd
+
         return pd.DataFrame(ordered_input), outside_range
 
     def predict(self, raw_input: Mapping[str, Any], apply_threshold: Optional[float] = None) -> Dict[str, Any]:

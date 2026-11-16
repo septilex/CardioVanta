@@ -35,7 +35,8 @@ HIGH = dict(age=67.0, sex=1, cp=0, trestbps=160.0, chol=286.0, fbs=0, restecg=0,
 LOW = dict(age=37.0, sex=0, cp=2, trestbps=120.0, chol=200.0, fbs=0, restecg=1,
            thalach=187.0, exang=0, oldpeak=0.0, slope=2, ca=0, thal=2)
 GOLDEN_BY_VERSION = {"1.0.0": {"high": 0.985790929, "low": 0.016065906},
-                     "1.1.0": {"high": 0.994343297, "low": 0.007331075}}
+                     "1.1.0": {"high": 0.994343297, "low": 0.007331075},
+                     "1.1.1": {"high": 0.994343297, "low": 0.007331075}}
 
 
 def main() -> int:

@@ -1,0 +1,175 @@
+{
+  "format": "cardiovanta.portable_linear.v1",
+  "kind": "sigmoid_calibrated_logistic_regression",
+  "classes": [
+    0,
+    1
+  ],
+  "estimator": {
+    "feature_names_in": [
+      "age",
+      "sex",
+      "cp",
+      "trestbps",
+      "chol",
+      "fbs",
+      "restecg",
+      "thalach",
+      "exang",
+      "oldpeak",
+      "slope",
+      "ca",
+      "thal"
+    ],
+    "preprocessor": {
+      "continuous": {
+        "features": [
+          "age",
+          "trestbps",
+          "chol",
+          "thalach",
+          "oldpeak"
+        ],
+        "mean": [
+          54.289256198347104,
+          131.70661157024793,
+          244.88429752066116,
+          150.12396694214877,
+          1.0719008264462808
+        ],
+        "scale": [
+          9.134385146726768,
+          17.95726900188743,
+          47.748426495236316,
+          21.9324923110465,
+          1.2037629115359054
+        ]
+      },
+      "binary": {
+        "features": [
+          "sex",
+          "fbs",
+          "exang"
+        ]
+      },
+      "categorical": {
+        "features": [
+          {
+            "feature": "cp",
+            "categories": [
+              0,
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "feature": "restecg",
+            "categories": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "feature": "slope",
+            "categories": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "feature": "ca",
+            "categories": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "feature": "thal",
+            "categories": [
+              0,
+              1,
+              2,
+              3
+            ]
+          }
+        ]
+      },
+      "feature_names_out": [
+        "num__age",
+        "num__trestbps",
+        "num__chol",
+        "num__thalach",
+        "num__oldpeak",
+        "bin__sex",
+        "bin__fbs",
+        "bin__exang",
+        "cat__cp_0",
+        "cat__cp_1",
+        "cat__cp_2",
+        "cat__cp_3",
+        "cat__restecg_0",
+        "cat__restecg_1",
+        "cat__restecg_2",
+        "cat__slope_0",
+        "cat__slope_1",
+        "cat__slope_2",
+        "cat__ca_0",
+        "cat__ca_1",
+        "cat__ca_2",
+        "cat__ca_3",
+        "cat__ca_4",
+        "cat__thal_0",
+        "cat__thal_1",
+        "cat__thal_2",
+        "cat__thal_3"
+      ]
+    },
+    "logistic_regression": {
+      "coef": [
+        -0.009178736949181653,
+        -0.1120151620292626,
+        -0.271203028276117,
+        0.29378849892225256,
+        -0.4100568138601762,
+        -0.4333298834226183,
+        -0.014138687624883614,
+        -0.4325308176384882,
+        -0.6724032469891478,
+        0.08719912858872601,
+        0.3999108136598803,
+        0.1858933094448216,
+        -0.12067752556611538,
+        0.1372065904740402,
+        -0.015929060203644808,
+        -0.002799082689717046,
+        -0.2526313247622314,
+        0.2560304121562286,
+        0.5548763195902331,
+        -0.2709050266005686,
+        -0.24980614057962686,
+        -0.09769949908863221,
+        0.06413435138287453,
+        0.016140289657062407,
+        -0.041778478955104184,
+        0.5713488844541204,
+        -0.5451106904517985
+      ],
+      "intercept": 0.3614649566593082,
+      "classes": [
+        0,
+        1
+      ]
+    }
+  },
+  "calibrator": {
+    "method": "sigmoid",
+    "a": -1.3763273457910457,
+    "b": -0.11140480447535386
+  }
+}

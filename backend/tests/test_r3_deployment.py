@@ -63,30 +63,36 @@ def test_production_python_runtime_is_pinned_and_vercel_supported():
 
 def test_deployed_dependencies_are_fully_pinned_and_model_compatible():
     api = _requirements("api/requirements.txt")
-    for pkg in ("fastapi", "pydantic", "pydantic-settings", "joblib", "scikit-learn", "pandas",
-                "numpy", "scipy", "threadpoolctl"):
+    for pkg in ("fastapi", "pydantic", "pydantic-settings", "numpy"):
         assert pkg in api, f"api/requirements.txt must pin {pkg}"
+    # The served model is portable JSON computed with NumPy, so the function ships no scientific stack
+    # (backend/tests/test_portable_model.py proves the app runs with those packages blocked).
     meta = json.loads((REGISTRY_ROOT / ENTRY_REL / "metadata.json").read_text(encoding="utf-8"))
-    assert api["scikit-learn"] == meta["runtime"]["sklearn_version"] == "1.9.1"
-    # Backend/CI requirements and the ML package declare the same versions as the deployed function.
+    assert meta["runtime"]["serialization"] == "portable_json"
+    assert not set(api) & {"scikit-learn", "scipy", "pandas", "joblib", "threadpoolctl"}
+    # Backend/CI requirements pin the scikit-learn the joblib-registered versions need, and every package the
+    # function and the backend share has the same version.
     backend = _requirements("backend/requirements.txt")
     research = _requirements("requirements.txt")
+    reference = json.loads((REGISTRY_ROOT / "models" / "cardiovanta-lr13" / "1.1.0" / "metadata.json").read_text(encoding="utf-8"))
+    assert backend["scikit-learn"] == reference["runtime"]["sklearn_version"] == meta["runtime"]["sklearn_version"] == "1.9.1"
     pkg_deps = {d.split("==")[0].lower(): d.split("==")[1]
                 for d in tomllib.loads((ROOT / "cardiovanta_ml" / "pyproject.toml").read_text())["project"]["dependencies"]}
     for name in ("numpy", "scipy", "joblib", "scikit-learn", "pandas"):
-        assert api[name] == pkg_deps[name], name
+        assert backend[name] == pkg_deps[name], name
     for name in set(api) & set(backend):
         assert api[name] == backend[name], name
     for name in ("numpy", "scipy", "threadpoolctl", "joblib", "scikit-learn", "pandas"):
-        assert api[name] == research[name], name
+        assert backend[name] == research[name], name
 
 
 def test_installed_runtime_matches_pins():
     import numpy, pandas, scipy, sklearn
     api = _requirements("api/requirements.txt")
-    assert sklearn.__version__ == api["scikit-learn"]
-    assert numpy.__version__ == api["numpy"] and scipy.__version__ == api["scipy"]
-    assert pandas.__version__ == api["pandas"]
+    backend = _requirements("backend/requirements.txt")
+    assert numpy.__version__ == api["numpy"] == backend["numpy"]
+    assert sklearn.__version__ == backend["scikit-learn"] and scipy.__version__ == backend["scipy"]
+    assert pandas.__version__ == backend["pandas"]
 
 
 # =============================================================================
@@ -127,9 +133,8 @@ def test_vercel_config_includes_runtime_resources():
         "artifacts/model/model.joblib", "artifacts/model/explanation_model.joblib",
         "artifacts/model/metadata.json", "artifacts/model/feature_schema.json",
         "artifacts/model/shap_background.json", "artifacts/model/reference_predictions.csv",
-        *(f"{SERVED_ARTIFACT_DIR.relative_to(ROOT).as_posix()}/{name}" for name in (
-            "model.joblib", "explanation_model.joblib", "metadata.json", "feature_schema.json",
-            "shap_background.json", "reference_predictions.csv")),
+        *(f"{SERVED_ARTIFACT_DIR.relative_to(ROOT).as_posix()}/{name}" for name in json.loads(
+            (ROOT / "artifacts" / ENTRY_REL / "metadata.json").read_text(encoding="utf-8"))["artifacts"].values()),
         "backend/app/main.py", "backend/app/core/config.py", "src/config/config.py",
         "configs/prediction_service.json",
     ]

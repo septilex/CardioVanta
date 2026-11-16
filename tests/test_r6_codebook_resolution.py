@@ -18,7 +18,7 @@ spec.loader.exec_module(r6)
 # Contract file bytes. R1-R6: 50249533dd26a9ca30c070100a045c921182e206dca88620f4e073c8568df531 (contract 2.0.0).
 # Contract 2.1.0 (2026-11-15) resolved the codes R6 left open by patient matching
 # (docs/reports/CATEGORICAL_ENCODING_VERIFICATION_2026-11-15.md), so the file changed.
-CONTRACT_SHA256 = "780506840b5bceb95463c4ba320250eb61be9a830b9229f24fb7cc5745e4b278"
+CONTRACT_SHA256 = "ffef787a7723ef4919ebe0201e97bf310ac43db5b5cca2c79ce0adad2e7c89bd"
 
 
 @pytest.fixture(scope="module")

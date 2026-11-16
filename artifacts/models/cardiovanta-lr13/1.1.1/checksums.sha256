@@ -1,0 +1,8 @@
+# SHA-256 manifest for cardiovanta-lr13@1.1.1 (sha256sum format).
+# Files live in the registry's artifact_directory: artifacts/model-1.1.1/ (immutable once registered).
+4d85963c9aa07bd212a1462b6a6bd737db07b2e2b2f81737340b9f96b1330d23  explanation_model.json
+eeb6c2bd8383628de1de552219f8c4add628277292ea5815f4f384f2ba4b44a2  feature_schema.json
+9ff987db301831a657388df6476db4a3137f76fee691a07a26845daa6cd4b7b3  metadata.json
+e61f637f1b7afa3f429ec8bd893cd34e69438a19356b872796fa2799779a67ae  model.json
+8ded5ecf7b1ca484b1a42fa764037a7cb67b64587e5a92cfeba322430d5925b7  reference_predictions.csv
+42bd7b42b585fe418abd837a449d71ccfb83be8bbdbc8dd6c1583c0bbed9e822  shap_background.json

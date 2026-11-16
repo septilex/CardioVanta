@@ -34,8 +34,9 @@ from src.inference.outcome import (
 )
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-from backend.tests.served_model import SERVED_GOLDEN, SERVED_VERSION, SERVED_QUALIFIED_NAME, SERVED_ARTIFACT_DIR
-MODEL_DIR = SERVED_ARTIFACT_DIR
+from backend.tests.served_model import (SERVED_GOLDEN, SERVED_VERSION, SERVED_QUALIFIED_NAME, SERVED_ARTIFACT_DIR,
+                                        SKLEARN_REFERENCE_DIR, SKLEARN_REFERENCE_VERSION)
+MODEL_DIR = SKLEARN_REFERENCE_DIR  # scikit-learn objects for the independent recomputation
 
 # Hand-checked synthetic fixtures.
 # HIGH: older man, asymptomatic chest pain (the highest-prevalence presentation in
@@ -144,10 +145,10 @@ def test_api_outcome_semantics_are_disease_positive(client):
 
 def test_outcome_helpers_match_loaded_model(artifacts):
     metadata = json.loads((MODEL_DIR / "metadata.json").read_text())
-    assert metadata["package_version"] == SERVED_VERSION
+    assert metadata["package_version"] == SKLEARN_REFERENCE_VERSION
     assert "outcome_semantics" not in metadata  # frozen package: interim mapping applies
     label = resolve_disease_label(metadata)
-    assert label == LEGACY_PACKAGE_DISEASE_LABEL[SERVED_VERSION] == 0
+    assert label == LEGACY_PACKAGE_DISEASE_LABEL[SKLEARN_REFERENCE_VERSION] == LEGACY_PACKAGE_DISEASE_LABEL[SERVED_VERSION] == 0
     assert disease_label_index(artifacts["model"].classes_, label) == 0
     assert disease_log_odds_sign(artifacts["explanation_model"].classes_, label) == -1.0
     assert outcome_mapping_source(metadata) == "interim_legacy_inverted_target_mapping"
