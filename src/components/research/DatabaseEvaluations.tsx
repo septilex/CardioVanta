@@ -30,7 +30,11 @@ export function DatabaseEvaluations() {
   useEffect(() => {
     const controller = new AbortController();
     fetchResearchEvaluations(controller.signal)
-      .then((data) => setState({ kind: "ready", data }))
+      .then((data) => {
+        // A response that arrives after cleanup (unmount, or React Strict Mode's extra mount/unmount in
+        // development) belongs to a discarded effect: never apply it.
+        if (!controller.signal.aborted) setState({ kind: "ready", data });
+      })
       .catch((err: unknown) => {
         if (controller.signal.aborted) return; // the reader left the page; nothing to show
         const message =
