@@ -40,6 +40,8 @@ CLASSIFICATION: Dict[str, Dict[str, str]] = {
     "backend/tests/test_secrets_config.py": {"class": "ci_safe", "reason": "fake secret values only; environment-variable and secret-masking behaviour"},
     "backend/tests/test_research_db.py": {"class": "ci_safe", "reason": "research metadata only (no patient data); PostgreSQL JOINs against a throwaway database"},
     "backend/tests/test_feedback_crud.py": {"class": "ci_safe", "reason": "anonymous feedback documents only; MongoDB CRUD against a throwaway database"},
+    "backend/tests/test_ai_explanation.py": {"class": "ci_safe", "reason": "synthetic AI provider responses; temporary SQLite usage quota only"},
+    "backend/tests/test_ai_security.py": {"class": "ci_safe", "reason": "synthetic signed tokens and temporary SQLite usage quota only"},
     # ---- tests/: safe ----
     "tests/test_artifact_integrity.py": {"class": "ci_safe", "reason": "hashes production artifacts (reference predictions are development rows)"},
     "tests/test_monitoring.py": {"class": "ci_safe", "reason": "synthetic telemetry tests"},

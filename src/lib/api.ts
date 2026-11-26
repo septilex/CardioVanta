@@ -66,7 +66,10 @@ export async function predict(data: PredictRequest, signal?: AbortSignal): Promi
     throw new ApiError(errorMessage, response.status, errorCode);
   }
 
-  return response.json();
+  const result: PredictResponse = await response.json();
+  const token = response.headers.get("X-Explanation-Token");
+  if (token) result.explanation_token = token;
+  return result;
 }
 
 /* ─── Research evaluations (PostgreSQL, research metadata only) ─── */

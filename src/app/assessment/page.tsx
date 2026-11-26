@@ -11,6 +11,7 @@ import NextStepStrip from "./NextStepStrip";
 import { EcgTrace } from "../../components/motion/EcgTrace";
 import StepsOverview from "./StepsOverview";
 import ExplanationFeedback from "./ExplanationFeedback";
+import AIExplanation from "./AIExplanation";
 import PredictionsUnavailable from "./PredictionsUnavailable";
 import { PREDICTION_AVAILABILITY, UNAVAILABLE_CODE } from "../../lib/predictionAvailability";
 import { MotionProvider } from "../../components/motion/MotionProvider";
@@ -234,6 +235,7 @@ function ResultsPanel({ result, tab, onTabChange, onEdit, onNew }: ResultsPanelP
         )}
         {result.explanation && <AuditPanel explanation={result.explanation} active={tab === "audit"} />}
       </div>
+      <AIExplanation result={result} />
       {result.metadata?.package_version && (
         <ExplanationFeedback section={tab} modelVersion={result.metadata.package_version} />
       )}

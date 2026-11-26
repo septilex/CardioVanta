@@ -51,6 +51,7 @@ export interface ShapEquivalentExplanationResult {
 }
 
 export interface PredictResponse {
+  explanation_token?: string;
   prediction: PredictionResult;
   development_range_warning: DevelopmentRangeWarning;
   explanation: ExplanationResult;

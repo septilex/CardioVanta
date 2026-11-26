@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 import logging
 from backend.app.core.config import settings
 from cardiovanta_ml import InferenceEngine, load_model
-from backend.app.api.endpoints import feedback, predict, research
+from backend.app.api.endpoints import feedback, predict, research, ai_explanation
 from backend.app.core.logging import setup_logging
 from backend.app.api.middleware import MonitoringMiddleware
 from backend.app.core import prediction_availability
@@ -69,6 +69,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=False,
+    expose_headers=["X-Explanation-Token"],
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],  # PATCH/DELETE: feedback update and withdrawal
     allow_headers=["*"],
 )
@@ -134,3 +135,5 @@ def health_check():
     if model_package is None:
         raise HTTPException(status_code=503, detail="Service Unavailable: Model package not loaded")
     return {"status": "ok", "service": "CardioVanta"}
+
+app.include_router(ai_explanation.router, prefix="/api/v1", tags=["ai"])
