@@ -3145,3 +3145,35 @@
   flex-wrap: wrap;
   justify-content: flex-end;
 }
+
+/* Explanation feedback (ExplanationFeedback.tsx). */
+.ax-feedback {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ax-field-border);
+  font-size: 13.5px;
+  color: var(--ax-text-main);
+}
+.ax-feedback--note { color: var(--ax-text-muted); }
+.ax-feedback-q { font-weight: 600; }
+.ax-feedback-btn {
+  border: 1px solid var(--ax-field-border);
+  background: #FFFFFF;
+  color: var(--ax-burgundy);
+  font: inherit;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color var(--cv-dur-fast) var(--cv-ease-out), background-color var(--cv-dur-fast) var(--cv-ease-out);
+}
+.ax-feedback-btn:hover:not(:disabled) { border-color: var(--ax-burgundy); background: #FBF0F1; }
+.ax-feedback-btn:focus-visible { outline: 2px solid var(--ax-burgundy); outline-offset: 2px; }
+.ax-feedback-btn:disabled { opacity: 0.55; cursor: progress; }
+.ax-feedback-btn--quiet { color: var(--ax-text-muted); }
+.ax-feedback-note { color: var(--ax-text-muted); }
+.ax-feedback-fine { flex-basis: 100%; font-size: 12px; color: var(--ax-text-muted); }

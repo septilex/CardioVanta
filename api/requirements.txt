@@ -9,3 +9,5 @@ pydantic-settings==2.7.1
 numpy==2.4.6
 # PostgreSQL driver for the research-evaluations endpoint (imported lazily; prediction serving never loads it).
 psycopg[binary]==3.2.3
+# MongoDB driver for anonymous explanation feedback (imported lazily; prediction serving never loads it).
+pymongo==4.10.1
