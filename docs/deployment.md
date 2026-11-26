@@ -1,11 +1,26 @@
 # Deployment & Production Artifacts
 
 ## Production Artifacts
-The production model bundle is self-contained in the `artifacts/model/` directory. No external databases are required for inference.
-- `model.joblib`: The calibrated ensemble model wrapper.
-- `explanation_model.joblib`: The underlying uncalibrated Logistic Regression model for SHAP/linear explanations.
-- `feature_schema.json`: The authoritative contract for expected feature types, ranges, and allowed categories.
-- `metadata.json`: Immutable provenance, configuration, and policy constraints.
+The API loads an explicitly versioned model from `artifacts/models/` and verifies its registry metadata and artifact checksums before deserializing/serving it. The current 1.1.1 serving package uses portable JSON model parameters. PostgreSQL and MongoDB are optional for prediction; they support research metadata and anonymous feedback respectively.
+
+## Local Docker development
+Docker Compose starts the FastAPI backend, PostgreSQL 16, and MongoDB 7. Create a local-only environment file from the committed placeholders and keep it untracked:
+
+```powershell
+Copy-Item .env.docker.example .env.docker
+# Replace both placeholder passwords with local values.
+docker compose --env-file .env.docker up --build
+```
+
+The backend uses Compose service DNS (`postgres`, `mongo`), waits for database health checks, and exposes the model-backed API at `http://localhost:8000/api/v1/health`. It runs as a non-root account. The Docker image contains only the current registered model files needed by the API, not the research data or experiment/report trees. `LLM_ENABLED` is forced to false in Compose and the image; no OpenAI key is supplied. This is a local development topology and does not alter Vercel's architecture.
+
+The `Backend Docker smoke check` GitHub Actions workflow builds but never publishes the image, starts it without database or provider credentials, and polls the health endpoint. PostgreSQL and MongoDB in Compose are available to developers for database feature work; they are not required to pass this image health check.
+
+## Request-time platform status
+Open `/platform-status` to see when the FastAPI health endpoint was last checked and whether the backend and registered model package are available. Its App Router page is explicitly dynamic, and the server fetch uses `cache: "no-store"` with a 2.5-second abort bound; refresh the route to demonstrate a request-time result rather than a build-time snapshot. On Vercel it calls the current deployment's own host and existing `/api/*` rewrite; in Compose or self-hosted deployments, set the server-only `CARDIOVANTA_BACKEND_URL`. Internal errors and response bodies are not rendered.
+
+## Scheduled dependency audit
+`.github/workflows/scheduled-dependency-audit.yml` runs weekly and can also be started manually. It runs `npm audit` for the frontend and `pip-audit` separately against the root, backend, and API requirements. It uses no application credentials. This job reports known dependency advisories; it does not replace PR verification or audit application logic.
 
 ## Continuous Integration (CI)
 CardioVanta uses GitHub Actions for automated, secretless CI verification before code reaches production.

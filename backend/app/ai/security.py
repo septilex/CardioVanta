@@ -1,11 +1,10 @@
 """Signed, expiring derived results; persistent atomic usage reservations."""
-import base64
 import hashlib
-import hmac
-import json
 import secrets
 import sqlite3
 import time
+from typing import Literal
+import jwt
 from pydantic import Field
 from .schemas import StrictModel, ExplanationRequest
 from backend.app.core.config import settings
@@ -16,9 +15,11 @@ class TokenRequest(StrictModel):
     token: str = Field(min_length=1, max_length=7000)
 
 class Claims(StrictModel):
-    audience: str
-    expires: int
-    nonce: str
+    iss: Literal["cardiovanta-ai-explanation"]
+    aud: Literal["cardiovanta-explanation-v1"]
+    iat: int
+    exp: int
+    jti: str = Field(pattern=r"^[0-9a-f]{32}$")
     data: ExplanationRequest
 
 def key() -> bytes:
@@ -27,27 +28,24 @@ def key() -> bytes:
         raise ValueError("Signing configuration unavailable")
     return value
 
-def encode(value: bytes) -> str:
-    return base64.urlsafe_b64encode(value).decode().rstrip("=")
-
 def issue(data: ExplanationRequest) -> str:
-    claims = Claims(audience="cardiovanta-explanation-v1", expires=int(time.time())+300,
-                    nonce=secrets.token_hex(16), data=data)
-    payload = encode(claims.model_dump_json().encode())
-    signature = encode(hmac.digest(key(), payload.encode(), "sha256"))
-    return payload+"."+signature
+    issued = int(time.time())
+    claims = Claims(iss="cardiovanta-ai-explanation", aud="cardiovanta-explanation-v1",
+                    iat=issued, exp=issued+300, jti=secrets.token_hex(16), data=data)
+    return jwt.encode(claims.model_dump(mode="json"), key(), algorithm="HS256", headers={"typ": "JWT"})
 
 def verify(token: str) -> Claims:
     try:
-        payload, signature = token.split(".")
-        expected = encode(hmac.digest(key(), payload.encode(), "sha256"))
-        if not hmac.compare_digest(signature, expected):
+        if not isinstance(token, str) or len(token) > 7000:
             raise ValueError()
-        claims = Claims.model_validate_json(base64.urlsafe_b64decode(payload + "="*(-len(payload)%4)))
+        payload = jwt.decode(
+            token, key(), algorithms=["HS256"], audience="cardiovanta-explanation-v1",
+            issuer="cardiovanta-ai-explanation",
+            options={"require": ["iss", "aud", "iat", "exp", "jti", "data"], "verify_iat": True},
+        )
+        claims = Claims.model_validate(payload)
         now = int(time.time())
-        if claims.audience != "cardiovanta-explanation-v1" or not now < claims.expires <= now+300:
-            raise ValueError()
-        if len(claims.nonce) != 32:
+        if claims.iat > now or not now < claims.exp <= claims.iat+300:
             raise ValueError()
         return claims
     except Exception:

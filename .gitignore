@@ -20,6 +20,7 @@ __pycache__/
 .env
 .env.*
 !.env.example
+!.env.docker.example
 .vercel/
 
 # Editor
@@ -36,6 +37,7 @@ frontend/
 render.yaml
 docker-compose.yml
 .dockerignore
+!.dockerignore
 
 # Scratch / local-only scripts
 local_predict.py

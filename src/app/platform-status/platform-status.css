@@ -1,0 +1,122 @@
+.platform-status-page {
+  min-height: 100svh;
+  padding: clamp(1.5rem, 5vw, 4rem) 1.25rem;
+  background: var(--cv-warm-white);
+  color: var(--cv-text);
+}
+
+.platform-status-wrap {
+  width: min(100%, 58rem);
+  margin: 0 auto;
+}
+
+.platform-status-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--cv-dark);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.platform-status-mark {
+  display: grid;
+  width: 2.3rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--cv-red);
+  color: white;
+  font-family: var(--cv-font-display), Georgia, serif;
+}
+
+.platform-status-content {
+  margin-top: clamp(3rem, 10vh, 6rem);
+  max-width: 46rem;
+}
+
+.platform-status-kicker {
+  color: var(--cv-red);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.platform-status-content h1 {
+  margin-top: 0.65rem;
+  font-size: clamp(2.4rem, 7vw, 4.5rem);
+  line-height: 1.06;
+}
+
+.platform-status-intro {
+  max-width: 58ch;
+  margin-top: 1rem;
+  color: var(--cv-text-muted);
+  font-size: 1.08rem;
+}
+
+.platform-status-list {
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--cv-border);
+}
+
+.platform-status-row {
+  display: flex;
+  min-height: 6rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--cv-border);
+}
+
+.platform-status-row h2 {
+  font-family: var(--cv-font-body), system-ui, sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0;
+  transform: none;
+}
+
+.platform-status-row p {
+  margin-top: 0.2rem;
+  color: var(--cv-text-muted);
+  font-size: 0.9rem;
+}
+
+.platform-status-value {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.platform-status-value.is-available { color: #326440; }
+.platform-status-value.is-unavailable { color: #842032; }
+
+.platform-status-dot {
+  width: 0.55rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.platform-status-checked,
+.platform-status-note {
+  margin-top: 1.25rem;
+  color: var(--cv-text-muted);
+  font-size: 0.84rem;
+}
+
+.platform-status-checked time { color: var(--cv-text); font-variant-numeric: tabular-nums; }
+.platform-status-note { max-width: 68ch; }
+
+.platform-status-page a:focus-visible {
+  outline: 3px solid var(--cv-focus);
+  outline-offset: 4px;
+}
+
+@media (max-width: 520px) {
+  .platform-status-row { align-items: flex-start; flex-direction: column; justify-content: center; gap: 0.8rem; padding: 1.15rem 0; }
+}

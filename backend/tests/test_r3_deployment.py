@@ -372,13 +372,14 @@ def test_ci_production_job_enforces_all_required_checks():
                      "scripts/ci/verify_wheel_install.py",
                      "--model-id cardiovanta-lr13 --model-version 1.0.0",
                      'CARDIOVANTA_RUN_INSTALL_TESTS: "1"',
-                     # CI data quarantine: tests run by explicit classification, never by directory
-                     "pytest $(python scripts/ci/test_classification.py --list ci_safe)",
+                     # Complete backend suite; classification and quarantine guard still constrain it
+                     "python -m pytest backend/tests -q",
+                     "scripts/ci/test_classification.py --check",
                      "CARDIOVANTA_DATA_QUARANTINE=1"):
         assert required in job, required
     assert "continue-on-error" not in job and "|| true" not in job
-    assert not re.search(r"pytest\s+(tests|backend/tests)/?(\s|$)", job)  # no directory-wide collection
-    # the backend synthetic suite, monitoring and artifact-integrity tests are all still in the ci_safe set
+    assert not re.search(r"pytest\s+tests/?(\s|$)", job)  # no unclassified research-data collection
+    # Every backend test module remains classified ci_safe under the active data-quarantine guard.
     spec = importlib.util.spec_from_file_location("ci_test_classification", ROOT / "scripts" / "ci" / "test_classification.py")
     tc = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(tc)
