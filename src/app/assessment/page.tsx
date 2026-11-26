@@ -16,7 +16,8 @@ import { MotionProvider } from "../../components/motion/MotionProvider";
 import { AnimatedNumber } from "../../components/motion/AnimatedNumber";
 import { RouteTransition } from "../../components/motion/RouteTransition";
 import { AppSidebar, MobileNav } from "../../components/shell/AppNav";
-import { NAV_BACK, collapse, formatProbability, panelSwap, revealGroup, revealItem } from "../../lib/motion";
+import { NAV_BACK, collapse, panelSwap, revealGroup, revealItem } from "../../lib/motion";
+import { describeEstimate } from "../../lib/clinicalFormat";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    INITIAL DATA — 13 model features, exact existing defaults & encodings
@@ -327,9 +328,7 @@ function DotArray({ filled }: { filled: number }) {
 
 function SummaryPanel({ result, active }: { result: PredictResponse; active: boolean }) {
   const probability = result.prediction?.probability;
-  const percentText = probability != null ? formatProbability(probability) : "--";
-  const inHundred = probability != null ? Math.min(100, Math.max(0, Math.round(probability * 100))) : null;
-  const headline = inHundred === null ? "--" : inHundred === 0 ? "Fewer than 1" : `About ${inHundred}`;
+  const { percentText, inHundred, headline } = describeEstimate(probability);
   const up = topFactors(result, 1);
   const down = topFactors(result, -1);
   const outside = result.development_range_warning?.outside_development_range;
