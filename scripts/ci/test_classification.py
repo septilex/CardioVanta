@@ -37,6 +37,7 @@ CLASSIFICATION: Dict[str, Dict[str, str]] = {
                  "test_stage5_contract", "test_stage6_security")},
     "backend/tests/test_prediction_containment.py": {"class": "ci_safe", "reason": "synthetic profiles; prediction-availability switch (Phase 10 containment)"},
     "backend/tests/test_portable_model.py": {"class": "ci_safe", "reason": "synthetic profiles; NumPy-only portable model parity and serving without scikit-learn"},
+    "backend/tests/test_secrets_config.py": {"class": "ci_safe", "reason": "fake secret values only; environment-variable and secret-masking behaviour"},
     # ---- tests/: safe ----
     "tests/test_artifact_integrity.py": {"class": "ci_safe", "reason": "hashes production artifacts (reference predictions are development rows)"},
     "tests/test_monitoring.py": {"class": "ci_safe", "reason": "synthetic telemetry tests"},
