@@ -68,3 +68,43 @@ export async function predict(data: PredictRequest, signal?: AbortSignal): Promi
 
   return response.json();
 }
+
+/* ─── Research evaluations (PostgreSQL, research metadata only) ─── */
+
+export interface ResearchEvaluationRow {
+  version: string;
+  serialization: string;
+  cohort: string;
+  cohort_name: string;
+  cohort_role: string;
+  n_patients: number;
+  method: string;
+  evaluated_on: string;
+  source: string;
+  metric: string;
+  value: number;
+}
+
+export interface ResearchEvaluations {
+  evaluations: ResearchEvaluationRow[];
+  version_coverage: { version: string; serialization: string; calibration: string; evaluation_count: number; cohorts: string[] }[];
+  unevaluated_cohorts: { code: string; name: string; country: string; n_patients: number; role: string }[];
+}
+
+/** GET /api/v1/research/evaluations. Rejects with ApiError (status 503 + code) when the database is unavailable. */
+export async function fetchResearchEvaluations(signal?: AbortSignal): Promise<ResearchEvaluations> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/research/evaluations`, { signal });
+  if (!response.ok) {
+    let message = "Research data could not be loaded.";
+    let code: string | undefined;
+    try {
+      const body = await response.json();
+      message = typeof body.detail === "string" ? body.detail : message;
+      code = typeof body.code === "string" ? body.code : undefined;
+    } catch {
+      // keep the generic message
+    }
+    throw new ApiError(message, response.status, code);
+  }
+  return response.json();
+}

@@ -832,3 +832,23 @@
     left: 0 !important;
   }
 }
+
+/* Research database section (DatabaseEvaluations). */
+.doc-db { display: grid; gap: 14px; }
+.doc-db-status {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--ax-field-border);
+  border-radius: 10px;
+  color: var(--ax-text-muted);
+  font-size: 14px;
+}
+.doc-db-notes {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--ax-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}

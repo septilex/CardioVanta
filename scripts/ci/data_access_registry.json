@@ -8,6 +8,13 @@
         "heart.csv"
       ]
     },
+    "backend/tests/test_research_db.py": {
+      "role": "path_reference",
+      "reason": "compares the source path string recorded in the research database's seed; never opens the file",
+      "tokens": [
+        "phase2c_final_evaluation.json"
+      ]
+    },
     "experiments/advanced_model_search.py": {
       "role": "research_data_access",
       "reason": "load_dev_data/load_locked_test read heart.csv; locked-partition accessor",
