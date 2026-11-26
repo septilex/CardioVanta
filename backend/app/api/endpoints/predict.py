@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, HTTPException, Request
+from fastapi import APIRouter, Depends, Query, HTTPException, Request, Response
 from typing import Optional
 import logging
 from backend.app.schemas.predict import (
@@ -23,6 +23,7 @@ router = APIRouter()
 )
 def predict_endpoint(
     request: Request,
+    response: Response,
     payload: PredictRequest,
     threshold: Optional[float] = Query(None, ge=0.0, le=1.0)
 ):
@@ -120,6 +121,19 @@ def predict_endpoint(
         except Exception as log_err:
             logger.error(f"Telemetry logging failed: {log_err}", exc_info=True)
             
+        # Optional capability header preserves the existing prediction JSON contract.
+        from backend.app.ai.client import available
+        if available():
+            try:
+                from backend.app.ai.security import issue
+                from backend.app.ai.schemas import ExplanationRequest
+                data = ExplanationRequest(probability=prediction.probability, outcome=prediction.outcome,
+                    contributing_factors=[{"feature_name": name, "contribution_direction": "increases" if value > 0 else "decreases" if value < 0 else "neutral"}
+                        for name, value in exp_res["contributions"].items()])
+                response.headers["X-Explanation-Token"] = issue(data)
+                response.headers["Cache-Control"] = "no-store"
+            except Exception:
+                pass  # Optional explanation failure must never break prediction serving.
         return response_obj
     except Exception as e:
         # Do not log or print the exception string/traceback: engine error messages can

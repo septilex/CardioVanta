@@ -20,7 +20,7 @@ from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Settings whose values must never be printed, logged or sent to the browser.
-SECRET_SETTINGS = ("DATABASE_URL", "MONGODB_URI")
+SECRET_SETTINGS = ("DATABASE_URL", "MONGODB_URI", "OPENAI_API_KEY", "AI_SIGNING_KEY")
 
 
 class MissingSecretError(RuntimeError):
@@ -33,6 +33,14 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore"
     )
+
+    AI_SIGNING_KEY: Optional[SecretStr] = None
+    AI_USAGE_DB: str = ""
+    AI_DAILY_LIMIT: int = 50
+    AI_MINUTE_LIMIT: int = 5
+    LLM_ENABLED: bool = False
+    OPENAI_API_KEY: Optional[SecretStr] = None
+    OPENAI_MODEL: str = ""
 
     PROJECT_NAME: str = "CardioVanta"
     ENVIRONMENT: str = "production"
