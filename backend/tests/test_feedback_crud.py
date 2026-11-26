@@ -16,6 +16,8 @@ from backend.app.core.config import settings
 from backend.app.db import mongo
 from backend.app.main import app
 
+from backend.tests.ci_env import assert_ci_provides, needs_database, require_database_url
+
 TEST_MONGODB_URI = os.environ.get("TEST_MONGODB_URI", "").strip()
 VALID = {"helpful": True, "section": "why", "model_version": "1.1.1"}
 
@@ -84,11 +86,16 @@ def test_empty_update_is_rejected(client, no_store):
 
 # --- against a throwaway MongoDB ---------------------------------------------------------------------------
 
-needs_db = pytest.mark.skipif(not TEST_MONGODB_URI, reason="TEST_MONGODB_URI is not set (CI provides one)")
+needs_db = needs_database("TEST_MONGODB_URI")   # skips locally without a database; never skips in CI
+
+
+def test_ci_provides_the_test_database():
+    assert_ci_provides("TEST_MONGODB_URI")
 
 
 @pytest.fixture
 def store(monkeypatch):
+    require_database_url("TEST_MONGODB_URI")
     host = urlparse(TEST_MONGODB_URI).hostname
     if host not in ("localhost", "127.0.0.1") and not urlparse(TEST_MONGODB_URI).path.rstrip("/").endswith("_test"):
         pytest.fail("TEST_MONGODB_URI must point at localhost or a database whose name ends in _test")

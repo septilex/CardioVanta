@@ -20,6 +20,8 @@ from backend.app.db.migrate import SQL_DIR, apply_migrations, migration_files
 from backend.app.db.postgres import ResearchDatabaseUnavailable, connect
 from backend.app.main import app
 
+from backend.tests.ci_env import assert_ci_provides, needs_database, require_database_url
+
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "").strip()
 TABLES = ("metrics", "evaluations", "cohorts", "model_versions", "schema_migrations")
 
@@ -86,11 +88,16 @@ def _is_throwaway(url: str) -> bool:
     return parsed.hostname in ("localhost", "127.0.0.1") or (parsed.path or "").rstrip("/").endswith("_test")
 
 
-needs_db = pytest.mark.skipif(not TEST_DATABASE_URL, reason="TEST_DATABASE_URL is not set (CI provides one)")
+needs_db = needs_database("TEST_DATABASE_URL")   # skips locally without a database; never skips in CI
+
+
+def test_ci_provides_the_test_database():
+    assert_ci_provides("TEST_DATABASE_URL")
 
 
 @pytest.fixture(scope="module")
 def db_settings():
+    require_database_url("TEST_DATABASE_URL")
     if not _is_throwaway(TEST_DATABASE_URL):
         pytest.fail("TEST_DATABASE_URL must point at localhost or a database whose name ends in _test")
     cfg = Settings(_env_file=None, DATABASE_URL=TEST_DATABASE_URL)
