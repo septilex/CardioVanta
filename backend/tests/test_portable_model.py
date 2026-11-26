@@ -139,7 +139,7 @@ def test_portable_load_failure_is_a_compatibility_error(tmp_registry, monkeypatc
 
 _NO_SKLEARN_PROBE = r"""
 import importlib.abc, json, os, sys
-BLOCKED = ("sklearn", "scipy", "pandas", "joblib", "threadpoolctl")
+BLOCKED = ("sklearn", "scipy", "pandas", "joblib", "threadpoolctl", "psycopg", "pymongo", "bson")  # predictions never touch a database
 class Block(importlib.abc.MetaPathFinder):
     def find_spec(self, name, path=None, target=None):
         if name.split(".")[0] in BLOCKED:

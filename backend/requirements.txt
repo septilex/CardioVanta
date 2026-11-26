@@ -11,3 +11,7 @@ pandas==3.0.6
 numpy==2.4.6
 scipy==1.17.1
 threadpoolctl==3.7.0
+# PostgreSQL driver (research evaluations; openspec/changes/research-evaluations-postgres).
+psycopg[binary]==3.2.3
+# MongoDB driver (explanation feedback; openspec/changes/explanation-feedback-mongodb).
+pymongo==4.10.1

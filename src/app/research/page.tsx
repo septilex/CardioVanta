@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 import { DocShell } from "../../components/shell/DocShell";
 import { CountUp } from "../../components/motion/CountUp";
+import { DatabaseEvaluations } from "../../components/research/DatabaseEvaluations";
 import { NAV_BACK, NAV_LATERAL } from "../../lib/motion";
 
 export const metadata: Metadata = {
@@ -145,8 +146,8 @@ const ERAS: { name: string; items: Milestone[] }[] = [
         body: (
           <>
             On 20 new partitions, pooled out-of-fold calibration moved the slope from 1.267 to 1.003 with no loss of
-            discrimination; all four pre-registered criteria passed. Production is unchanged until a new model version
-            is approved.
+            discrimination; all four pre-registered criteria passed. Adopted as model 1.1.0 (served as its NumPy-only
+            export, 1.1.1).
           </>
         ),
       },
@@ -251,7 +252,7 @@ const METRICS: MetricRow[] = [
     range: "1.169–1.374",
     pooled: "1.003",
     meaning: "1 is ideal. Above 1 means the probabilities are too timid, pulled towards 50%.",
-    limit: "The deployed recipe is under-confident; the confirmed fix is not deployed.",
+    limit: "The original recipe was under-confident; the confirmed fix is served since model 1.1.0.",
   },
   {
     name: "Expected calibration error",
@@ -367,8 +368,8 @@ export default function ResearchPage() {
               <thead>
                 <tr>
                   <th scope="col">Metric</th>
-                  <th scope="col" className="num">Production recipe</th>
-                  <th scope="col" className="num">Pooled calibration (not deployed)</th>
+                  <th scope="col" className="num">Original recipe (1.0.0)</th>
+                  <th scope="col" className="num">Pooled calibration (served since 1.1.0)</th>
                   <th scope="col">What it tells you · and its limit</th>
                 </tr>
               </thead>
@@ -396,6 +397,14 @@ export default function ResearchPage() {
               not evidence of clinical accuracy for any other population.
             </p>
           </div>
+        </section>
+
+        <section className="doc-section" aria-labelledby="database">
+          <div className="reveal">
+            <p className="doc-eyebrow">Research database</p>
+            <h2 id="database">Every recorded evaluation, by model and cohort</h2>
+          </div>
+          <DatabaseEvaluations />
         </section>
 
         <section className="doc-section" aria-labelledby="explain">

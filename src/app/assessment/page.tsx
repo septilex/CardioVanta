@@ -10,13 +10,21 @@ import "./assessment.css";
 import NextStepStrip from "./NextStepStrip";
 import { EcgTrace } from "../../components/motion/EcgTrace";
 import StepsOverview from "./StepsOverview";
+import ExplanationFeedback from "./ExplanationFeedback";
 import PredictionsUnavailable from "./PredictionsUnavailable";
 import { PREDICTION_AVAILABILITY, UNAVAILABLE_CODE } from "../../lib/predictionAvailability";
 import { MotionProvider } from "../../components/motion/MotionProvider";
 import { AnimatedNumber } from "../../components/motion/AnimatedNumber";
 import { RouteTransition } from "../../components/motion/RouteTransition";
 import { AppSidebar, MobileNav } from "../../components/shell/AppNav";
-import { NAV_BACK, collapse, formatProbability, panelSwap, revealGroup, revealItem } from "../../lib/motion";
+import { NAV_BACK, collapse, panelSwap, revealGroup, revealItem } from "../../lib/motion";
+import { describeEstimate } from "../../lib/clinicalFormat";
+import { TimeoutError, withTimeout } from "../../lib/async";
+
+/** Show the "starting the model" notice after this long. */
+const SLOW_NOTICE_MS = 5_000;
+/** Give up on a prediction request after this long (a serverless cold start can be slow). */
+const REQUEST_TIMEOUT_MS = 75_000;
 
 /* ═══════════════════════════════════════════════════════════════════════════
    INITIAL DATA — 13 model features, exact existing defaults & encodings
@@ -226,6 +234,9 @@ function ResultsPanel({ result, tab, onTabChange, onEdit, onNew }: ResultsPanelP
         )}
         {result.explanation && <AuditPanel explanation={result.explanation} active={tab === "audit"} />}
       </div>
+      {result.metadata?.package_version && (
+        <ExplanationFeedback section={tab} modelVersion={result.metadata.package_version} />
+      )}
     </m.section>
   );
 }
@@ -327,9 +338,7 @@ function DotArray({ filled }: { filled: number }) {
 
 function SummaryPanel({ result, active }: { result: PredictResponse; active: boolean }) {
   const probability = result.prediction?.probability;
-  const percentText = probability != null ? formatProbability(probability) : "--";
-  const inHundred = probability != null ? Math.min(100, Math.max(0, Math.round(probability * 100))) : null;
-  const headline = inHundred === null ? "--" : inHundred === 0 ? "Fewer than 1" : `About ${inHundred}`;
+  const { percentText, inHundred, headline } = describeEstimate(probability);
   const up = topFactors(result, 1);
   const down = topFactors(result, -1);
   const outside = result.development_range_warning?.outside_development_range;
@@ -618,30 +627,28 @@ function AssessmentForm() {
     setError(null);
     setResult(null);
 
-    // A cold start of the serverless model can take up to ~40 s, so allow 75 s before giving up,
-    // and tell the person what is happening after a few seconds instead of leaving a silent spinner.
+    // Callback: after a few seconds, show the "starting the model" notice. Nothing waits on it.
     setSlow(false);
-    const slowId = setTimeout(() => setSlow(true), 5000);
-    const timeoutId = setTimeout(() => controller.abort("timeout"), 75000);
+    const slowId = setTimeout(() => setSlow(true), SLOW_NOTICE_MS);
 
     try {
-      const response = await predict(formData, controller.signal);
-      clearTimeout(timeoutId);
-      clearTimeout(slowId);
+      // Promise: the request races a deadline (Promise.race inside withTimeout). A cold start of the
+      // serverless model can take a while, so the deadline is generous; on timeout the request is aborted.
+      const response = await withTimeout(predict(formData, controller.signal), REQUEST_TIMEOUT_MS, controller);
       setResult(response);
       setResultTab("summary");
       setShowResults(true);
       setHasSwapped(true);
     } catch (err: unknown) {
-      clearTimeout(timeoutId);
-      clearTimeout(slowId);
-      if ((err instanceof Error && err.name === "AbortError") || err === "timeout") {
-        if (err === "timeout") {
-          setError({
-            message: "The prediction service took too long to respond. It may still be starting up, so please try again.",
-            kind: "retryable",
-          });
-        }
+      if (err instanceof TimeoutError) {
+        setError({
+          message: "The prediction service took too long to respond. It may still be starting up, so please try again.",
+          kind: "retryable",
+        });
+        return;
+      }
+      // Aborted because the person reset the form or sent a newer request: not an error to show.
+      if (err instanceof Error && err.name === "AbortError") {
         return;
       }
 
@@ -654,6 +661,7 @@ function AssessmentForm() {
         });
       }
     } finally {
+      clearTimeout(slowId);
       if (abortControllerRef.current === controller) {
         setLoading(false);
         setSlow(false);

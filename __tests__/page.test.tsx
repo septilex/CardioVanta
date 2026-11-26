@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Page from '../src/app/assessment/page';
 import { predict, ApiError } from '../src/lib/api';
 
@@ -196,13 +196,31 @@ describe('CardioVanta Page Skeleton', () => {
   });
 
   it('handles abort timeout gracefully', async () => {
-    mockPredict.mockRejectedValueOnce('timeout');
+    jest.useFakeTimers();
+    try {
+      let signal: AbortSignal | undefined;
+      // The request never answers on its own, like a cold start that runs past the deadline.
+      mockPredict.mockImplementationOnce((_data, s) => {
+        signal = s;
+        return new Promise(() => {});
+      });
 
-    render(<Page />);
-    fireEvent.click(screen.getByRole('button', { name: /Generate Analysis/i }));
+      render(<Page />);
+      fireEvent.click(screen.getByRole('button', { name: /Generate Analysis/i }));
 
-    await waitFor(() => {
+      await act(async () => {
+        jest.advanceTimersByTime(5_000);
+      });
+      expect(screen.getByRole('status')).toHaveTextContent(/waking up/i);   // callback-driven notice
+
+      await act(async () => {
+        jest.advanceTimersByTime(70_000);                                   // past the 75 s deadline
+      });
       expect(screen.getByText(/took too long to respond/i)).toBeInTheDocument();
-    });
+      expect(signal?.aborted).toBe(true);                                    // the request itself was stopped
+      expect(screen.getByRole('button', { name: /Generate Analysis/i })).not.toBeDisabled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

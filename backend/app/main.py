@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 import logging
 from backend.app.core.config import settings
 from cardiovanta_ml import InferenceEngine, load_model
-from backend.app.api.endpoints import predict
+from backend.app.api.endpoints import feedback, predict, research
 from backend.app.core.logging import setup_logging
 from backend.app.api.middleware import MonitoringMiddleware
 from backend.app.core import prediction_availability
@@ -69,7 +69,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],  # PATCH/DELETE: feedback update and withdrawal
     allow_headers=["*"],
 )
 app.add_middleware(MonitoringMiddleware)
@@ -125,6 +125,8 @@ async def predictions_unavailable_handler(request: Request, exc: prediction_avai
     )
 
 app.include_router(predict.router, prefix="/api/v1", tags=["predict"])
+app.include_router(research.router, prefix="/api/v1", tags=["research"])
+app.include_router(feedback.router, prefix="/api/v1", tags=["feedback"])
 
 @app.get("/api/v1/health")
 def health_check():
