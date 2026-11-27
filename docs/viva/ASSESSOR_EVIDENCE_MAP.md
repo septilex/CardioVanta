@@ -2,6 +2,8 @@
 
 This map points to behavior in code and tests. A rubric topic marked **not implemented** should not be claimed during assessment. It describes the repository at the time of this change; the assessor must re-evaluate the branch before awarding credit.
 
+**Scope limitation:** The canonical Kalvium mandatory 27-concept checklist was not present in the repository, the available task attachments, or the repository's viva materials during this audit. The concepts below are the specific topics identified in the available requests, including the five additions from this branch; this document is **not** a complete 27-item audit and must not be used to claim 27/27 coverage. Map each exact mandatory rubric row against implementation and tests once the authoritative checklist is available.
+
 ## Five additional concepts
 
 | Rubric concept / points | Implementation evidence | Test evidence | What it demonstrates and a short viva demo |

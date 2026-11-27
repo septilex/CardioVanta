@@ -372,8 +372,8 @@ def test_ci_production_job_enforces_all_required_checks():
                      "scripts/ci/verify_wheel_install.py",
                      "--model-id cardiovanta-lr13 --model-version 1.0.0",
                      'CARDIOVANTA_RUN_INSTALL_TESTS: "1"',
-                     # Complete backend suite; classification and quarantine guard still constrain it
-                     "python -m pytest backend/tests -q",
+                     # Run only explicitly classified safe tests under the active quarantine guard
+                     "python -m pytest $(python scripts/ci/test_classification.py --list ci_safe) -q",
                      "scripts/ci/test_classification.py --check",
                      "CARDIOVANTA_DATA_QUARANTINE=1"):
         assert required in job, required
