@@ -1,0 +1,60 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:?Set in .env.docker}:${POSTGRES_PASSWORD:?Set in .env.docker}@postgres:5432/${POSTGRES_DB:-cardiovanta}
+      MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:?Set in .env.docker}:${MONGO_INITDB_ROOT_PASSWORD:?Set in .env.docker}@mongo:27017/cardiovanta?authSource=admin
+      LLM_ENABLED: "false"
+      AI_USAGE_DB: ""
+      OPENAI_API_KEY: ""
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+
+  postgres:
+    image: postgres:16.9
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Set in .env.docker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set in .env.docker}
+      POSTGRES_DB: ${POSTGRES_DB:-cardiovanta}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB:-cardiovanta}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  mongo:
+    image: mongo:7.0.16
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:?Set in .env.docker}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?Set in .env.docker}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--username", "${MONGO_INITDB_ROOT_USERNAME}", "--password", "${MONGO_INITDB_ROOT_PASSWORD}", "--authenticationDatabase", "admin", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  postgres-data:
+  mongo-data:

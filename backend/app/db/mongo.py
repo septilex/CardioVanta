@@ -17,6 +17,7 @@ from backend.app.core.config import Settings, settings as default_settings
 COLLECTION = "explanation_feedback"
 DEFAULT_DATABASE = "cardiovanta"
 TIMEOUT_MS = 3000
+SECTION_INDEX = "feedback_section_1"
 
 _clients: Dict[str, Any] = {}
 _lock = threading.Lock()
@@ -43,7 +44,13 @@ def collection(cfg: Optional[Settings] = None) -> Any:
     uri = (cfg or default_settings).require_secret("MONGODB_URI")
     client = _client(uri)
     db = client.get_default_database(default=DEFAULT_DATABASE)
-    return db[COLLECTION]
+    col = db[COLLECTION]
+    # MongoDB create_index is idempotent for an existing key/options pair. Running it
+    # from the lazy accessor keeps every warm or cold process on the same schema.
+    from pymongo import ASCENDING
+
+    col.create_index([("section", ASCENDING)], name=SECTION_INDEX)
+    return col
 
 
 def reset_clients() -> None:

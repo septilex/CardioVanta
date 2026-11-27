@@ -1,0 +1,73 @@
+name: Backend Docker smoke check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-healthcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/data/*
+            /data/external/raw/heart-disease.names
+            !/experiments/results/error_analysis.json
+            !/experiments/results/candidate_comparison.json
+            !/experiments/results/nested_lda_evaluation.json
+            !/experiments/results/nested_threshold_optimization.json
+            !/experiments/results/nested_cv_90pct_results.json
+            !/experiments/phase13/test_results.json
+            !/experiments/phase13/tabicl_test_results.json
+            !/reports/error_analysis.md
+            !/reports/phase2c_final_evaluation.csv
+            !/reports/phase2c_final_evaluation.json
+            !/reports/phase2c_model_selection.json
+            !/reports/model_baseline_results.csv
+            !/reports/model_baseline_results.json
+            !/reports/cardio_vanta_master_audit.md
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build backend image (never pushed)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile
+          load: true
+          push: false
+          tags: cardiovanta-backend:ci
+
+      - name: Start container and wait for health endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name cardiovanta-backend -p 8000:8000 \
+            -e LLM_ENABLED=false cardiovanta-backend:ci
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:8000/api/v1/health > /tmp/health.json; then
+              cat /tmp/health.json
+              exit 0
+            fi
+            if [ "$(docker inspect -f '{{.State.Status}}' cardiovanta-backend)" = "exited" ]; then
+              docker logs cardiovanta-backend
+              exit 1
+            fi
+            sleep 3
+          done
+          docker logs cardiovanta-backend
+          exit 1
+
+      - name: Remove smoke-test container
+        if: always()
+        run: docker rm -f cardiovanta-backend || true

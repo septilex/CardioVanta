@@ -13,7 +13,7 @@ forbid any field outside the schema.
 import logging
 from typing import Any, Callable, Literal, Optional
 
-from fastapi import APIRouter, Header, Response
+from fastapi import APIRouter, Header, Query, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -99,9 +99,9 @@ def create_feedback(payload: FeedbackCreate, response: Response):
 
 
 @router.get("/feedback/summary")
-def feedback_summary():
+def feedback_summary(section: Optional[Section] = Query(default=None)):
     def action(col):
-        pipeline = [
+        pipeline = ([{"$match": {"section": section}}] if section is not None else []) + [
             {"$group": {"_id": "$section", "total": {"$sum": 1},
                         "helpful": {"$sum": {"$cond": ["$helpful", 1, 0]}}}},
             {"$sort": {"_id": 1}},

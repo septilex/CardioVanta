@@ -1,5 +1,6 @@
 import time
 from concurrent.futures import ThreadPoolExecutor
+import jwt
 import pytest
 from pydantic import SecretStr
 from backend.app.ai import security
@@ -14,7 +15,11 @@ def configured(monkeypatch, tmp_path):
     return ExplanationRequest(probability=0.4,outcome="significant_obstructive_cad_present",contributing_factors=[{"feature_name":"age","contribution_direction":"increases"}])
 
 def test_valid(configured):
-    assert security.verify(security.issue(configured)).data == configured
+    token = security.issue(configured)
+    claims = security.verify(token)
+    assert claims.data == configured
+    assert claims.iss == "cardiovanta-ai-explanation"
+    assert claims.aud == "cardiovanta-explanation-v1"
 
 def test_expired(configured,monkeypatch):
     token=security.issue(configured)
@@ -22,12 +27,26 @@ def test_expired(configured,monkeypatch):
     monkeypatch.setattr(security.time,"time",lambda:now+301)
     with pytest.raises(ValueError): security.verify(token)
 
-@pytest.mark.parametrize("kind",["payload","signature","missing","extra"])
+@pytest.mark.parametrize("kind",["payload","signature","missing","extra","none_algorithm", "wrong_algorithm"])
 def test_invalid(configured,kind):
     token=security.issue(configured)
-    a,b=token.split(".")
-    token={"payload":"A"+a[1:]+"."+b,"signature":a+"."+"A"*43,"missing":"","extra":token+".x"}[kind]
+    parts=token.split(".")
+    token={"payload":parts[0]+".eyJpc3MiOiJ4In0."+parts[2],
+           "signature":parts[0]+"."+parts[1]+"."+"A"*43,
+           "missing":"", "extra":token+".x",
+           "none_algorithm":jwt.encode({"iss":"cardiovanta-ai-explanation","aud":"cardiovanta-explanation-v1","iat":int(time.time()),"exp":int(time.time())+100,"jti":"a"*32,"data":configured.model_dump(mode="json")}, key=None, algorithm="none"),
+           "wrong_algorithm":jwt.encode({"iss":"cardiovanta-ai-explanation","aud":"cardiovanta-explanation-v1","iat":int(time.time()),"exp":int(time.time())+100,"jti":"a"*32,"data":configured.model_dump(mode="json")}, "z"*48, algorithm="HS384")}[kind]
     with pytest.raises(ValueError): security.verify(token)
+
+@pytest.mark.parametrize("claim,value",[("aud","another-service"),("iss","user-login"),
+                                          ("data",{"probability":0.4,"outcome":"unknown","contributing_factors":[]})])
+def test_claim_validation(configured, claim, value):
+    payload={"iss":"cardiovanta-ai-explanation","aud":"cardiovanta-explanation-v1",
+             "iat":int(time.time()),"exp":int(time.time())+100,"jti":"a"*32,
+             "data":configured.model_dump(mode="json")}
+    payload[claim]=value
+    signed=jwt.encode(payload, security.key(), algorithm="HS256")
+    with pytest.raises(ValueError): security.verify(signed)
 
 def test_request_fields():
     with pytest.raises(ValueError): security.TokenRequest.model_validate({})
@@ -37,6 +56,20 @@ def test_replay(configured):
     token=security.issue(configured)
     assert security.reserve(token)
     assert not security.reserve(token)
+
+def test_failed_attempt_can_retry_success_is_one_time_and_attempts_are_bounded(configured):
+    token=security.issue(configured)
+    assert security.reserve(token)
+    security.complete(token, succeeded=False)
+    assert security.reserve(token)
+    security.complete(token, succeeded=True)
+    assert not security.reserve(token)
+
+    retry_token=security.issue(configured)
+    for _ in range(security.MAX_TOKEN_ATTEMPTS):
+        assert security.reserve(retry_token)
+        security.complete(retry_token, succeeded=False)
+    assert not security.reserve(retry_token)
 
 def test_global_limit(configured,monkeypatch):
     monkeypatch.setattr(security.settings,"AI_MINUTE_LIMIT",2)

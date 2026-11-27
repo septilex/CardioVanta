@@ -162,3 +162,30 @@ def test_summary_aggregates_per_section(client, store):
     assert body["total"] == 3
     assert body["sections"] == [{"section": "summary", "total": 1, "helpful": 1},
                                 {"section": "why", "total": 2, "helpful": 1}]
+
+
+@needs_db
+def test_section_index_is_named_ascending_and_idempotent(store):
+    from backend.app.db.mongo import SECTION_INDEX
+    mongo.collection()  # repeated lazy initialization must keep one named index
+    indexes = {index["name"]: index for index in store.list_indexes()}
+    assert SECTION_INDEX in indexes
+    assert indexes[SECTION_INDEX]["key"] == {"section": 1}
+
+
+@needs_db
+def test_filtered_summary_uses_match_before_group_and_counts_correctly(client, store):
+    for helpful, section in [(True, "why"), (False, "why"), (True, "summary")]:
+        client.post("/api/v1/feedback", json={**VALID, "helpful": helpful, "section": section})
+    response = client.get("/api/v1/feedback/summary", params={"section": "why"})
+    assert response.status_code == 200
+    assert response.json() == {"sections": [{"section": "why", "total": 2, "helpful": 1}], "total": 2}
+    explain = store.database.command("explain", {
+        "find": store.name, "filter": {"section": "why"}, "hint": "feedback_section_1",
+    }, verbosity="queryPlanner")
+    plan = str(explain["queryPlanner"]["winningPlan"])
+    assert "IXSCAN" in plan
+
+
+def test_invalid_summary_filter_is_rejected(client, no_store):
+    assert client.get("/api/v1/feedback/summary", params={"section": "landing"}).status_code == 422

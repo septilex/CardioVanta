@@ -38,8 +38,8 @@ after disclosure. It supports loading, errors and retry, retaining the original 
 Successful results remain in component memory; no new database storage is introduced.
 
 ## Configuration and demonstration
-Install backend/requirements.txt in the project virtual environment. Both dependency
-manifests pin openai==2.8.1. Configure backend-only OPENAI_API_KEY, OPENAI_MODEL (a
+Install backend/requirements.txt in the project virtual environment. Backend/API runtime
+manifests pin openai==2.8.1 and PyJWT==2.15.1. Configure backend-only OPENAI_API_KEY, OPENAI_MODEL (a
 model supporting structured outputs), and LLM_ENABLED=true only after privacy review,
 provider retention review and appropriate access/budget controls. Default LLM_ENABLED=false.
 Never use NEXT_PUBLIC for secrets. AI is forcibly unavailable when VERCEL is set; do not
@@ -78,10 +78,12 @@ public access still requires privacy review and a deployment with durable shared
 Prediction provenance: predict_endpoint issues X-Explanation-Token only after successful
 model inference and explanation. Existing prediction JSON is unchanged. The frontend
 keeps this header in memory and submits only {"token":"..."}. Tokens contain derived
-probability, outcome and directions, a random nonce, fixed audience and five-minute
-expiry. They are HMAC-SHA256 signed with AI_SIGNING_KEY (minimum 32 characters).
-They are authenticated, NOT encrypted: treat the token as sensitive bearer data.
-security.verify checks signature in constant time, expiry, audience and strict schemas.
+probability, outcome and directions, a random jti, fixed issuer and audience, issued-at
+time and five-minute expiry. They are standard HS256 JWTs signed with AI_SIGNING_KEY
+(minimum 32 bytes). Verification hardcodes HS256 and requires issuer, audience, iat,
+exp, jti and strict allowlisted data claims. Previous non-JWT tokens are rejected.
+JWTs are authenticated, NOT encrypted: treat the token as sensitive bearer data.
+These are explanation capabilities, not user-login tokens.
 No client-provided prediction fields or arbitrary instructions are accepted.
 
 security.reserve uses SQLite BEGIN IMMEDIATE to atomically allow at most three provider
