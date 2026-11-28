@@ -148,8 +148,9 @@ def test_real_mongo_validator_indexes_relations_and_delete(monkeypatch):
             assert indexes["feedback_section_created"]["key"] == [("section", 1), ("created_at", -1)]
             assert indexes["feedback_version_created"]["key"] == [("model_version", 1), ("created_at", -1)]
             assert "events_parent_created" in col.database[EVENTS].index_information()
-            plan = col.find({"section": "why"}).sort("created_at", -1).hint("feedback_section_created").explain()
-            assert "feedback_section_created" in str(plan["queryPlanner"]["winningPlan"])
+            # No hint: MongoDB's own planner must pick the index, and the index must supply the sort order.
+            plan = str(col.find({"section": "why"}).sort("created_at", -1).explain()["queryPlanner"]["winningPlan"])
+            assert "IXSCAN" in plan and "feedback_section_created" in plan and "'SORT'" not in plan, plan
             headers = {"X-Edit-Token": data["edit_token"]}
             assert client.patch(f"/api/v1/feedback/{oid}", json={"helpful": False}, headers=headers).status_code == 200
             assert col.database[EVENTS].count_documents({"feedback_id": oid}) == 2
@@ -157,3 +158,54 @@ def test_real_mongo_validator_indexes_relations_and_delete(monkeypatch):
             assert col.database[EVENTS].count_documents({"feedback_id": oid}) == 0
     finally:
         col.database.client.drop_database(col.database.name)
+
+
+@needs_database("TEST_DATABASE_URL")
+def test_real_postgres_planner_uses_the_declared_indexes(postgres_schema):
+    """#43: with realistic row counts PostgreSQL's own planner chooses the indexes from migration 003."""
+    with postgres_schema.begin() as db:
+        owners = [uuid.uuid4() for _ in range(200)]
+        db.execute(text("INSERT INTO users (id, email) SELECT u, u::text || '@example.test' FROM unnest(CAST(:ids AS uuid[])) AS u"),
+                   {"ids": owners})
+        # 20,000 synthetic sessions; about 1% have expired, which is what the daily clean-up deletes.
+        db.execute(text("""
+            INSERT INTO refresh_sessions (id, user_id, family, token_hash, expires_at)
+            SELECT gen_random_uuid(), (CAST(:ids AS uuid[]))[1 + n % 200], gen_random_uuid(), md5(n::text) || md5((n + 1)::text),
+                   now() + CASE WHEN n % 100 = 0 THEN interval '-1 day' ELSE interval '7 days' END
+            FROM generate_series(1, 20000) AS n"""), {"ids": owners})
+        db.execute(text("""
+            INSERT INTO upload_batches (id, user_id, status, created_at)
+            SELECT gen_random_uuid(), (CAST(:ids AS uuid[]))[1 + n % 200], 'completed', now() - n * interval '1 minute'
+            FROM generate_series(1, 20000) AS n"""), {"ids": owners})
+        db.execute(text("ANALYZE refresh_sessions; ANALYZE upload_batches"))
+        expired = db.scalar(text("EXPLAIN (FORMAT JSON) SELECT id FROM refresh_sessions WHERE expires_at < now()"))
+        owner = db.scalar(text("EXPLAIN (FORMAT JSON) SELECT id FROM upload_batches WHERE user_id = :u ORDER BY created_at DESC LIMIT 10"),
+                          {"u": owners[0]})
+    assert "refresh_sessions_expiry_idx" in str(expired), expired
+    assert "upload_batches_owner_idx" in str(owner), owner
+    assert "'Sort'" not in str(owner)  # the composite (user_id, created_at) index already returns rows in order
+
+
+@needs_database("TEST_DATABASE_URL")
+def test_real_postgres_cron_is_idempotent_under_concurrent_invocations(postgres_schema):
+    """#51: overlapping cron deliveries serialize on the advisory lock; the day's work runs exactly once."""
+    from backend.app.api.endpoints.maintenance import maintain
+    from backend.app.db.orm import MaintenanceRun
+    with postgres_schema.begin() as db:
+        owner = uuid.uuid4()
+        db.execute(text("INSERT INTO users (id, email) VALUES (:u, 'cron@example.test')"), {"u": owner})
+        db.execute(text("""INSERT INTO refresh_sessions (id, user_id, family, token_hash, expires_at)
+                           SELECT gen_random_uuid(), :u, gen_random_uuid(), md5(n::text) || md5((n + 7)::text),
+                                  now() - interval '1 hour' FROM generate_series(1, 5) AS n"""), {"u": owner})
+
+    def run(_):
+        with Session(postgres_schema) as db:
+            return maintain(db)
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        results = list(pool.map(run, range(6)))
+    assert sorted(r["status"] for r in results) == ["already_completed"] * 5 + ["completed"]
+    assert {r["removed_sessions"] for r in results} == {5}  # every caller reports the single real run
+    with Session(postgres_schema) as db:
+        assert db.query(MaintenanceRun).count() == 1
+        assert db.scalar(text("SELECT count(*) FROM refresh_sessions")) == 0
