@@ -90,3 +90,34 @@ test("support checkout failure keeps a retryable UI", async () => {
   expect(await screen.findByRole("alert")).toHaveTextContent("temporarily unavailable");
   await waitFor(() => expect(screen.getByRole("button", { name: "Open test checkout" })).toBeEnabled());
 });
+
+describe("messages derived from the redirect URL (no effect copies the URL into state)", () => {
+  afterEach(() => window.history.pushState({}, "", "/"));
+
+  test.each([
+    ["returned", /A redirect does not confirm payment/],
+    ["cancelled", /Checkout was cancelled/],
+  ])("support page after Stripe redirect: checkout=%s", async (value, message) => {
+    window.history.pushState({}, "", `/support?checkout=${value}`);
+    request.mockResolvedValue({ enabled: true });
+    render(<Support />);
+    expect(await screen.findByText(message)).toBeInTheDocument();
+  });
+
+  test("an unknown checkout value shows nothing", async () => {
+    window.history.pushState({}, "", "/support?checkout=<script>");
+    request.mockResolvedValue({ enabled: true });
+    render(<Support />);
+    await waitFor(() => expect(request).toHaveBeenCalled());
+    expect(screen.queryByText(/redirect does not confirm|was cancelled/)).not.toBeInTheDocument();
+  });
+
+  test("a failed Google sign-in is reported until the reader acts", async () => {
+    window.history.pushState({}, "", "/research/workspace?login=failed");
+    request.mockResolvedValue({ enabled: true, google: true });
+    render(<Workspace />);
+    expect(await screen.findByRole("alert")).toHaveTextContent(/Google sign-in failed or was cancelled/);
+    fireEvent.click(await screen.findByRole("button", { name: /Create a viewer account/ }));
+    expect(screen.queryByText(/Google sign-in failed/)).not.toBeInTheDocument();
+  });
+});

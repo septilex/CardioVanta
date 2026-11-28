@@ -1,23 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
 import { workspaceRequest } from "../../lib/workspace";
+import { useQueryParam } from "../../lib/useQueryParam";
+
+const RETURN_NOTICES: Record<string, string> = {
+  returned: "You have returned from Stripe. A redirect does not confirm payment; completion is recorded only after Stripe sends a verified event.",
+  cancelled: "Checkout was cancelled. You can start again when you are ready.",
+};
 
 export function Support() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [amount, setAmount] = useState(500);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [requestKey, setRequestKey] = useState("");
   useEffect(() => {
     let active = true;
     workspaceRequest<{ enabled: boolean }>("/support/status").then(value => { if (active) setEnabled(value.enabled); })
       .catch(() => { if (active) { setEnabled(false); setError("Support checkout is unavailable. Please try again later."); } });
-    const returned = new URLSearchParams(window.location.search).get("checkout");
-    if (returned === "returned") setNotice("You have returned from Stripe. A redirect does not confirm payment; completion is recorded only after Stripe sends a verified event.");
-    if (returned === "cancelled") setNotice("Checkout was cancelled. You can start again when you are ready.");
     return () => { active = false; };
   }, []);
+  // Derived from the URL Stripe returned to, not copied into state by an effect.
+  const notice = RETURN_NOTICES[useQueryParam("checkout") ?? ""] ?? "";
   return <div className="workspace-content">
     {enabled === null && <p role="status">Checking test checkout availability…</p>}
     {enabled === false && <p className="workspace-status">Test checkout has not been enabled on this deployment.</p>}

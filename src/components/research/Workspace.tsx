@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { afterStatusUpdate, refreshAccount, setAccess, workspaceBase, workspaceRequest, type Account, type ImportState } from "../../lib/workspace";
 import { ImportLive } from "./ImportLive";
+import { useQueryParam } from "../../lib/useQueryParam";
+
+const LOGIN_FAILED = "Google sign-in failed or was cancelled. If you already have an account, sign in with your password and link Google.";
 
 export function Workspace() {
   const [account, setAccount] = useState<Account | null>(null);
@@ -30,12 +33,16 @@ export function Workspace() {
       .then(async status => { if (active) setAvailable(status); if (status.enabled) { const user = await refreshAccount(); if (active) setAccount(user); } })
       .catch(() => { if (active) setError("Account service is unavailable. Please reload to try again."); })
       .finally(() => { if (active) setLoading(false); });
-    if (new URLSearchParams(window.location.search).get("login") === "failed") setError("Google sign-in failed or was cancelled. If you already have an account, sign in with your password and link Google.");
     return () => { active = false; };
   }, []);
 
+  // The OAuth callback redirects here with ?login=failed. Shown until the reader does something else.
+  const loginFailed = useQueryParam("login") === "failed";
+  const [loginNoticeDismissed, setLoginNoticeDismissed] = useState(false);
+  const shownError = error || (loginFailed && !loginNoticeDismissed ? LOGIN_FAILED : "");
+
   async function act(task: () => Promise<void>) {
-    setBusy(true); setError(""); setNotice("");
+    setBusy(true); setError(""); setNotice(""); setLoginNoticeDismissed(true);
     try { await task(); } catch (error) { setError((error as Error).message); } finally { setBusy(false); }
   }
 
@@ -52,7 +59,7 @@ export function Workspace() {
   if (loading) return <p role="status">Checking account access…</p>;
 
   return <div className="workspace-content">
-    {error && <p className="workspace-error" role="alert">{error}</p>}
+    {shownError && <p className="workspace-error" role="alert">{shownError}</p>}
     {notice && <p className="workspace-status" role="status">{notice}</p>}
     {available && !available.enabled && <p className="workspace-status">The research workspace has not been enabled on this deployment. <Link href="/research">Public research</Link> and <Link href="/assessment">Heart Analysis</Link> remain available.</p>}
     {!account && available?.enabled && <section aria-labelledby="account-heading">
@@ -63,7 +70,7 @@ export function Workspace() {
         <label>Password<input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={register ? 12 : 1} maxLength={128} autoComplete={register ? "new-password" : "current-password"} aria-describedby={register ? "password-policy" : undefined} /></label>
         {register && <p id="password-policy">Use 12–128 characters, including a letter and a number.</p>}
         <button className="btn-primary" disabled={busy}>{busy ? "Please wait…" : register ? "Create account" : "Sign in"}</button>
-        <button type="button" className="workspace-link" disabled={busy} onClick={() => { setRegister(!register); setError(""); }}>{register ? "Already registered? Sign in" : "Create a viewer account"}</button>
+        <button type="button" className="workspace-link" disabled={busy} onClick={() => { setRegister(!register); setError(""); setLoginNoticeDismissed(true); }}>{register ? "Already registered? Sign in" : "Create a viewer account"}</button>
       </form>
       {available.google && <a className="workspace-link" href={`${workspaceBase}/api/v1/auth/google`}>Continue with Google</a>}
     </section>}
