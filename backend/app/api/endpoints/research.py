@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from backend.app.core.config import MissingSecretError
 from backend.app.db.postgres import ResearchDatabaseUnavailable
 from backend.app.db.research import research_evaluations
+from backend.app.services.shared import cache_read, cache_write
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -23,6 +24,9 @@ def _unavailable(code: str, detail: str) -> JSONResponse:
 
 @router.get("/research/evaluations")
 def get_research_evaluations():
+    cached = cache_read()
+    if cached is not None:
+        return JSONResponse(content=cached, headers={"Cache-Control": "no-store", "X-Cache": "HIT"})
     try:
         data = research_evaluations()
     except MissingSecretError:
@@ -31,4 +35,5 @@ def get_research_evaluations():
     except ResearchDatabaseUnavailable as e:
         logger.error("Research database unavailable: %s", e)
         return _unavailable(UNAVAILABLE, "The research database is temporarily unavailable.")
-    return JSONResponse(content=data, headers={"Cache-Control": "public, max-age=300"})
+    cache_write(data)
+    return JSONResponse(content=data, headers={"Cache-Control": "no-store", "X-Cache": "MISS"})

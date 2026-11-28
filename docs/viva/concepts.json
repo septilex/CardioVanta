@@ -1,0 +1,426 @@
+[
+  {
+    "number": 1,
+    "concept": "LLM API integration",
+    "category": "AI App Engineering —",
+    "points": 0.2,
+    "initial": "PARTIAL",
+    "evidence": "`backend/app/ai/client.py` already integrates OpenAI, but availability is disabled on Vercel. Complete deployment-safe usage control."
+  },
+  {
+    "number": 2,
+    "concept": "Prompt engineering",
+    "category": "AI App Engineering —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "`backend/app/ai/prompts/explanation_v1.py` contains a carefully constrained system prompt."
+  },
+  {
+    "number": 3,
+    "concept": "Structured outputs",
+    "category": "AI App Engineering —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "`backend/app/ai/schemas.py` and `client.py` implement Pydantic structured output parsing."
+  },
+  {
+    "number": 4,
+    "concept": "Input sanitization & injection awareness",
+    "category": "Auth & Security —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Strict Pydantic schemas, bounded request body, and explicit untrusted-input instructions in the AI prompt."
+  },
+  {
+    "number": 5,
+    "concept": "JWT issuance & verification",
+    "category": "Auth & Security —",
+    "points": 0.2,
+    "initial": "PARTIAL",
+    "evidence": "`backend/app/ai/security.py` uses custom HMAC-signed expiring tokens, not standard JWTs. Implement proper JWT authentication."
+  },
+  {
+    "number": 6,
+    "concept": "OAuth / 3rd-party login",
+    "category": "Auth & Security —",
+    "points": 0.2,
+    "initial": "MISSING",
+    "evidence": "Implement Google OAuth/OIDC login."
+  },
+  {
+    "number": 7,
+    "concept": "Password hashing",
+    "category": "Auth & Security —",
+    "points": 0.2,
+    "initial": "MISSING",
+    "evidence": "Implement secure Argon2id password hashing for application accounts."
+  },
+  {
+    "number": 8,
+    "concept": "Rate limiting",
+    "category": "Auth & Security —",
+    "points": 0.2,
+    "initial": "PARTIAL",
+    "evidence": "Existing AI usage quotas use SQLite. Upgrade to shared, deployment-safe rate limiting and cover other protected endpoints."
+  },
+  {
+    "number": 9,
+    "concept": "Role-based authorization checks",
+    "category": "Auth & Security —",
+    "points": 0.2,
+    "initial": "MISSING",
+    "evidence": "Implement admin, researcher, and viewer roles with backend authorization checks."
+  },
+  {
+    "number": 10,
+    "concept": "Backend deployment",
+    "category": "Backend & System Design —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "`api/index.py` and `vercel.json` configure the FastAPI serverless application."
+  },
+  {
+    "number": 11,
+    "concept": "File upload handling",
+    "category": "Backend & System Design —",
+    "points": 0.2,
+    "initial": "MISSING",
+    "evidence": "Add safe CSV upload and research-metadata import functionality."
+  },
+  {
+    "number": 12,
+    "concept": "HTTP status codes used correctly",
+    "category": "Backend & System Design —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing endpoints use 200, 201, 204, 401, 403, 404, 422, 429, 503 and other appropriate responses."
+  },
+  {
+    "number": 13,
+    "concept": "Middleware",
+    "category": "Backend & System Design —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "`backend/app/api/middleware.py` implements monitoring middleware and request IDs."
+  },
+  {
+    "number": 14,
+    "concept": "Problem modeling",
+    "category": "Backend & System Design —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing 13-feature cardiovascular model, prediction contracts, model registry, and inference engine."
+  },
+  {
+    "number": 15,
+    "concept": "Request body validation",
+    "category": "Backend & System Design —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Pydantic validation, strict input schemas and validation exception handlers."
+  },
+  {
+    "number": 16,
+    "concept": "RESTful endpoint design",
+    "category": "Backend & System Design —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing prediction, research, AI explanation and feedback endpoints."
+  },
+  {
+    "number": 17,
+    "concept": "Server-side error handling",
+    "category": "Backend & System Design —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "FastAPI exception handling and endpoint-specific error responses."
+  },
+  {
+    "number": 18,
+    "concept": "System design basics: frontend, backend, DB and other systems integration",
+    "category": "Backend & System Design —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing Next.js + FastAPI + MongoDB + PostgreSQL + ML model architecture."
+  },
+  {
+    "number": 19,
+    "concept": "Automated API testing / integration tests",
+    "category": "Engineering Practices —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Pytest API tests and CI integration tests using PostgreSQL and MongoDB service containers."
+  },
+  {
+    "number": 20,
+    "concept": "Containerization with Docker",
+    "category": "Engineering Practices —",
+    "points": 0.5,
+    "initial": "MISSING",
+    "evidence": "Add production-quality Dockerfiles and Docker Compose."
+  },
+  {
+    "number": 21,
+    "concept": "Environment variables & secrets management",
+    "category": "Engineering Practices —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "`.env.example`, `backend/app/core/config.py`, `SecretStr` and environment-based configuration."
+  },
+  {
+    "number": 22,
+    "concept": "Async data fetching from API",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "`src/lib/api.ts`, prediction API and research fetching."
+  },
+  {
+    "number": 23,
+    "concept": "Client-side routing",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Next.js App Router, navigation links and `usePathname`."
+  },
+  {
+    "number": 24,
+    "concept": "Form handling — controlled inputs",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Controlled assessment inputs using `useState` and `onChange`."
+  },
+  {
+    "number": 25,
+    "concept": "Form validation",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Required fields, input constraints and server-side Pydantic validation."
+  },
+  {
+    "number": 26,
+    "concept": "Frontend deployment",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing Vercel deployment."
+  },
+  {
+    "number": 27,
+    "concept": "JavaScript — async/await",
+    "category": "Frontend —",
+    "points": 0.1,
+    "initial": "FULL",
+    "evidence": "Async prediction flow and API calls."
+  },
+  {
+    "number": 28,
+    "concept": "JavaScript — Closures",
+    "category": "Frontend —",
+    "points": 0.1,
+    "initial": "FULL",
+    "evidence": "Existing callback handlers and React hooks close over component state and values."
+  },
+  {
+    "number": 29,
+    "concept": "JavaScript — Event loop",
+    "category": "Frontend —",
+    "points": 0.1,
+    "initial": "PARTIAL",
+    "evidence": "Async callbacks and Promises exist, but an explicit microtask/macrotask demonstration and test are needed."
+  },
+  {
+    "number": 30,
+    "concept": "JavaScript — Hoisting",
+    "category": "Frontend —",
+    "points": 0.1,
+    "initial": "FULL",
+    "evidence": "`src/lib/clinicalFormat.ts` and `__tests__/clinicalFormat.test.ts`."
+  },
+  {
+    "number": 31,
+    "concept": "JavaScript — Promises vs callbacks",
+    "category": "Frontend —",
+    "points": 0.1,
+    "initial": "FULL",
+    "evidence": "`src/lib/async.ts` and `__tests__/async.test.ts`."
+  },
+  {
+    "number": 32,
+    "concept": "Loading & error UI states",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Assessment loading, timeout, error and retry states with tests."
+  },
+  {
+    "number": 33,
+    "concept": "React component composition",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing assessment, result panels, navigation and reusable components."
+  },
+  {
+    "number": 34,
+    "concept": "Responsive layout & styling competence",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Responsive layouts, mobile navigation and component styles."
+  },
+  {
+    "number": 35,
+    "concept": "Side effects with useEffect",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing prediction warm-up, animation and research fetching effects with cleanup tests."
+  },
+  {
+    "number": 36,
+    "concept": "State management with useState",
+    "category": "Frontend —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing assessment state and UI state management."
+  },
+  {
+    "number": 37,
+    "concept": "Aggregation pipelines",
+    "category": "NoSQL (MongoDB) —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "`backend/app/api/endpoints/feedback.py` uses `$group`, `$sum`, `$cond` and `$sort`."
+  },
+  {
+    "number": 38,
+    "concept": "CRUD operations (Mongo)",
+    "category": "NoSQL (MongoDB) —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Feedback create, read, update and delete endpoints."
+  },
+  {
+    "number": 39,
+    "concept": "Embedding vs referencing relationships",
+    "category": "NoSQL (MongoDB) —",
+    "points": 0.2,
+    "initial": "MISSING",
+    "evidence": "Add a meaningful embedded and referenced data model."
+  },
+  {
+    "number": 40,
+    "concept": "Indexing for query performance (Mongo)",
+    "category": "NoSQL (MongoDB) —",
+    "points": 0.2,
+    "initial": "MISSING",
+    "evidence": "Add explicit query-supporting indexes and test them."
+  },
+  {
+    "number": 41,
+    "concept": "Schema modeling (Mongo)",
+    "category": "NoSQL (MongoDB) —",
+    "points": 0.2,
+    "initial": "PARTIAL",
+    "evidence": "Pydantic models control application data, but MongoDB-level schema validation needs to be added."
+  },
+  {
+    "number": 42,
+    "concept": "Filtering, ordering, grouping",
+    "category": "SQL (Postgres) —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing research queries include `WHERE`, `ORDER BY` and `GROUP BY`."
+  },
+  {
+    "number": 43,
+    "concept": "Indexing for query performance (SQL)",
+    "category": "SQL (Postgres) —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Explicit indexes exist in `001_research_schema.sql`."
+  },
+  {
+    "number": 44,
+    "concept": "Normalization basics",
+    "category": "SQL (Postgres) —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing separated research tables and relational constraints."
+  },
+  {
+    "number": 45,
+    "concept": "ORM usage (Prisma/Sequelize)",
+    "category": "SQL (Postgres) —",
+    "points": 0.2,
+    "initial": "MISSING",
+    "evidence": "Add a suitable ORM integration for the existing Python backend."
+  },
+  {
+    "number": 46,
+    "concept": "Relational schema design with PK/FK",
+    "category": "SQL (Postgres) —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "Existing primary keys, foreign keys, uniqueness and cascade constraints."
+  },
+  {
+    "number": 47,
+    "concept": "SQL JOINs",
+    "category": "SQL (Postgres) —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "`backend/app/db/research.py` contains INNER JOIN, LEFT JOIN and anti-join queries."
+  },
+  {
+    "number": 48,
+    "concept": "Transactions",
+    "category": "SQL (Postgres) —",
+    "points": 0.2,
+    "initial": "FULL",
+    "evidence": "`backend/app/db/migrate.py` explicitly uses PostgreSQL transactions."
+  },
+  {
+    "number": 49,
+    "concept": "Caching with Redis",
+    "category": "System & Integration —",
+    "points": 0.4,
+    "initial": "MISSING",
+    "evidence": "Implement Redis-backed caching for appropriate non-clinical data."
+  },
+  {
+    "number": 50,
+    "concept": "Payment gateway integration",
+    "category": "System & Integration —",
+    "points": 0.5,
+    "initial": "MISSING",
+    "evidence": "Implement a safe Stripe test-mode support payment flow."
+  },
+  {
+    "number": 51,
+    "concept": "Scheduled jobs / cron",
+    "category": "System & Integration —",
+    "points": 0.3,
+    "initial": "MISSING",
+    "evidence": "Add a protected scheduled maintenance task using Vercel Cron."
+  },
+  {
+    "number": 52,
+    "concept": "Server-side rendering",
+    "category": "System & Integration —",
+    "points": 0.5,
+    "initial": "FULL",
+    "evidence": "Existing Next.js App Router Server Components, including the root layout and research page."
+  },
+  {
+    "number": 53,
+    "concept": "WebSocket / real-time communication",
+    "category": "System & Integration —",
+    "points": 0.5,
+    "initial": "MISSING",
+    "evidence": "Implement real-time operational status or research import progress updates."
+  }
+]

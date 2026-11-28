@@ -13,7 +13,8 @@ class ExplanationError(Exception):
         self.status, self.code = status, code
 
 def available() -> bool:
-    return bool(not os.getenv("VERCEL") and settings.AI_SIGNING_KEY and len(settings.AI_SIGNING_KEY.get_secret_value()) >= 32 and settings.AI_USAGE_DB and settings.LLM_ENABLED and settings.OPENAI_API_KEY and settings.OPENAI_MODEL.strip()
+    shared_controls = settings.REDIS_URL or (not os.getenv("VERCEL") and settings.ENVIRONMENT == "development" and settings.AI_USAGE_DB)
+    return bool(shared_controls and settings.AI_SIGNING_KEY and len(settings.AI_SIGNING_KEY.get_secret_value()) >= 32 and settings.LLM_ENABLED and settings.OPENAI_API_KEY and settings.OPENAI_MODEL.strip()
                 and importlib.util.find_spec("openai"))
 
 async def provider_parse(data: ExplanationRequest):

@@ -20,7 +20,8 @@ from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Settings whose values must never be printed, logged or sent to the browser.
-SECRET_SETTINGS = ("DATABASE_URL", "MONGODB_URI", "OPENAI_API_KEY", "AI_SIGNING_KEY")
+SECRET_SETTINGS = ("DATABASE_URL", "MONGODB_URI", "OPENAI_API_KEY", "AI_SIGNING_KEY", "REDIS_URL",
+                   "JWT_SIGNING_KEY", "GOOGLE_CLIENT_SECRET", "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "CRON_SECRET")
 
 
 class MissingSecretError(RuntimeError):
@@ -41,6 +42,24 @@ class Settings(BaseSettings):
     LLM_ENABLED: bool = False
     OPENAI_API_KEY: Optional[SecretStr] = None
     OPENAI_MODEL: str = ""
+
+    REDIS_URL: Optional[SecretStr] = None
+    AUTH_ENABLED: bool = False
+    JWT_SIGNING_KEY: Optional[SecretStr] = None
+    JWT_ISSUER: str = "cardiovanta"
+    JWT_AUDIENCE: str = "cardiovanta-research"
+    ACCESS_TOKEN_SECONDS: int = 600
+    REFRESH_TOKEN_SECONDS: int = 604800
+    APP_ORIGIN: str = "http://localhost:3000"
+    COOKIE_SECURE: bool = True
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: Optional[SecretStr] = None
+    PAYMENTS_ENABLED: bool = False
+    STRIPE_SECRET_KEY: Optional[SecretStr] = None
+    STRIPE_WEBHOOK_SECRET: Optional[SecretStr] = None
+    CRON_SECRET: Optional[SecretStr] = None
+    REALTIME_ENABLED: bool = False
+    RESEARCH_CACHE_TTL: int = 300
 
     PROJECT_NAME: str = "CardioVanta"
     ENVIRONMENT: str = "production"

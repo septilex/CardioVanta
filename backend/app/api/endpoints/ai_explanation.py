@@ -47,7 +47,8 @@ async def explanation(request: Request):
             raise client.ExplanationError(503, "AI_USAGE_UNAVAILABLE") from None
         return JSONResponse(result.model_dump(), headers=HEADERS)
     except client.ExplanationError as exc:
-        return JSONResponse({"code": exc.code, "detail": "AI explanation could not be generated. Please try again later."}, status_code=exc.status, headers=HEADERS)
+        headers = {**HEADERS, **({"Retry-After": "60"} if exc.status == 429 else {})}
+        return JSONResponse({"code": exc.code, "detail": "AI explanation could not be generated. Please try again later."}, status_code=exc.status, headers=headers)
     finally:
         if reserved and not succeeded:
             try:
