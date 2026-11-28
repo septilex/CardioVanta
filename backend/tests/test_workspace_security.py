@@ -180,3 +180,48 @@ def test_serverless_ai_requires_shared_config(monkeypatch):
     assert not available()
     monkeypatch.setattr(settings, "REDIS_URL", SecretStr("redis://localhost"))
     assert available()
+
+
+def _request(peer="10.0.0.1", **headers):
+    from starlette.requests import Request
+    scope = {"type": "http", "method": "POST", "path": "/", "client": (peer, 1234),
+             "headers": [(k.replace("_", "-").encode(), v.encode()) for k, v in headers.items()]}
+    return Request(scope)
+
+
+def test_client_identity_ignores_forwarded_headers_by_default(monkeypatch):
+    monkeypatch.setattr(settings, "CLIENT_IP_HEADER", None)
+    # Without an explicit trust boundary a client cannot pick its own rate-limit bucket.
+    assert shared.anonymous_id(_request(x_forwarded_for="1.2.3.4", x_real_ip="5.6.7.8")) == "10.0.0.1"
+
+
+def test_client_identity_uses_rightmost_trusted_proxy_entry(monkeypatch):
+    monkeypatch.setattr(settings, "CLIENT_IP_HEADER", "x-forwarded-for")
+    # A spoofed left-hand value is ignored; the trusted proxy appended the address it saw.
+    assert shared.anonymous_id(_request(x_forwarded_for="1.2.3.4, 203.0.113.9")) == "203.0.113.9"
+    monkeypatch.setattr(settings, "CLIENT_IP_HEADER", "x-real-ip")
+    assert shared.anonymous_id(_request(x_real_ip="2001:db8::1")) == "2001:db8::1"
+
+
+@pytest.mark.parametrize("value", ["", "not-an-ip", "1.2.3.4, <script>", "999.1.1.1"])
+def test_client_identity_falls_back_to_peer_for_invalid_values(monkeypatch, value):
+    monkeypatch.setattr(settings, "CLIENT_IP_HEADER", "x-forwarded-for")
+    assert shared.anonymous_id(_request(x_forwarded_for=value)) == "10.0.0.1"
+
+
+def test_client_ip_header_setting_is_allowlisted():
+    from backend.app.core.config import Settings
+    assert Settings(CLIENT_IP_HEADER=" X-Real-IP ").CLIENT_IP_HEADER == "x-real-ip"
+    assert Settings(CLIENT_IP_HEADER="").CLIENT_IP_HEADER is None
+    with pytest.raises(ValueError):
+        Settings(CLIENT_IP_HEADER="x-client-ip")
+
+
+def test_compose_stack_never_trusts_a_forwarded_ip_header():
+    """The Next.js rewrite in the Compose stack forwards a client-supplied X-Forwarded-For unchanged (verified
+    end to end on 2026-11-28: a spoofed value created its own rate-limit bucket). The generated Compose
+    configuration must therefore leave CLIENT_IP_HEADER unset."""
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    for name in ("scripts/workspace_setup.py", "docker-compose.yml"):
+        assert "CLIENT_IP_HEADER" not in (root / name).read_text(encoding="utf-8"), name

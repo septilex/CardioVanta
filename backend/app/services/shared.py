@@ -1,5 +1,6 @@
 """Redis counters and public research caching. Never stores clinical data or raw tokens."""
 import hashlib
+import ipaddress
 import json
 from functools import lru_cache
 
@@ -40,8 +41,23 @@ def limit(scope: str, identity: str, maximum: int = 10, seconds: int = 60) -> No
 
 
 def anonymous_id(request: Request) -> str:
-    # Do not trust arbitrary forwarded IP headers. Configure the ASGI proxy trust boundary explicitly.
-    return request.client.host if request.client else "unknown"
+    """Client identity for anonymous rate limits.
+
+    By default this is the socket peer. Behind a proxy the peer is the proxy itself, so every visitor shares one
+    bucket: safe, but coarse. CLIENT_IP_HEADER opts in to a header that the deployment's edge overwrites with the
+    client address (x-real-ip on Vercel). The rightmost entry is used, which is the hop added by an appending proxy
+    (e.g. nginx $proxy_add_x_forwarded_for). Never enable it behind a proxy that forwards a client-supplied value
+    unchanged, such as the Compose Next.js rewrite. Anything that is not a valid IP address falls back to the peer.
+    """
+    peer = request.client.host if request.client else "unknown"
+    header = settings.CLIENT_IP_HEADER
+    if not header:
+        return peer
+    candidate = request.headers.get(header, "").split(",")[-1].strip()
+    try:
+        return str(ipaddress.ip_address(candidate))
+    except ValueError:
+        return peer
 
 
 def cache_read():

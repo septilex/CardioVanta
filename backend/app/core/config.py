@@ -60,6 +60,20 @@ class Settings(BaseSettings):
     CRON_SECRET: Optional[SecretStr] = None
     REALTIME_ENABLED: bool = False
     RESEARCH_CACHE_TTL: int = 300
+    # Header that the deployment's edge OVERWRITES with the client address, for anonymous rate limits: "x-real-ip"
+    # on Vercel. Leave unset behind proxies that pass a client-supplied value through: the Compose Next.js rewrite
+    # forwards X-Forwarded-For unchanged (verified 2026-11-28), so a client could otherwise choose its own bucket.
+    CLIENT_IP_HEADER: Optional[str] = None
+
+    @field_validator("CLIENT_IP_HEADER")
+    @classmethod
+    def _known_client_ip_header(cls, value: Optional[str]) -> Optional[str]:
+        if value in (None, ""):
+            return None
+        name = value.strip().lower()
+        if name not in ("x-real-ip", "x-forwarded-for"):
+            raise ValueError("CLIENT_IP_HEADER must be x-real-ip or x-forwarded-for")
+        return name
 
     PROJECT_NAME: str = "CardioVanta"
     ENVIRONMENT: str = "production"
