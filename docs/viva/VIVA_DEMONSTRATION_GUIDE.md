@@ -347,7 +347,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 20. Containerization with Docker
 
-**Engineering Practices — · 0.5 points · Implemented; deployment verification pending**
+**Engineering Practices — · 0.5 points · Fully implemented and tested**
 
 **Meaning and purpose:** Containers package reproducible application runtimes; Compose supplies health-checked dependencies and persistent local volumes. App processes run as non-root users.
 
@@ -361,7 +361,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** Docker Engine and Compose.
 
-**Verification limit:** No Docker engine on the verification machine: images and Compose health checks have not been built or run. The same topology (standalone Next.js proxy, uvicorn, PostgreSQL, Mongo replica set, Redis) was verified end to end without containers.
+**Verification limit:** Verified in CI on PR #9 (Workspace container verification, run 46130345355): backend, migrate and frontend images built; PostgreSQL, Mongo replica set, Redis, migrations, backend and frontend all reached healthy; /research HTML, /api/v1/health and the proxied /api/v1/auth/status returned successfully.
 
 ## 21. Environment variables & secrets management
 

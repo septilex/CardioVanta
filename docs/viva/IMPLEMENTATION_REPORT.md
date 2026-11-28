@@ -2,14 +2,14 @@
 
 Branch `feature/complete-53-viva-concepts` in `C:\AntiGravity Projects\CardioVanta-53-concepts`, based on
 `origin/main` `e6b7250`. The original `CardioVanta` working directory was not modified. Nothing on this branch has
-been pushed or deployed.
+been deployed; it is open as PR #9 (not merged).
 
 ## Current status — 2026-11-28
 
 | Status | Count | Concepts |
 |---|---:|---|
-| Fully implemented and tested | **47** | all except those below |
-| Implemented; deployment verification pending | **3** | 20 Docker, 51 Cron (Vercel invocation), 53 WebSocket (Vercel fallback) |
+| Fully implemented and tested | **48** | all except those below |
+| Implemented; deployment verification pending | **2** | 51 Cron (Vercel invocation), 53 WebSocket (Vercel fallback) |
 | Implemented; requires external credentials for live proof | **3** | 1 LLM (OpenAI key), 6 Google OAuth (client), 50 Stripe (test keys) |
 | Partially implemented | 0 | |
 | Not implemented | 0 | |
@@ -40,6 +40,7 @@ behaviour ran against real services, not mocks. It does not mean this branch is 
 | Dependency audit | `pip-audit -r` backend, api, test requirements; `npm audit` | no known vulnerabilities |
 | Secret scan | patterns for provider keys, private keys and credentialed URLs over every changed file | none (one documented placeholder) |
 | End to end | standalone Next.js proxy + uvicorn + real PostgreSQL/MongoDB/Redis; `scripts/verify_workspace_deployment.py` and a lifecycle script | login/RBAC, import, WebSocket `ready → completed`, cache MISS/HIT/invalidation, Origin and token rejection, SSR per request |
+| CI on PR #9 (`207811c`) | GitHub Actions runs 46130345315 and 46130345355 | backend 838 passed / 2 skipped; research stack 842 passed / 3 skipped (pre-existing platform skips; every real-service test ran); frontend 19 suites; audits clean; **Docker: three images built, full Compose stack healthy, smoke checks passed** |
 | Clean environment | fresh virtualenv from the pinned requirements only (no link to any other environment), real services, `CARDIOVANTA_RUN_INSTALL_TESTS=1` | **694 passed, 3 skipped** (CI-only assertions); `pip-audit` of the installed environment: no known vulnerabilities |
 
 ## Defects found and fixed during continuation
@@ -77,8 +78,6 @@ No model artifacts, model versions, feature contracts, thresholds or prediction 
 
 ## Remaining requirements
 
-* **Docker (#20):** build the images and run Compose health checks on a machine with Docker, or through the
-  `Workspace container verification` workflow on a pull request.
 * **Deployment (#51, #53):** after deployment, confirm a scheduled Vercel cron call (`CRON_SECRET` set) and the
   live-status polling fallback on Vercel. Set `CLIENT_IP_HEADER=x-real-ip` and, optionally, `RESEARCH_API_ORIGIN`.
 * **Credentials (#1, #6, #50):** OpenAI key, Google OAuth client, Stripe test keys and webhook secret.

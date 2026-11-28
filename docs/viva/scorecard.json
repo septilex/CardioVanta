@@ -1,8 +1,8 @@
 {
   "totals": {
     "NEEDS_CREDENTIALS": 3,
-    "FULL": 47,
-    "DEPLOY_PENDING": 3
+    "FULL": 48,
+    "DEPLOY_PENDING": 2
   },
   "labels": {
     "FULL": "Fully implemented and tested",
@@ -28,8 +28,7 @@
     },
     "Engineering Practices \u2014": {
       "total": 3,
-      "FULL": 2,
-      "DEPLOY_PENDING": 1
+      "FULL": 3
     },
     "Frontend \u2014": {
       "total": 15,

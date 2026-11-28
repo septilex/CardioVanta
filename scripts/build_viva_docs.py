@@ -102,7 +102,7 @@ proof(19, ".github/workflows/verify.yml", "verify-backend, quarantined-research-
 proof(20, "docker-compose.yml", "frontend/backend/postgres/mongo/redis/migrate services", ".github/workflows/workspace-containers.yml",
       "Containers package reproducible application runtimes; Compose supplies health-checked dependencies and persistent local volumes. App processes run as non-root users.",
       "Run scripts/workspace_setup.py, docker compose --env-file .env.docker config --quiet, then up --build --wait. Verify both health endpoints and import WebSocket behavior.", "Docker Engine and Compose",
-      "No Docker engine on the verification machine: images and Compose health checks have not been built or run. The same topology (standalone Next.js proxy, uvicorn, PostgreSQL, Mongo replica set, Redis) was verified end to end without containers.", DEPLOY)
+      "Verified in CI on PR #9 (Workspace container verification, run 46130345355): backend, migrate and frontend images built; PostgreSQL, Mongo replica set, Redis, migrations, backend and frontend all reached healthy; /research HTML, /api/v1/health and the proxied /api/v1/auth/status returned successfully.", FULL)
 proof(21, "backend/app/core/config.py", "Settings, SECRET_SETTINGS, require_secret", "backend/tests/test_secrets_config.py",
       "Environment configuration separates code from credentials; SecretStr masks values and integrations default to disabled.",
       "Run python -m backend.app.core.config: only presence is reported. Verify .env files are ignored and .env.example contains empty secret values.")

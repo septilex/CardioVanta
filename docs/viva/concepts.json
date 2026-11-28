@@ -316,8 +316,8 @@
     "meaning": "Containers package reproducible application runtimes; Compose supplies health-checked dependencies and persistent local volumes. App processes run as non-root users.",
     "demo": "Run scripts/workspace_setup.py, docker compose --env-file .env.docker config --quiet, then up --build --wait. Verify both health endpoints and import WebSocket behavior.",
     "configuration": "Docker Engine and Compose",
-    "pending": "No Docker engine on the verification machine: images and Compose health checks have not been built or run. The same topology (standalone Next.js proxy, uvicorn, PostgreSQL, Mongo replica set, Redis) was verified end to end without containers.",
-    "final": "DEPLOY_PENDING"
+    "pending": "Verified in CI on PR #9 (Workspace container verification, run 46130345355): backend, migrate and frontend images built; PostgreSQL, Mongo replica set, Redis, migrations, backend and frontend all reached healthy; /research HTML, /api/v1/health and the proxied /api/v1/auth/status returned successfully.",
+    "final": "FULL"
   },
   {
     "number": 21,
