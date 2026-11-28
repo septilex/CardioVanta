@@ -52,6 +52,9 @@ services:
       redis: {condition: service_healthy}
   frontend:
     build: .
+    environment:
+      # Server-only: lets /research/evaluations render live database data on each request (SSR).
+      RESEARCH_API_ORIGIN: http://backend:8000
     ports: ["127.0.0.1:3000:3000"]
     depends_on:
       backend: {condition: service_healthy}
