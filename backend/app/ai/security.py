@@ -55,6 +55,8 @@ def verify(token: str) -> Claims:
 
 def reserve(token: str) -> bool:
     """Atomically claim one bounded provider attempt for a signed token."""
+    if settings.REDIS_URL:
+        return reserve_shared(token)
     if not settings.AI_USAGE_DB or settings.AI_DAILY_LIMIT < 1 or settings.AI_MINUTE_LIMIT < 1:
         raise ValueError("Usage control unavailable")
     now = int(time.time())
@@ -95,6 +97,12 @@ def reserve(token: str) -> bool:
 
 def complete(token: str, succeeded: bool) -> None:
     """Release an attempt; permanently lock a token after a successful response."""
+    if settings.REDIS_URL:
+        from backend.app.services.shared import redis
+        result = redis().eval(COMPLETE_SCRIPT, 1, shared_token_key(token), int(succeeded))
+        if not result:
+            raise ValueError("Usage reservation unavailable")
+        return
     if not settings.AI_USAGE_DB:
         raise ValueError("Usage control unavailable")
     digest = hashlib.sha256(token.encode()).hexdigest()
@@ -105,3 +113,36 @@ def complete(token: str, succeeded: bool) -> None:
         )
         if cursor.rowcount != 1:
             raise ValueError("Usage reservation unavailable")
+
+
+# All keys share a Redis Cluster hash slot. The budget counts attempts, including failures.
+RESERVE_SCRIPT = """
+if redis.call('HGET', KEYS[1], 'done') == '1' or redis.call('HGET', KEYS[1], 'busy') == '1' then return 0 end
+if tonumber(redis.call('HGET', KEYS[1], 'attempts') or '0') >= 3 then return 0 end
+if tonumber(redis.call('GET', KEYS[2]) or '0') >= tonumber(ARGV[1]) then return 0 end
+if tonumber(redis.call('GET', KEYS[3]) or '0') >= tonumber(ARGV[2]) then return 0 end
+redis.call('HINCRBY', KEYS[1], 'attempts', 1)
+redis.call('HSET', KEYS[1], 'busy', 1)
+redis.call('EXPIRE', KEYS[1], 600)
+if redis.call('INCR', KEYS[2]) == 1 then redis.call('EXPIRE', KEYS[2], 86400) end
+if redis.call('INCR', KEYS[3]) == 1 then redis.call('EXPIRE', KEYS[3], 60) end
+return 1
+"""
+COMPLETE_SCRIPT = """
+if redis.call('HGET', KEYS[1], 'busy') ~= '1' then return 0 end
+redis.call('HSET', KEYS[1], 'busy', 0)
+if ARGV[1] == '1' then redis.call('HSET', KEYS[1], 'done', 1) end
+return 1
+"""
+
+
+def shared_token_key(token: str) -> str:
+    return "cv:{ai}:token:" + hashlib.sha256(token.encode()).hexdigest()
+
+
+def reserve_shared(token: str) -> bool:
+    from backend.app.services.shared import redis
+    if settings.AI_DAILY_LIMIT < 1 or settings.AI_MINUTE_LIMIT < 1:
+        raise ValueError("Usage control unavailable")
+    return bool(redis().eval(RESERVE_SCRIPT, 3, shared_token_key(token), "cv:{ai}:daily", "cv:{ai}:minute",
+                             settings.AI_DAILY_LIMIT, settings.AI_MINUTE_LIMIT))

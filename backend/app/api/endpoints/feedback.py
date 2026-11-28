@@ -13,12 +13,14 @@ forbid any field outside the schema.
 import logging
 from typing import Any, Callable, Literal, Optional
 
-from fastapi import APIRouter, Header, Response
+from fastapi import APIRouter, Header, Response, Depends, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.app.core.config import MissingSecretError
 from backend.app.db import mongo
+from backend.app.db.mongo_setup import EVENTS
+from backend.app.auth.security import require_roles
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -89,8 +91,12 @@ def create_feedback(payload: FeedbackCreate, response: Response):
     def action(col):
         token, digest = mongo.new_edit_token()
         stamp = mongo.now()
-        doc = {**payload.model_dump(), "created_at": stamp, "updated_at": stamp, "edit_token_hash": digest}
-        doc["_id"] = col.insert_one(doc).inserted_id
+        doc = {**payload.model_dump(), "created_at": stamp, "updated_at": stamp, "edit_token_hash": digest,
+               "metadata": {"surface": "assessment", "schema_version": 1}}
+        with col.database.client.start_session() as session, session.start_transaction():
+            doc["_id"] = col.insert_one(doc, session=session).inserted_id
+            col.database[EVENTS].insert_one({"feedback_id": doc["_id"], "action": "created",
+                                             "fields": [], "created_at": stamp}, session=session)
         body = {**mongo.public_view(doc), "edit_token": token}
         return JSONResponse(status_code=201, content=body,
                             headers={"Location": f"/api/v1/feedback/{doc['_id']}", "Cache-Control": "no-store"})
@@ -110,6 +116,29 @@ def feedback_summary():
                     for row in col.aggregate(pipeline)]
         return {"sections": sections, "total": sum(s["total"] for s in sections)}
 
+    return _with_store(action)
+
+
+@router.get("/research/feedback")
+def research_feedback(section: Optional[Section] = None,
+                      model_version: Optional[str] = Query(default=None, pattern=r"^\d+\.\d+\.\d+$", max_length=20),
+                      user=Depends(require_roles("researcher", "admin"))):
+    if (section is None) == (model_version is None):
+        return _error(422, "Choose exactly one filter: section or model_version.")
+    def action(col):
+        query = {"section": section} if section is not None else {"model_version": model_version}
+        return {"feedback": [mongo.public_view(doc) for doc in col.find(query).sort("created_at", -1).limit(50)]}
+    return _with_store(action)
+
+
+@router.get("/research/feedback/{feedback_id}/events")
+def research_feedback_events(feedback_id: str, user=Depends(require_roles("researcher", "admin"))):
+    def action(col):
+        oid = _object_id(feedback_id)
+        if oid is None or col.find_one({"_id": oid}) is None:
+            return _error(404, "Feedback not found.")
+        events = col.database[EVENTS].find({"feedback_id": oid}).sort("created_at", -1).limit(50)
+        return {"events": [{"action": e["action"], "fields": e["fields"], "created_at": e["created_at"].isoformat()} for e in events]}
     return _with_store(action)
 
 
@@ -137,8 +166,12 @@ def update_feedback(feedback_id: str, payload: FeedbackUpdate,
         if isinstance(doc, JSONResponse):
             return doc
         changes["updated_at"] = mongo.now()
-        updated = col.find_one_and_update({"_id": doc["_id"]}, {"$set": changes},
-                                          return_document=True)
+        with col.database.client.start_session() as session, session.start_transaction():
+            updated = col.find_one_and_update({"_id": doc["_id"]}, {"$set": changes}, return_document=True, session=session)
+            if updated is None:
+                return _error(404, "Feedback not found.")
+            col.database[EVENTS].insert_one({"feedback_id": doc["_id"], "action": "updated",
+                                             "fields": sorted(set(changes)-{"updated_at"}), "created_at": changes["updated_at"]}, session=session)
         return mongo.public_view(updated)
 
     return _with_store(action)
@@ -150,7 +183,9 @@ def delete_feedback(feedback_id: str, x_edit_token: Optional[str] = Header(defau
         doc = _authorise(col, feedback_id, x_edit_token)
         if isinstance(doc, JSONResponse):
             return doc
-        col.delete_one({"_id": doc["_id"]})
+        with col.database.client.start_session() as session, session.start_transaction():
+            col.delete_one({"_id": doc["_id"]}, session=session)
+            col.database[EVENTS].delete_many({"feedback_id": doc["_id"]}, session=session)
         return Response(status_code=204)
 
     return _with_store(action)

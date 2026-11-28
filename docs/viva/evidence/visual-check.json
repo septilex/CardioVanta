@@ -1,0 +1,13 @@
+{
+  "desktop": [
+    1440,
+    1000
+  ],
+  "mobile": [
+    390,
+    844
+  ],
+  "pageErrors": [],
+  "authenticated": "Synthetic browser fixture; not live login proof",
+  "horizontalOverflow": false
+}

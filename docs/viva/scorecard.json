@@ -1,0 +1,52 @@
+{
+  "totals": {
+    "NEEDS_CREDENTIALS": 3,
+    "FULL": 48,
+    "DEPLOY_PENDING": 2
+  },
+  "labels": {
+    "FULL": "Fully implemented and tested",
+    "PARTIAL": "Partially implemented",
+    "DEPLOY_PENDING": "Implemented; deployment verification pending",
+    "NEEDS_CREDENTIALS": "Implemented; requires external credentials for live proof",
+    "NOT_IMPLEMENTED": "Not implemented"
+  },
+  "categories": {
+    "AI App Engineering \u2014": {
+      "total": 3,
+      "NEEDS_CREDENTIALS": 1,
+      "FULL": 2
+    },
+    "Auth & Security \u2014": {
+      "total": 6,
+      "FULL": 5,
+      "NEEDS_CREDENTIALS": 1
+    },
+    "Backend & System Design \u2014": {
+      "total": 9,
+      "FULL": 9
+    },
+    "Engineering Practices \u2014": {
+      "total": 3,
+      "FULL": 3
+    },
+    "Frontend \u2014": {
+      "total": 15,
+      "FULL": 15
+    },
+    "NoSQL (MongoDB) \u2014": {
+      "total": 5,
+      "FULL": 5
+    },
+    "SQL (Postgres) \u2014": {
+      "total": 7,
+      "FULL": 7
+    },
+    "System & Integration \u2014": {
+      "total": 5,
+      "FULL": 2,
+      "NEEDS_CREDENTIALS": 1,
+      "DEPLOY_PENDING": 2
+    }
+  }
+}

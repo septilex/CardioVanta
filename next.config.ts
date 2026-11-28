@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  async rewrites() {
+    return process.env.API_PROXY_TARGET
+      ? [{ source: "/api/:path*", destination: `${process.env.API_PROXY_TARGET}/api/:path*` }]
+      : [];
+  },
   poweredByHeader: false,
   async headers() {
     // Static media in /public is not content-hashed, so browsers revalidate daily while Vercel's CDN keeps it

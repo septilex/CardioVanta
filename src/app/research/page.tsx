@@ -405,6 +405,7 @@ export default function ResearchPage() {
             <h2 id="database">Every recorded evaluation, by model and cohort</h2>
           </div>
           <DatabaseEvaluations />
+          <p><Link href="/research/evaluations">View these evaluations rendered on the server</Link> · <Link href="/research/workspace">Open the research workspace</Link> · <Link href="/support">Project support test checkout</Link></p>
         </section>
 
         <section className="doc-section" aria-labelledby="explain">

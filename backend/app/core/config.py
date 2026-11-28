@@ -20,7 +20,8 @@ from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Settings whose values must never be printed, logged or sent to the browser.
-SECRET_SETTINGS = ("DATABASE_URL", "MONGODB_URI", "OPENAI_API_KEY", "AI_SIGNING_KEY")
+SECRET_SETTINGS = ("DATABASE_URL", "MONGODB_URI", "OPENAI_API_KEY", "AI_SIGNING_KEY", "REDIS_URL",
+                   "JWT_SIGNING_KEY", "GOOGLE_CLIENT_SECRET", "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "CRON_SECRET")
 
 
 class MissingSecretError(RuntimeError):
@@ -41,6 +42,38 @@ class Settings(BaseSettings):
     LLM_ENABLED: bool = False
     OPENAI_API_KEY: Optional[SecretStr] = None
     OPENAI_MODEL: str = ""
+
+    REDIS_URL: Optional[SecretStr] = None
+    AUTH_ENABLED: bool = False
+    JWT_SIGNING_KEY: Optional[SecretStr] = None
+    JWT_ISSUER: str = "cardiovanta"
+    JWT_AUDIENCE: str = "cardiovanta-research"
+    ACCESS_TOKEN_SECONDS: int = 600
+    REFRESH_TOKEN_SECONDS: int = 604800
+    APP_ORIGIN: str = "http://localhost:3000"
+    COOKIE_SECURE: bool = True
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: Optional[SecretStr] = None
+    PAYMENTS_ENABLED: bool = False
+    STRIPE_SECRET_KEY: Optional[SecretStr] = None
+    STRIPE_WEBHOOK_SECRET: Optional[SecretStr] = None
+    CRON_SECRET: Optional[SecretStr] = None
+    REALTIME_ENABLED: bool = False
+    RESEARCH_CACHE_TTL: int = 300
+    # Header that the deployment's edge OVERWRITES with the client address, for anonymous rate limits: "x-real-ip"
+    # on Vercel. Leave unset behind proxies that pass a client-supplied value through: the Compose Next.js rewrite
+    # forwards X-Forwarded-For unchanged (verified 2026-11-28), so a client could otherwise choose its own bucket.
+    CLIENT_IP_HEADER: Optional[str] = None
+
+    @field_validator("CLIENT_IP_HEADER")
+    @classmethod
+    def _known_client_ip_header(cls, value: Optional[str]) -> Optional[str]:
+        if value in (None, ""):
+            return None
+        name = value.strip().lower()
+        if name not in ("x-real-ip", "x-forwarded-for"):
+            raise ValueError("CLIENT_IP_HEADER must be x-real-ip or x-forwarded-for")
+        return name
 
     PROJECT_NAME: str = "CardioVanta"
     ENVIRONMENT: str = "production"

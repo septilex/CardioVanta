@@ -1,0 +1,32 @@
+name: Workspace container verification
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate ephemeral local configuration
+        run: python scripts/workspace_setup.py
+      - name: Validate and build all services
+        run: |
+          docker compose --env-file .env.docker config --quiet
+          docker compose --env-file .env.docker build
+          docker compose --env-file .env.docker up --wait --wait-timeout 180
+      - name: Check frontend server HTML and backend health
+        run: |
+          curl --fail http://localhost:3000/research -o research.html
+          python -c "from pathlib import Path; assert 'Research &amp; Evidence' in Path('research.html').read_text()"
+          curl --fail http://localhost:8000/api/v1/health
+          curl --fail http://localhost:3000/api/v1/auth/status
+      - name: Stop ephemeral stack
+        if: always()
+        run: docker compose --env-file .env.docker down --volumes

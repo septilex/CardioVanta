@@ -23,7 +23,11 @@ from backend.app.main import app
 from backend.tests.ci_env import assert_ci_provides, needs_database, require_database_url
 
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "").strip()
-TABLES = ("metrics", "evaluations", "cohorts", "model_versions", "schema_migrations")
+TABLES = ("metrics", "evaluations", "cohorts", "model_versions", "schema_migrations",
+          # 003_accounts_operations.sql: without these the fixture leaves a re-used test database half-migrated
+          # and test_migrations_apply_once fails on the second run (CI only ever sees a fresh database).
+          "payment_events", "support_payments", "maintenance_runs", "upload_batches", "oauth_flows",
+          "refresh_sessions", "oauth_accounts", "user_roles", "roles", "users")
 
 
 @pytest.fixture(scope="module")
@@ -72,7 +76,7 @@ def test_schema_declares_the_relationships():
     schema = (SQL_DIR / "001_research_schema.sql").read_text(encoding="utf-8")
     assert "REFERENCES model_versions (id)" in schema and "REFERENCES cohorts (id)" in schema
     assert "REFERENCES evaluations (id) ON DELETE CASCADE" in schema
-    assert [p.name for p in migration_files()] == ["001_research_schema.sql", "002_research_seed.sql"]
+    assert [p.name for p in migration_files()] == ["001_research_schema.sql", "002_research_seed.sql", "003_accounts_operations.sql"]
 
 
 def test_no_patient_data_columns():
@@ -110,7 +114,7 @@ def db_settings():
 
 @needs_db
 def test_migrations_apply_once(db_settings):
-    assert apply_migrations(db_settings) == ["001_research_schema.sql", "002_research_seed.sql"]
+    assert apply_migrations(db_settings) == [p.name for p in migration_files()]
     assert apply_migrations(db_settings) == []
 
 
@@ -168,4 +172,7 @@ def test_endpoint_returns_the_join_results(client, db_settings, monkeypatch):
     body = r.json()
     assert set(body) == {"evaluations", "version_coverage", "unevaluated_cohorts"}
     assert len(body["evaluations"]) == 12 and len(body["unevaluated_cohorts"]) == 2
-    assert r.headers["cache-control"] == "public, max-age=300"
+    # Caching moved to Redis, which research imports invalidate immediately. A shared HTTP cache would keep serving
+    # the pre-import metrics for up to five minutes, so the response itself must not be stored.
+    assert r.headers["cache-control"] == "no-store"
+    assert r.headers["x-cache"] == "MISS"  # REDIS_URL is unset here: the database answered
