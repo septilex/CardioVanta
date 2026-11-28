@@ -5,7 +5,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 1. LLM API integration
 
-**AI App Engineering — · 0.2 points · PARTIAL**
+**AI App Engineering — · 0.2 points · Implemented; requires external credentials for live proof**
 
 **Meaning and purpose:** An LLM API consumes derived model output to produce an optional educational explanation. Provider calls are bounded, structured and store=False.
 
@@ -19,11 +19,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** LLM_ENABLED=true, OPENAI_API_KEY, OPENAI_MODEL, AI_SIGNING_KEY, REDIS_URL.
 
-**Verification limit:** Shared Redis integration and a configured provider/deployment remain unverified; mocked provider tests pass.
+**Verification limit:** Shared Redis reservation verified against real Redis (one of 12 concurrent reservations wins). The OpenAI provider itself is mocked; a live call needs the owner's API key.
 
 ## 2. Prompt engineering
 
-**AI App Engineering — · 0.2 points · FULL**
+**AI App Engineering — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Prompt engineering constrains tone, scope and trust boundaries so generated explanations do not become clinical advice.
 
@@ -41,7 +41,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 3. Structured outputs
 
-**AI App Engineering — · 0.2 points · FULL**
+**AI App Engineering — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Structured outputs validate provider responses against explicit Pydantic fields and contribution directions before display.
 
@@ -59,7 +59,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 4. Input sanitization & injection awareness
 
-**Auth & Security — · 0.2 points · FULL**
+**Auth & Security — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Input validation rejects unknown fields, malformed values and oversized bodies. Parameterized database operations prevent input from becoming SQL syntax.
 
@@ -77,7 +77,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 5. JWT issuance & verification
 
-**Auth & Security — · 0.2 points · FULL**
+**Auth & Security — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** JWTs are signed short-lived bearer credentials. The server verifies algorithm, signature, issuer, audience, expiry, not-before and UUID identifiers; refresh credentials rotate as stored hashes.
 
@@ -95,7 +95,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 6. OAuth / 3rd-party login
 
-**Auth & Security — · 0.2 points · FULL**
+**Auth & Security — · 0.2 points · Implemented; requires external credentials for live proof**
 
 **Meaning and purpose:** OAuth/OIDC delegates identity verification to Google. Authlib checks state, S256 PKCE and signed ID-token claims; existing email accounts require authenticated linking.
 
@@ -107,13 +107,13 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Viva explanation:** “OAuth/OIDC delegates identity verification to Google. Authlib checks state, S256 PKCE and signed ID-token claims; existing email accounts require authenticated linking.”
 
-**Configuration:** AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and registered /api/v1/auth/google/callback. Only mocked provider integration verified..
+**Configuration:** AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and registered /api/v1/auth/google/callback.
 
-**Verification limit:** Local implementation proof passed; no new deployment claimed.
+**Verification limit:** State, PKCE, nonce and ID-token checks are tested with real RSA-signed fixtures; no live Google sign-in has been performed (needs the owner's OAuth client).
 
 ## 7. Password hashing
 
-**Auth & Security — · 0.2 points · FULL**
+**Auth & Security — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Argon2id is a memory-hard password hash with per-password salts; plaintext passwords are never stored. A password change invalidates existing sessions.
 
@@ -131,11 +131,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 8. Rate limiting
 
-**Auth & Security — · 0.2 points · PARTIAL**
+**Auth & Security — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Atomic shared counters enforce limits across processes; Redis TTL bounds each window. Authentication, password changes, imports, checkout, WebSocket connections and AI calls use shared controls.
 
-**Open:** [backend/app/services/shared.py](../../backend/app/services/shared.py) — `LIMIT_SCRIPT, limit; AI RESERVE_SCRIPT`.
+**Open:** [backend/app/services/shared.py](../../backend/app/services/shared.py) — `LIMIT_SCRIPT, limit, anonymous_id; AI RESERVE_SCRIPT`.
 
 **Demonstration and expected behavior:** Run concurrent attempts: only the configured allowance succeeds, others get 429 with Retry-After. Disconnect Redis: protected work fails closed with 503.
 
@@ -143,13 +143,13 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Viva explanation:** “Atomic shared counters enforce limits across processes; Redis TTL bounds each window. Authentication, password changes, imports, checkout, WebSocket connections and AI calls use shared controls.”
 
-**Configuration:** REDIS_URL; TEST_REDIS_URL must use dedicated DB 15.
+**Configuration:** REDIS_URL; TEST_REDIS_URL must use dedicated DB 15; CLIENT_IP_HEADER=x-real-ip on Vercel only.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers. Exactly 7 of 40 concurrent attempts succeed. A spoofed X-Forwarded-For through the Compose Next.js proxy was shown to pass through unchanged, so CLIENT_IP_HEADER stays unset there.
 
 ## 9. Role-based authorization checks
 
-**Auth & Security — · 0.2 points · FULL**
+**Auth & Security — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** RBAC checks authoritative database roles at the backend. Viewer reads, researcher imports/reviews feedback, and admin manages account roles.
 
@@ -167,7 +167,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 10. Backend deployment
 
-**Backend & System Design — · 0.2 points · FULL**
+**Backend & System Design — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** A serverless ASGI entry point serves FastAPI while packaging the immutable portable model and runtime dependencies.
 
@@ -185,7 +185,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 11. File upload handling
 
-**Backend & System Design — · 0.2 points · PARTIAL**
+**Backend & System Design — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** File handling bounds multipart input, validates every CSV row, and imports only research evaluation metadata inside one transaction.
 
@@ -199,11 +199,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; existing model/cohort records.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers. End to end through the standalone Next.js proxy: upload 200, two rows committed.
 
 ## 12. HTTP status codes used correctly
 
-**Backend & System Design — · 0.2 points · FULL**
+**Backend & System Design — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** HTTP status codes communicate success, validation failure, missing identity, denied access, conflicts, rate limits and unavailable services consistently.
 
@@ -221,7 +221,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 13. Middleware
 
-**Backend & System Design — · 0.2 points · FULL**
+**Backend & System Design — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Middleware wraps requests for cross-cutting behavior such as request IDs, monitoring and pre-parser body limits.
 
@@ -239,7 +239,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 14. Problem modeling
 
-**Backend & System Design — · 0.2 points · FULL**
+**Backend & System Design — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Problem modeling expresses a fixed 13-feature research prediction contract with explicit outcome and threshold semantics.
 
@@ -257,7 +257,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 15. Request body validation
 
-**Backend & System Design — · 0.2 points · FULL**
+**Backend & System Design — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Request schemas enforce types, required fields, ranges and forbidden extras before business logic runs.
 
@@ -275,7 +275,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 16. RESTful endpoint design
 
-**Backend & System Design — · 0.2 points · FULL**
+**Backend & System Design — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** REST endpoints represent resources and use HTTP methods for creation, retrieval, updates and deletion.
 
@@ -293,7 +293,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 17. Server-side error handling
 
-**Backend & System Design — · 0.2 points · FULL**
+**Backend & System Design — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Server error handling maps failures to safe responses and rolls back incomplete work without exposing secrets or raw clinical input.
 
@@ -311,7 +311,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 18. System design basics: frontend, backend, DB and other systems integration
 
-**Backend & System Design — · 0.2 points · FULL**
+**Backend & System Design — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** System design separates browser interaction, API authorization, transactional metadata storage, optional shared infrastructure and immutable model inference.
 
@@ -329,7 +329,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 19. Automated API testing / integration tests
 
-**Engineering Practices — · 0.2 points · FULL**
+**Engineering Practices — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Automated API tests exercise contracts and failure cases; CI provisions real PostgreSQL, a Mongo replica set and Redis for integration tests.
 
@@ -341,13 +341,13 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Viva explanation:** “Automated API tests exercise contracts and failure cases; CI provisions real PostgreSQL, a Mongo replica set and Redis for integration tests.”
 
-**Configuration:** Real integration CI still needs to run on this branch.
+**Configuration:** Real-service suites verified locally (see 37-49); this branch's CI run happens when it is pushed.
 
 **Verification limit:** Local implementation proof passed; no new deployment claimed.
 
 ## 20. Containerization with Docker
 
-**Engineering Practices — · 0.5 points · PARTIAL**
+**Engineering Practices — · 0.5 points · Implemented; deployment verification pending**
 
 **Meaning and purpose:** Containers package reproducible application runtimes; Compose supplies health-checked dependencies and persistent local volumes. App processes run as non-root users.
 
@@ -361,11 +361,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** Docker Engine and Compose.
 
-**Verification limit:** Docker CLI is unavailable locally; builds and Compose health checks have not run.
+**Verification limit:** No Docker engine on the verification machine: images and Compose health checks have not been built or run. The same topology (standalone Next.js proxy, uvicorn, PostgreSQL, Mongo replica set, Redis) was verified end to end without containers.
 
 ## 21. Environment variables & secrets management
 
-**Engineering Practices — · 0.2 points · FULL**
+**Engineering Practices — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Environment configuration separates code from credentials; SecretStr masks values and integrations default to disabled.
 
@@ -383,7 +383,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 22. Async data fetching from API
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Async fetching lets the UI await remote results while displaying loading and error states.
 
@@ -401,7 +401,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 23. Client-side routing
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Client-side routing changes App Router pages through Next links while preserving the shared shell.
 
@@ -419,7 +419,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 24. Form handling — controlled inputs
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Controlled inputs keep displayed form values synchronized with React state so validation and submission use the same data.
 
@@ -437,7 +437,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 25. Form validation
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Client validation gives early feedback; backend schemas remain authoritative against bypassed browser controls.
 
@@ -455,13 +455,13 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 26. Frontend deployment
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** A production frontend build produces deployable server HTML, client bundles and static assets for Vercel or the container runtime.
 
 **Open:** [next.config.ts](../../next.config.ts) — `standalone build and response headers`.
 
-**Demonstration and expected behavior:** Run npm run build; show /research, /research/workspace and /support in the route output. This branch was built locally, not deployed.
+**Demonstration and expected behavior:** Run npm run build; show the static routes and the dynamic /research/evaluations route. The live Vercel deployment serves main; this branch was built locally, not deployed.
 
 **Automated evidence:** [backend/tests/test_r3_deployment.py](../../backend/tests/test_r3_deployment.py); `npm run build`.
 
@@ -473,7 +473,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 27. JavaScript — async/await
 
-**Frontend — · 0.1 points · FULL**
+**Frontend — · 0.1 points · Fully implemented and tested**
 
 **Meaning and purpose:** async/await expresses nonblocking request sequencing with ordinary try/catch handling.
 
@@ -491,11 +491,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 28. JavaScript — Closures
 
-**Frontend — · 0.1 points · FULL**
+**Frontend — · 0.1 points · Fully implemented and tested**
 
 **Meaning and purpose:** Closures retain lexical state such as the current batch, reconnect delay and stopped flag across callbacks.
 
-**Open:** [src/components/research/ImportLive.tsx](../../src/components/research/ImportLive.tsx) — `useEffect reconnect and cleanup closures`.
+**Open:** [src/components/research/ImportLive.tsx](../../src/components/research/ImportLive.tsx) — `useEffect reconnect, polling and cleanup closures`.
 
 **Demonstration and expected behavior:** Inspect reconnect and the cleanup callback; unmounting closes the captured socket and clears captured timers, proven by the test.
 
@@ -509,7 +509,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 29. JavaScript — Event loop
 
-**Frontend — · 0.1 points · FULL**
+**Frontend — · 0.1 points · Fully implemented and tested**
 
 **Meaning and purpose:** JavaScript runs synchronous work first, Promise microtasks next, then timer tasks. The importer uses this boundary before starting its file request.
 
@@ -527,7 +527,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 30. JavaScript — Hoisting
 
-**Frontend — · 0.1 points · FULL**
+**Frontend — · 0.1 points · Fully implemented and tested**
 
 **Meaning and purpose:** Function declarations are initialized before module execution; lexical bindings still have a temporal dead zone.
 
@@ -545,7 +545,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 31. JavaScript — Promises vs callbacks
 
-**Frontend — · 0.1 points · FULL**
+**Frontend — · 0.1 points · Fully implemented and tested**
 
 **Meaning and purpose:** Callbacks provide scheduled continuations; Promises model eventual completion and compose through race/await.
 
@@ -563,7 +563,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 32. Loading & error UI states
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Loading and error states explain what is happening and how to recover from unavailable services or failed requests.
 
@@ -581,7 +581,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 33. React component composition
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Component composition reuses the navigation/layout frame while isolating interactive account, import and support behavior.
 
@@ -599,7 +599,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 34. Responsive layout & styling competence
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Responsive layout adapts spacing, wrapping and form controls to screen size while preserving keyboard focus and readable content.
 
@@ -617,13 +617,13 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 35. Side effects with useEffect
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Effects synchronize component lifetimes with external subscriptions and clean up sockets/timers on dependency changes or unmount.
 
 **Open:** [src/components/research/ImportLive.tsx](../../src/components/research/ImportLive.tsx) — `useEffect socket lifecycle`.
 
-**Demonstration and expected behavior:** Run the socket cleanup test; navigate away during an import and verify the connection/timer are closed.
+**Demonstration and expected behavior:** Run the socket cleanup and polling tests; navigate away during an import and verify the connection and every timer are cleared.
 
 **Automated evidence:** [__tests__/import-live.test.tsx](../../__tests__/import-live.test.tsx); [__tests__/useEffectBehaviour.test.tsx](../../__tests__/useEffectBehaviour.test.tsx).
 
@@ -635,7 +635,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 36. State management with useState
 
-**Frontend — · 0.2 points · FULL**
+**Frontend — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** useState holds changing account, form and import state, triggering render updates through setters.
 
@@ -653,7 +653,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 37. Aggregation pipelines
 
-**NoSQL (MongoDB) — · 0.2 points · PARTIAL**
+**NoSQL (MongoDB) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Mongo aggregation groups feedback by section and calculates total/helpful counts without transferring every document to Python.
 
@@ -667,11 +667,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 38. CRUD operations (Mongo)
 
-**NoSQL (MongoDB) — · 0.2 points · PARTIAL**
+**NoSQL (MongoDB) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Mongo CRUD persists anonymous votes and allows their owner to update or withdraw them using a one-time returned edit credential.
 
@@ -685,11 +685,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 39. Embedding vs referencing relationships
 
-**NoSQL (MongoDB) — · 0.2 points · PARTIAL**
+**NoSQL (MongoDB) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Small bounded metadata is embedded for frequent reads; potentially growing audit events reference the parent ObjectId in another collection.
 
@@ -703,17 +703,17 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 40. Indexing for query performance (Mongo)
 
-**NoSQL (MongoDB) — · 0.2 points · PARTIAL**
+**NoSQL (MongoDB) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Compound Mongo indexes support equality filters followed by creation-date ordering, and parent-filtered event history.
 
 **Open:** [backend/app/db/mongo_setup.py](../../backend/app/db/mongo_setup.py) — `setup; research_feedback and research_feedback_events`.
 
-**Demonstration and expected behavior:** Inspect section/date, model-version/date and parent/date indexes; run filtered/sorted queries and the explain-plan test. Each index corresponds to a real endpoint.
+**Demonstration and expected behavior:** Inspect section/date, model-version/date and parent/date indexes; run the explain-plan test. Without any hint, MongoDB's planner chooses the section/date IXSCAN and needs no SORT stage.
 
 **Automated evidence:** [backend/tests/test_workspace_services.py](../../backend/tests/test_workspace_services.py).
 
@@ -721,11 +721,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 41. Schema modeling (Mongo)
 
-**NoSQL (MongoDB) — · 0.2 points · PARTIAL**
+**NoSQL (MongoDB) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Database-level JSON Schema enforces types and allowed fields even when a writer bypasses FastAPI. The migration backfills safe metadata and refuses existing invalid documents.
 
@@ -739,11 +739,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 42. Filtering, ordering, grouping
 
-**SQL (Postgres) — · 0.2 points · PARTIAL**
+**SQL (Postgres) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** SQL filtering, ordering and grouping turn research records into stable evaluation tables, coverage counts and missing-evaluation lists.
 
@@ -757,17 +757,17 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 43. Indexing for query performance (SQL)
 
-**SQL (Postgres) — · 0.2 points · PARTIAL**
+**SQL (Postgres) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Indexes accelerate actual join/filter and cleanup access paths while uniqueness indexes prevent duplicate identities and metrics.
 
 **Open:** [backend/app/db/sql/001_research_schema.sql](../../backend/app/db/sql/001_research_schema.sql) — `evaluations_model_version_idx, evaluations_cohort_idx; migration 003 session indexes`.
 
-**Demonstration and expected behavior:** Inspect pg_indexes after migrations; relate evaluation FK indexes to joins and refresh expiry/family indexes to cleanup/revocation. Do not promise index scans on tiny tables.
+**Demonstration and expected behavior:** Run test_real_postgres_planner_uses_the_declared_indexes: with 20,000 synthetic sessions and batches, PostgreSQL's planner chooses refresh_sessions_expiry_idx for clean-up and upload_batches_owner_idx (no Sort node) for a user's recent imports.
 
 **Automated evidence:** [backend/tests/test_research_db.py](../../backend/tests/test_research_db.py); [backend/tests/test_workspace_services.py](../../backend/tests/test_workspace_services.py).
 
@@ -775,11 +775,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 44. Normalization basics
 
-**SQL (Postgres) — · 0.2 points · PARTIAL**
+**SQL (Postgres) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Normalization separates users, roles, identities and sessions so repeated facts are not copied into unrelated rows.
 
@@ -793,11 +793,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 45. ORM usage (Prisma/Sequelize)
 
-**SQL (Postgres) — · 0.2 points · PARTIAL**
+**SQL (Postgres) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** SQLAlchemy 2 maps Python entities to SQL rows and coordinates identity, relationships and explicit transactions. It is the Python-stack equivalent of the rubric's Prisma/Sequelize examples.
 
@@ -811,11 +811,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification.
 
-**Verification limit:** ORM API tests pass with SQLite; PostgreSQL mapping/migration integration remains unverified locally.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers. Registration, role change, import and refresh rotation ran through the ORM on PostgreSQL.
 
 ## 46. Relational schema design with PK/FK
 
-**SQL (Postgres) — · 0.2 points · PARTIAL**
+**SQL (Postgres) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Relational keys give rows stable identity, connect related entities and prevent orphaned or duplicate records.
 
@@ -829,11 +829,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 47. SQL JOINs
 
-**SQL (Postgres) — · 0.2 points · PARTIAL**
+**SQL (Postgres) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** INNER JOIN returns complete metric provenance; LEFT JOIN preserves models with no evaluations; an anti-join identifies unevaluated cohorts.
 
@@ -847,11 +847,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 48. Transactions
 
-**SQL (Postgres) — · 0.2 points · PARTIAL**
+**SQL (Postgres) — · 0.2 points · Fully implemented and tested**
 
 **Meaning and purpose:** Transactions make migrations and multi-row imports atomic: either all intended writes commit or none survive.
 
@@ -865,11 +865,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.
 
 ## 49. Caching with Redis
 
-**System & Integration — · 0.4 points · PARTIAL**
+**System & Integration — · 0.4 points · Fully implemented and tested**
 
 **Meaning and purpose:** Read-through Redis caching avoids repeated public research SQL queries; TTL bounds staleness and successful imports invalidate the cache. No individual predictions are cached.
 
@@ -883,11 +883,11 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Configuration:** REDIS_URL, RESEARCH_CACHE_TTL; DATABASE_URL.
 
-**Verification limit:** Real service integration was skipped locally; configured CI must run it before final certification.
+**Verification limit:** Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers. End to end: MISS, HIT, import, MISS with the new rows visible.
 
 ## 50. Payment gateway integration
 
-**System & Integration — · 0.5 points · PARTIAL**
+**System & Integration — · 0.5 points · Implemented; requires external credentials for live proof**
 
 **Meaning and purpose:** Stripe Checkout handles payment details externally. Only signed test-mode webhook events can mark a support record paid; duplicate event IDs are idempotent.
 
@@ -905,7 +905,7 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 ## 51. Scheduled jobs / cron
 
-**System & Integration — · 0.3 points · PARTIAL**
+**System & Integration — · 0.3 points · Implemented; deployment verification pending**
 
 **Meaning and purpose:** A protected daily cron removes expired authentication state, marks abandoned import attempts failed and records one idempotent maintenance result per UTC date.
 
@@ -913,46 +913,46 @@ Read the status on each concept before claiming completion. Mocked tests are not
 
 **Demonstration and expected behavior:** Call without the cron bearer secret (401), call with it (completed), and repeat (already_completed). Inspect retained research/feedback and removed expired sessions.
 
-**Automated evidence:** [backend/tests/test_workspace_workflows.py](../../backend/tests/test_workspace_workflows.py).
+**Automated evidence:** [backend/tests/test_workspace_workflows.py](../../backend/tests/test_workspace_workflows.py); [backend/tests/test_workspace_services.py](../../backend/tests/test_workspace_services.py).
 
 **Viva explanation:** “A protected daily cron removes expired authentication state, marks abandoned import attempts failed and records one idempotent maintenance result per UTC date.”
 
 **Configuration:** CRON_SECRET of at least 32 characters, DATABASE_URL; Vercel production cron at 03:00 UTC / 08:30 Asia/Kolkata.
 
-**Verification limit:** Local cleanup/auth/idempotence tests pass; Vercel cron invocation and PostgreSQL advisory-lock integration are not verified.
+**Verification limit:** PostgreSQL advisory-lock integration verified: six overlapping invocations on real PostgreSQL produce exactly one run. A scheduled invocation by Vercel has not been observed (requires a deployment with CRON_SECRET).
 
 ## 52. Server-side rendering
 
-**System & Integration — · 0.5 points · FULL**
+**System & Integration — · 0.5 points · Fully implemented and tested**
 
-**Meaning and purpose:** Server Components render the research composition on the server; Client Components hydrate interactive state. These routes are statically prerendered server HTML, not request-time dynamic SSR.
+**Meaning and purpose:** Server-side rendering produces HTML on the server for each request. /research/evaluations reads the live research database through the API (cache: no-store) and sends a finished table, so it works without JavaScript and shows an import immediately. /research, by contrast, is prerendered once at build time (SSG) and fetches the same table in the browser.
 
-**Open:** [src/app/research/page.tsx](../../src/app/research/page.tsx) — `ResearchPage; layout.tsx RootLayout; Workspace client boundary`.
+**Open:** [src/app/research/evaluations/page.tsx](../../src/app/research/evaluations/page.tsx) — `ResearchEvaluationsPage (dynamic = force-dynamic); lib/serverResearch.ts loadEvaluationsOnServer; EvaluationsTable`.
 
-**Demonstration and expected behavior:** Build production, inspect .next/server/app/research.html with JavaScript absent and find the Research heading. Root layout/research page have no use-client directive; DatabaseEvaluations and Workspace do.
+**Demonstration and expected behavior:** npm run build marks /research/evaluations as dynamic and writes no HTML for it. Start the server with RESEARCH_API_ORIGIN, then curl the page twice: two different server timestamps and the database rows in the raw HTML (verified 2026-11-28, including rows imported moments earlier).
 
-**Automated evidence:** `npm run build`; [scripts/verify_workspace_deployment.py](../../scripts/verify_workspace_deployment.py); `docs/viva/evidence/verification.json`.
+**Automated evidence:** [__tests__/ssr-evaluations.test.tsx](../../__tests__/ssr-evaluations.test.tsx); `npm run build`.
 
-**Viva explanation:** “Server Components render the research composition on the server; Client Components hydrate interactive state. These routes are statically prerendered server HTML, not request-time dynamic SSR.”
+**Viva explanation:** “Server-side rendering produces HTML on the server for each request. /research/evaluations reads the live research database through the API (cache: no-store) and sends a finished table, so it works without JavaScript and shows an import immediately. /research, by contrast, is prerendered once at build time (SSG) and fetches the same table in the browser.”
 
-**Configuration:** None.
+**Configuration:** RESEARCH_API_ORIGIN (server-only) naming the API origin reachable from the Next.js server.
 
 **Verification limit:** Local implementation proof passed; no new deployment claimed.
 
 ## 53. WebSocket / real-time communication
 
-**System & Integration — · 0.5 points · PARTIAL**
+**System & Integration — · 0.5 points · Implemented; deployment verification pending**
 
 **Meaning and purpose:** An authenticated WebSocket sends durable import states and heartbeats. Reconnects re-read PostgreSQL, so another serverless instance can resume without an in-memory job registry.
 
-**Open:** [backend/app/api/endpoints/realtime.py](../../backend/app/api/endpoints/realtime.py) — `live, snapshot; src/components/research/ImportLive.tsx`.
+**Open:** [backend/app/api/endpoints/realtime.py](../../backend/app/api/endpoints/realtime.py) — `live, snapshot; src/components/research/ImportLive.tsx (socket + polling fallback)`.
 
-**Demonstration and expected behavior:** Create a batch, connect, send the JWT as the first message and upload metadata. Observe real status transitions, heartbeat and terminal state; wrong Origin/token/owner is rejected. Run the deployment verifier on the actual Vercel URL.
+**Demonstration and expected behavior:** Create a batch, connect, send the JWT as the first message and upload metadata. Observe ready then completed; a wrong Origin is refused at the handshake and a bad token is closed 1008. Where sockets are unavailable the page falls back to authenticated polling after three failed connections.
 
 **Automated evidence:** [backend/tests/test_workspace_workflows.py](../../backend/tests/test_workspace_workflows.py); [__tests__/import-live.test.tsx](../../__tests__/import-live.test.tsx); [scripts/verify_workspace_deployment.py](../../scripts/verify_workspace_deployment.py).
 
 **Viva explanation:** “An authenticated WebSocket sends durable import states and heartbeats. Reconnects re-read PostgreSQL, so another serverless instance can resume without an in-memory job registry.”
 
-**Configuration:** AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; REALTIME_ENABLED=true, Vercel Fluid Compute, websockets dependency.
+**Configuration:** AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; REALTIME_ENABLED=true on a host that can hold WebSocket connections (Docker/uvicorn).
 
-**Verification limit:** Local WebSocket behavior passes; target-deployment WebSocket verification has not run.
+**Verification limit:** Verified 2026-11-28 through the production-shaped stack (standalone Next.js proxy, uvicorn, real PostgreSQL/Redis). Vercel Functions do not host WebSocket servers, so production on Vercel relies on the polling fallback, which is unit-tested but has not been observed on a deployment.

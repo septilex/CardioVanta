@@ -12,8 +12,8 @@
     "meaning": "An LLM API consumes derived model output to produce an optional educational explanation. Provider calls are bounded, structured and store=False.",
     "demo": "Run the mocked provider success, timeout and invalid-output tests; configure Redis and OpenAI, request a prediction token, then request its explanation. Replaying a completed token returns 429.",
     "configuration": "LLM_ENABLED=true, OPENAI_API_KEY, OPENAI_MODEL, AI_SIGNING_KEY, REDIS_URL",
-    "pending": "Shared Redis integration and a configured provider/deployment remain unverified; mocked provider tests pass.",
-    "final": "PARTIAL"
+    "pending": "Shared Redis reservation verified against real Redis (one of 12 concurrent reservations wins). The OpenAI provider itself is mocked; a live call needs the owner's API key.",
+    "final": "NEEDS_CREDENTIALS"
   },
   {
     "number": 2,
@@ -91,9 +91,9 @@
     "tests": "backend/tests/test_workspace_oauth.py",
     "meaning": "OAuth/OIDC delegates identity verification to Google. Authlib checks state, S256 PKCE and signed ID-token claims; existing email accounts require authenticated linking.",
     "demo": "Run the mocked Google flow with real RSA/nonce validation. Wrong state, nonce, issuer, audience, expiry or signature redirects to a safe failure state; a valid fixture creates a viewer.",
-    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and registered /api/v1/auth/google/callback. Only mocked provider integration verified.",
-    "pending": "",
-    "final": "FULL"
+    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and registered /api/v1/auth/google/callback",
+    "pending": "State, PKCE, nonce and ID-token checks are tested with real RSA-signed fixtures; no live Google sign-in has been performed (needs the owner's OAuth client).",
+    "final": "NEEDS_CREDENTIALS"
   },
   {
     "number": 7,
@@ -119,13 +119,13 @@
     "initial": "PARTIAL",
     "evidence": "Existing AI usage quotas use SQLite. Upgrade to shared, deployment-safe rate limiting and cover other protected endpoints.",
     "source": "backend/app/services/shared.py",
-    "symbol": "LIMIT_SCRIPT, limit; AI RESERVE_SCRIPT",
+    "symbol": "LIMIT_SCRIPT, limit, anonymous_id; AI RESERVE_SCRIPT",
     "tests": "backend/tests/test_workspace_security.py; backend/tests/test_workspace_services.py",
     "meaning": "Atomic shared counters enforce limits across processes; Redis TTL bounds each window. Authentication, password changes, imports, checkout, WebSocket connections and AI calls use shared controls.",
     "demo": "Run concurrent attempts: only the configured allowance succeeds, others get 429 with Retry-After. Disconnect Redis: protected work fails closed with 503.",
-    "configuration": "REDIS_URL; TEST_REDIS_URL must use dedicated DB 15",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "configuration": "REDIS_URL; TEST_REDIS_URL must use dedicated DB 15; CLIENT_IP_HEADER=x-real-ip on Vercel only",
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers. Exactly 7 of 40 concurrent attempts succeed. A spoofed X-Forwarded-For through the Compose Next.js proxy was shown to pass through unchanged, so CLIENT_IP_HEADER stays unset there.",
+    "final": "FULL"
   },
   {
     "number": 9,
@@ -172,8 +172,8 @@
     "meaning": "File handling bounds multipart input, validates every CSV row, and imports only research evaluation metadata inside one transaction.",
     "demo": "Sign in as researcher, create an import, submit the header template with approved metadata. Valid rows commit; unknown columns, invalid UTF-8, unsafe filenames and duplicate metrics fail without partial writes.",
     "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; existing model/cohort records",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers. End to end through the standalone Next.js proxy: upload 200, two rows committed.",
+    "final": "FULL"
   },
   {
     "number": 12,
@@ -299,7 +299,7 @@
     "tests": "backend/tests/test_r3_deployment.py; backend/tests/test_workspace_security.py; backend/tests/test_workspace_workflows.py; backend/tests/test_workspace_services.py",
     "meaning": "Automated API tests exercise contracts and failure cases; CI provisions real PostgreSQL, a Mongo replica set and Redis for integration tests.",
     "demo": "Run the classified safe pytest suite and Jest. Show local skips explicitly and the CI rules that fail rather than skip when service URLs are missing.",
-    "configuration": "Real integration CI still needs to run on this branch",
+    "configuration": "Real-service suites verified locally (see 37-49); this branch's CI run happens when it is pushed",
     "pending": "",
     "final": "FULL"
   },
@@ -316,8 +316,8 @@
     "meaning": "Containers package reproducible application runtimes; Compose supplies health-checked dependencies and persistent local volumes. App processes run as non-root users.",
     "demo": "Run scripts/workspace_setup.py, docker compose --env-file .env.docker config --quiet, then up --build --wait. Verify both health endpoints and import WebSocket behavior.",
     "configuration": "Docker Engine and Compose",
-    "pending": "Docker CLI is unavailable locally; builds and Compose health checks have not run.",
-    "final": "PARTIAL"
+    "pending": "No Docker engine on the verification machine: images and Compose health checks have not been built or run. The same topology (standalone Next.js proxy, uvicorn, PostgreSQL, Mongo replica set, Redis) was verified end to end without containers.",
+    "final": "DEPLOY_PENDING"
   },
   {
     "number": 21,
@@ -410,7 +410,7 @@
     "symbol": "standalone build and response headers",
     "tests": "backend/tests/test_r3_deployment.py; npm run build",
     "meaning": "A production frontend build produces deployable server HTML, client bundles and static assets for Vercel or the container runtime.",
-    "demo": "Run npm run build; show /research, /research/workspace and /support in the route output. This branch was built locally, not deployed.",
+    "demo": "Run npm run build; show the static routes and the dynamic /research/evaluations route. The live Vercel deployment serves main; this branch was built locally, not deployed.",
     "configuration": "Vercel project or Docker runtime for publication",
     "pending": "",
     "final": "FULL"
@@ -439,7 +439,7 @@
     "initial": "FULL",
     "evidence": "Existing callback handlers and React hooks close over component state and values.",
     "source": "src/components/research/ImportLive.tsx",
-    "symbol": "useEffect reconnect and cleanup closures",
+    "symbol": "useEffect reconnect, polling and cleanup closures",
     "tests": "__tests__/import-live.test.tsx; __tests__/useEffectBehaviour.test.tsx",
     "meaning": "Closures retain lexical state such as the current batch, reconnect delay and stopped flag across callbacks.",
     "demo": "Inspect reconnect and the cleanup callback; unmounting closes the captured socket and clears captured timers, proven by the test.",
@@ -554,7 +554,7 @@
     "symbol": "useEffect socket lifecycle",
     "tests": "__tests__/import-live.test.tsx; __tests__/useEffectBehaviour.test.tsx",
     "meaning": "Effects synchronize component lifetimes with external subscriptions and clean up sockets/timers on dependency changes or unmount.",
-    "demo": "Run the socket cleanup test; navigate away during an import and verify the connection/timer are closed.",
+    "demo": "Run the socket cleanup and polling tests; navigate away during an import and verify the connection and every timer are cleared.",
     "configuration": "None",
     "pending": "",
     "final": "FULL"
@@ -588,8 +588,8 @@
     "meaning": "Mongo aggregation groups feedback by section and calculates total/helpful counts without transferring every document to Python.",
     "demo": "Create synthetic helpful/unhelpful feedback and GET /feedback/summary; inspect $group, $sum, $cond and $sort.",
     "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 38,
@@ -604,8 +604,8 @@
     "meaning": "Mongo CRUD persists anonymous votes and allows their owner to update or withdraw them using a one-time returned edit credential.",
     "demo": "Create (201), read (200), update with X-Edit-Token (200), delete (204), then read (404). Incorrect tokens cannot modify the record.",
     "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 39,
@@ -620,8 +620,8 @@
     "meaning": "Small bounded metadata is embedded for frequent reads; potentially growing audit events reference the parent ObjectId in another collection.",
     "demo": "Inspect metadata embedded in a feedback document and two referenced create/update events. Delete the parent: a Mongo transaction deletes its events too.",
     "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 40,
@@ -634,10 +634,10 @@
     "symbol": "setup; research_feedback and research_feedback_events",
     "tests": "backend/tests/test_workspace_services.py",
     "meaning": "Compound Mongo indexes support equality filters followed by creation-date ordering, and parent-filtered event history.",
-    "demo": "Inspect section/date, model-version/date and parent/date indexes; run filtered/sorted queries and the explain-plan test. Each index corresponds to a real endpoint.",
+    "demo": "Inspect section/date, model-version/date and parent/date indexes; run the explain-plan test. Without any hint, MongoDB's planner chooses the section/date IXSCAN and needs no SORT stage.",
     "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 41,
@@ -652,8 +652,8 @@
     "meaning": "Database-level JSON Schema enforces types and allowed fields even when a writer bypasses FastAPI. The migration backfills safe metadata and refuses existing invalid documents.",
     "demo": "Run setup twice; insert an invalid section or clinical_input directly with PyMongo and observe WriteError. Valid feedback remains accepted.",
     "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 42,
@@ -668,8 +668,8 @@
     "meaning": "SQL filtering, ordering and grouping turn research records into stable evaluation tables, coverage counts and missing-evaluation lists.",
     "demo": "Run the three queries after migrations; explain WHERE IS NULL, ORDER BY and GROUP BY. Model versions without evaluations remain visible.",
     "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 43,
@@ -682,10 +682,10 @@
     "symbol": "evaluations_model_version_idx, evaluations_cohort_idx; migration 003 session indexes",
     "tests": "backend/tests/test_research_db.py; backend/tests/test_workspace_services.py",
     "meaning": "Indexes accelerate actual join/filter and cleanup access paths while uniqueness indexes prevent duplicate identities and metrics.",
-    "demo": "Inspect pg_indexes after migrations; relate evaluation FK indexes to joins and refresh expiry/family indexes to cleanup/revocation. Do not promise index scans on tiny tables.",
+    "demo": "Run test_real_postgres_planner_uses_the_declared_indexes: with 20,000 synthetic sessions and batches, PostgreSQL's planner chooses refresh_sessions_expiry_idx for clean-up and upload_batches_owner_idx (no Sort node) for a user's recent imports.",
     "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 44,
@@ -700,8 +700,8 @@
     "meaning": "Normalization separates users, roles, identities and sessions so repeated facts are not copied into unrelated rows.",
     "demo": "Trace a user through its role and OAuth mapping, and an evaluation through model/cohort/metrics. Explain why a role change does not rewrite every session.",
     "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 45,
@@ -716,8 +716,8 @@
     "meaning": "SQLAlchemy 2 maps Python entities to SQL rows and coordinates identity, relationships and explicit transactions. It is the Python-stack equivalent of the rubric's Prisma/Sequelize examples.",
     "demo": "Open registration adding User with Role relationships and session rotation adding RefreshSession. Compare ORM operations with the retained raw research JOIN queries.",
     "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
-    "pending": "ORM API tests pass with SQLite; PostgreSQL mapping/migration integration remains unverified locally.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers. Registration, role change, import and refresh rotation ran through the ORM on PostgreSQL.",
+    "final": "FULL"
   },
   {
     "number": 46,
@@ -732,8 +732,8 @@
     "meaning": "Relational keys give rows stable identity, connect related entities and prevent orphaned or duplicate records.",
     "demo": "Run migration/FK tests and attempt an orphan metric or role mapping in a transaction: PostgreSQL rejects it.",
     "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 47,
@@ -748,8 +748,8 @@
     "meaning": "INNER JOIN returns complete metric provenance; LEFT JOIN preserves models with no evaluations; an anti-join identifies unevaluated cohorts.",
     "demo": "Run each query and point out the seeded zero-evaluation model and unevaluated cohorts. Compare why INNER JOIN would hide those gaps.",
     "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 48,
@@ -764,8 +764,8 @@
     "meaning": "Transactions make migrations and multi-row imports atomic: either all intended writes commit or none survive.",
     "demo": "Run migrations twice, then import a file whose second metric duplicates an existing one. The first new metric must also roll back.",
     "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers.",
+    "final": "FULL"
   },
   {
     "number": 49,
@@ -780,8 +780,8 @@
     "meaning": "Read-through Redis caching avoids repeated public research SQL queries; TTL bounds staleness and successful imports invalidate the cache. No individual predictions are cached.",
     "demo": "GET research evaluations twice (MISS then HIT), import a metric (invalidation), and test expiration. Redis outage falls back to SQL for public reads, while security limits fail closed.",
     "configuration": "REDIS_URL, RESEARCH_CACHE_TTL; DATABASE_URL",
-    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
-    "final": "PARTIAL"
+    "pending": "Verified 2026-11-28 against real disposable PostgreSQL 16.6, MongoDB 7.0.14 (replica set) and Redis 5.0.14; CI runs the same tests against service containers. End to end: MISS, HIT, import, MISS with the new rows visible.",
+    "final": "FULL"
   },
   {
     "number": 50,
@@ -797,7 +797,7 @@
     "demo": "Run synthetic signed-webhook tests, invalid signatures, repeated delivery and provider failure. With owner test credentials, complete Checkout and verify the Stripe event and PostgreSQL paid record.",
     "configuration": "PAYMENTS_ENABLED=true, sk_test_ STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, DATABASE_URL, REDIS_URL",
     "pending": "Mocked Stripe/signature tests pass; no real Stripe test event was processed and no payment is claimed.",
-    "final": "PARTIAL"
+    "final": "NEEDS_CREDENTIALS"
   },
   {
     "number": 51,
@@ -808,12 +808,12 @@
     "evidence": "Add a protected scheduled maintenance task using Vercel Cron.",
     "source": "backend/app/api/endpoints/maintenance.py",
     "symbol": "authorize, maintain, daily; vercel.json crons",
-    "tests": "backend/tests/test_workspace_workflows.py",
+    "tests": "backend/tests/test_workspace_workflows.py; backend/tests/test_workspace_services.py",
     "meaning": "A protected daily cron removes expired authentication state, marks abandoned import attempts failed and records one idempotent maintenance result per UTC date.",
     "demo": "Call without the cron bearer secret (401), call with it (completed), and repeat (already_completed). Inspect retained research/feedback and removed expired sessions.",
     "configuration": "CRON_SECRET of at least 32 characters, DATABASE_URL; Vercel production cron at 03:00 UTC / 08:30 Asia/Kolkata",
-    "pending": "Local cleanup/auth/idempotence tests pass; Vercel cron invocation and PostgreSQL advisory-lock integration are not verified.",
-    "final": "PARTIAL"
+    "pending": "PostgreSQL advisory-lock integration verified: six overlapping invocations on real PostgreSQL produce exactly one run. A scheduled invocation by Vercel has not been observed (requires a deployment with CRON_SECRET).",
+    "final": "DEPLOY_PENDING"
   },
   {
     "number": 52,
@@ -822,12 +822,12 @@
     "points": 0.5,
     "initial": "FULL",
     "evidence": "Existing Next.js App Router Server Components, including the root layout and research page.",
-    "source": "src/app/research/page.tsx",
-    "symbol": "ResearchPage; layout.tsx RootLayout; Workspace client boundary",
-    "tests": "npm run build; scripts/verify_workspace_deployment.py; docs/viva/evidence/verification.json",
-    "meaning": "Server Components render the research composition on the server; Client Components hydrate interactive state. These routes are statically prerendered server HTML, not request-time dynamic SSR.",
-    "demo": "Build production, inspect .next/server/app/research.html with JavaScript absent and find the Research heading. Root layout/research page have no use-client directive; DatabaseEvaluations and Workspace do.",
-    "configuration": "None",
+    "source": "src/app/research/evaluations/page.tsx",
+    "symbol": "ResearchEvaluationsPage (dynamic = force-dynamic); lib/serverResearch.ts loadEvaluationsOnServer; EvaluationsTable",
+    "tests": "__tests__/ssr-evaluations.test.tsx; npm run build",
+    "meaning": "Server-side rendering produces HTML on the server for each request. /research/evaluations reads the live research database through the API (cache: no-store) and sends a finished table, so it works without JavaScript and shows an import immediately. /research, by contrast, is prerendered once at build time (SSG) and fetches the same table in the browser.",
+    "demo": "npm run build marks /research/evaluations as dynamic and writes no HTML for it. Start the server with RESEARCH_API_ORIGIN, then curl the page twice: two different server timestamps and the database rows in the raw HTML (verified 2026-11-28, including rows imported moments earlier).",
+    "configuration": "RESEARCH_API_ORIGIN (server-only) naming the API origin reachable from the Next.js server",
     "pending": "",
     "final": "FULL"
   },
@@ -839,12 +839,12 @@
     "initial": "MISSING",
     "evidence": "Implement real-time operational status or research import progress updates.",
     "source": "backend/app/api/endpoints/realtime.py",
-    "symbol": "live, snapshot; src/components/research/ImportLive.tsx",
+    "symbol": "live, snapshot; src/components/research/ImportLive.tsx (socket + polling fallback)",
     "tests": "backend/tests/test_workspace_workflows.py; __tests__/import-live.test.tsx; scripts/verify_workspace_deployment.py",
     "meaning": "An authenticated WebSocket sends durable import states and heartbeats. Reconnects re-read PostgreSQL, so another serverless instance can resume without an in-memory job registry.",
-    "demo": "Create a batch, connect, send the JWT as the first message and upload metadata. Observe real status transitions, heartbeat and terminal state; wrong Origin/token/owner is rejected. Run the deployment verifier on the actual Vercel URL.",
-    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; REALTIME_ENABLED=true, Vercel Fluid Compute, websockets dependency",
-    "pending": "Local WebSocket behavior passes; target-deployment WebSocket verification has not run.",
-    "final": "PARTIAL"
+    "demo": "Create a batch, connect, send the JWT as the first message and upload metadata. Observe ready then completed; a wrong Origin is refused at the handshake and a bad token is closed 1008. Where sockets are unavailable the page falls back to authenticated polling after three failed connections.",
+    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; REALTIME_ENABLED=true on a host that can hold WebSocket connections (Docker/uvicorn)",
+    "pending": "Verified 2026-11-28 through the production-shaped stack (standalone Next.js proxy, uvicorn, real PostgreSQL/Redis). Vercel Functions do not host WebSocket servers, so production on Vercel relies on the polling fallback, which is unit-tested but has not been observed on a deployment.",
+    "final": "DEPLOY_PENDING"
   }
 ]
