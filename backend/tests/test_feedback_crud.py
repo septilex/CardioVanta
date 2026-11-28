@@ -103,6 +103,9 @@ def store(monkeypatch):
     mongo.reset_clients()
     col = mongo.collection()
     col.delete_many({})
+    from backend.app.db.mongo_setup import setup, EVENTS
+    setup()
+    col.database[EVENTS].delete_many({})
     yield col
     col.delete_many({})
     mongo.reset_clients()
@@ -117,7 +120,7 @@ def test_full_crud_cycle(client, store):
     fid, token = created["id"], created["edit_token"]
     assert r.headers["location"] == f"/api/v1/feedback/{fid}"
     stored = store.find_one()
-    assert set(stored) == {"_id", "helpful", "section", "model_version", "created_at", "updated_at", "edit_token_hash"}
+    assert set(stored) == {"_id", "helpful", "section", "model_version", "created_at", "updated_at", "edit_token_hash", "metadata"}
     assert stored["edit_token_hash"] != token
 
     # Read: 200, never the token or its hash.

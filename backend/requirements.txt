@@ -22,9 +22,9 @@ openai==2.8.1
 # Optional research workspace integrations (disabled without configuration)
 redis==7.1.0
 SQLAlchemy==2.0.58
-PyJWT==2.10.1
+PyJWT==2.15.1
 argon2-cffi==25.1.0
 Authlib==1.9.10
-python-multipart==0.0.22
+python-multipart==0.0.34
 stripe==14.4.0
 websockets==16.0

@@ -45,6 +45,12 @@ def account_api(monkeypatch, shared_store):
         with Session(engine, expire_on_commit=False) as db:
             yield db
     api = FastAPI()
+    from backend.app.api.endpoints import imports, payments, oauth, maintenance, realtime
+    from backend.app.api.body_limit import WorkspaceBodyLimit
+    for router in (imports.router, payments.router, oauth.router, maintenance.router, realtime.router):
+        api.include_router(router, prefix="/api/v1")
+    api.add_middleware(WorkspaceBodyLimit)
+    monkeypatch.setattr(realtime, "engine", lambda url: engine)
     api.include_router(accounts.router, prefix="/api/v1")
     api.dependency_overrides[session] = database
     with TestClient(api, headers={"Origin": "http://testserver"}) as client:

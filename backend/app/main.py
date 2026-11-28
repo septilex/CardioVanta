@@ -4,6 +4,9 @@ import logging
 from backend.app.core.config import settings
 from cardiovanta_ml import InferenceEngine, load_model
 from backend.app.api.endpoints import feedback, predict, research, ai_explanation
+from backend.app.api.endpoints import accounts, oauth
+from backend.app.api.endpoints import imports, realtime, payments, maintenance
+from backend.app.api.body_limit import WorkspaceBodyLimit
 from backend.app.core.logging import setup_logging
 from backend.app.api.middleware import MonitoringMiddleware
 from backend.app.core import prediction_availability
@@ -68,12 +71,13 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=False,
+    allow_credentials=True,
     expose_headers=["X-Explanation-Token"],
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],  # PATCH/DELETE: feedback update and withdrawal
     allow_headers=["*"],
 )
 app.add_middleware(MonitoringMiddleware)
+app.add_middleware(WorkspaceBodyLimit)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -84,6 +88,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     for err in exc.errors():
         err_copy = err.copy()
         err_copy.pop("input", None)
+        err_copy.pop("ctx", None)
         sanitized_errors.append(err_copy)
 
     logger.error("Validation error", extra={
@@ -108,6 +113,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},
+        headers=exc.headers,
     )
 
 @app.exception_handler(prediction_availability.PredictionsUnavailableError)
@@ -137,3 +143,9 @@ def health_check():
     return {"status": "ok", "service": "CardioVanta"}
 
 app.include_router(ai_explanation.router, prefix="/api/v1", tags=["ai"])
+app.include_router(accounts.router, prefix="/api/v1", tags=["accounts"])
+app.include_router(oauth.router, prefix="/api/v1", tags=["accounts"])
+app.include_router(imports.router, prefix="/api/v1", tags=["research imports"])
+app.include_router(realtime.router, prefix="/api/v1", tags=["realtime"])
+app.include_router(payments.router, prefix="/api/v1", tags=["support"])
+app.include_router(maintenance.router, prefix="/api/v1", tags=["maintenance"])

@@ -103,6 +103,7 @@ async def callback(request: Request, db: Session = Depends(session)):
         db.commit()
     except Exception:
         db.rollback()
+        response = RedirectResponse(settings.APP_ORIGIN.rstrip("/")+"/research/workspace?login=failed", status_code=303)
     response.delete_cookie(FLOW_COOKIE, path="/api/v1/auth/google")
     response.headers["Cache-Control"] = "no-store"
     return response

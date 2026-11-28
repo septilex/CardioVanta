@@ -30,6 +30,8 @@ CLASSES = ("ci_safe", "ci_safe_research_deps", "research_data")
 TEST_DIRS = ("tests", "backend/tests")
 
 CLASSIFICATION: Dict[str, Dict[str, str]] = {
+    **{f"backend/tests/{n}.py": {"class": "ci_safe", "reason": "synthetic workspace accounts, metadata and mocked external providers; real service integration when configured"}
+       for n in ("test_workspace_security", "test_workspace_workflows", "test_workspace_services", "test_workspace_oauth")},
     # ---- backend synthetic suite (512 tests passed under quarantine, 0 refused accesses) ----
     **{f"backend/tests/{n}.py": {"class": "ci_safe", "reason": "synthetic backend/registry/contract/deployment test"}
        for n in ("test_phase13_shap", "test_r0_outcome_semantics", "test_r1_feature_contract", "test_r2_registry",

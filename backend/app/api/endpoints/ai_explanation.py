@@ -1,5 +1,8 @@
 """Bound input before parsing; never expose validation input or provider details."""
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
+from starlette.concurrency import run_in_threadpool
+from backend.app.services import shared
+from backend.app.core.config import settings
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from backend.app.ai import client
@@ -33,7 +36,11 @@ async def explanation(request: Request):
     succeeded = False
     try:
         try:
-            allowed = reserve(body.token)
+            if settings.REDIS_URL:
+                await run_in_threadpool(shared.limit, "ai", shared.anonymous_id(request), settings.AI_MINUTE_LIMIT, 60)
+            allowed = await run_in_threadpool(reserve, body.token)
+        except HTTPException as exc:
+            raise client.ExplanationError(exc.status_code, "AI_USAGE_LIMIT" if exc.status_code == 429 else "AI_USAGE_UNAVAILABLE") from None
         except Exception:
             raise client.ExplanationError(503, "AI_USAGE_UNAVAILABLE") from None
         if not allowed:
@@ -41,7 +48,7 @@ async def explanation(request: Request):
         reserved = True
         result = await client.explain(data)
         try:
-            complete(body.token, succeeded=True)
+            await run_in_threadpool(complete, body.token, succeeded=True)
             succeeded = True
         except Exception:
             raise client.ExplanationError(503, "AI_USAGE_UNAVAILABLE") from None
@@ -52,7 +59,7 @@ async def explanation(request: Request):
     finally:
         if reserved and not succeeded:
             try:
-                complete(body.token, succeeded=False)
+                await run_in_threadpool(complete, body.token, succeeded=False)
             except Exception:
                 # Fail closed: an orphaned in-flight reservation cannot be replayed
                 # until process/database recovery; never expose storage details.

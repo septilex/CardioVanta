@@ -72,7 +72,7 @@ def test_schema_declares_the_relationships():
     schema = (SQL_DIR / "001_research_schema.sql").read_text(encoding="utf-8")
     assert "REFERENCES model_versions (id)" in schema and "REFERENCES cohorts (id)" in schema
     assert "REFERENCES evaluations (id) ON DELETE CASCADE" in schema
-    assert [p.name for p in migration_files()] == ["001_research_schema.sql", "002_research_seed.sql"]
+    assert [p.name for p in migration_files()] == ["001_research_schema.sql", "002_research_seed.sql", "003_accounts_operations.sql"]
 
 
 def test_no_patient_data_columns():
@@ -110,7 +110,7 @@ def db_settings():
 
 @needs_db
 def test_migrations_apply_once(db_settings):
-    assert apply_migrations(db_settings) == ["001_research_schema.sql", "002_research_seed.sql"]
+    assert apply_migrations(db_settings) == [p.name for p in migration_files()]
     assert apply_migrations(db_settings) == []
 
 
