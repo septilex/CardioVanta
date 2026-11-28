@@ -21,6 +21,7 @@ __pycache__/
 .env.*
 !.env.example
 .vercel/
+.visual-tools/
 
 # Editor
 .vscode/
@@ -34,8 +35,6 @@ Syne_extracted/
 # Stale / abandoned architecture
 frontend/
 render.yaml
-docker-compose.yml
-.dockerignore
 
 # Scratch / local-only scripts
 local_predict.py

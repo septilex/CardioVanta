@@ -5,7 +5,15 @@
     "category": "AI App Engineering —",
     "points": 0.2,
     "initial": "PARTIAL",
-    "evidence": "`backend/app/ai/client.py` already integrates OpenAI, but availability is disabled on Vercel. Complete deployment-safe usage control."
+    "evidence": "`backend/app/ai/client.py` already integrates OpenAI, but availability is disabled on Vercel. Complete deployment-safe usage control.",
+    "source": "backend/app/ai/client.py",
+    "symbol": "available, provider_parse, explain",
+    "tests": "backend/tests/test_ai_explanation.py; backend/tests/test_workspace_security.py; backend/tests/test_workspace_services.py",
+    "meaning": "An LLM API consumes derived model output to produce an optional educational explanation. Provider calls are bounded, structured and store=False.",
+    "demo": "Run the mocked provider success, timeout and invalid-output tests; configure Redis and OpenAI, request a prediction token, then request its explanation. Replaying a completed token returns 429.",
+    "configuration": "LLM_ENABLED=true, OPENAI_API_KEY, OPENAI_MODEL, AI_SIGNING_KEY, REDIS_URL",
+    "pending": "Shared Redis integration and a configured provider/deployment remain unverified; mocked provider tests pass.",
+    "final": "PARTIAL"
   },
   {
     "number": 2,
@@ -13,7 +21,15 @@
     "category": "AI App Engineering —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "`backend/app/ai/prompts/explanation_v1.py` contains a carefully constrained system prompt."
+    "evidence": "`backend/app/ai/prompts/explanation_v1.py` contains a carefully constrained system prompt.",
+    "source": "backend/app/ai/prompts/explanation_v1.py",
+    "symbol": "SYSTEM, VERSION",
+    "tests": "backend/tests/test_ai_explanation.py",
+    "meaning": "Prompt engineering constrains tone, scope and trust boundaries so generated explanations do not become clinical advice.",
+    "demo": "Open SYSTEM alongside provider_parse; inspect the separate system/user messages and the tests for invalid provider responses. Explain why user content cannot replace the system instructions.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 3,
@@ -21,7 +37,15 @@
     "category": "AI App Engineering —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "`backend/app/ai/schemas.py` and `client.py` implement Pydantic structured output parsing."
+    "evidence": "`backend/app/ai/schemas.py` and `client.py` implement Pydantic structured output parsing.",
+    "source": "backend/app/ai/schemas.py",
+    "symbol": "ExplanationContent, ExplanationResponse",
+    "tests": "backend/tests/test_ai_explanation.py",
+    "meaning": "Structured outputs validate provider responses against explicit Pydantic fields and contribution directions before display.",
+    "demo": "Run the valid-response and malformed/direction-mismatch tests; only schema-valid content reaches the browser.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 4,
@@ -29,7 +53,15 @@
     "category": "Auth & Security —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Strict Pydantic schemas, bounded request body, and explicit untrusted-input instructions in the AI prompt."
+    "evidence": "Strict Pydantic schemas, bounded request body, and explicit untrusted-input instructions in the AI prompt.",
+    "source": "backend/app/api/body_limit.py",
+    "symbol": "WorkspaceBodyLimit; PredictRequest in backend/app/schemas/predict.py",
+    "tests": "backend/tests/test_stage6_security.py; backend/tests/test_workspace_workflows.py",
+    "meaning": "Input validation rejects unknown fields, malformed values and oversized bodies. Parameterized database operations prevent input from becoming SQL syntax.",
+    "demo": "Send a prediction with an extra field and an import with patient_name: expect 422. Send a workspace body over its limit: expect 413 and no parsing/storage.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 5,
@@ -37,7 +69,15 @@
     "category": "Auth & Security —",
     "points": 0.2,
     "initial": "PARTIAL",
-    "evidence": "`backend/app/ai/security.py` uses custom HMAC-signed expiring tokens, not standard JWTs. Implement proper JWT authentication."
+    "evidence": "`backend/app/ai/security.py` uses custom HMAC-signed expiring tokens, not standard JWTs. Implement proper JWT authentication.",
+    "source": "backend/app/auth/security.py",
+    "symbol": "issue_access, verify_access, new_session",
+    "tests": "backend/tests/test_workspace_security.py",
+    "meaning": "JWTs are signed short-lived bearer credentials. The server verifies algorithm, signature, issuer, audience, expiry, not-before and UUID identifiers; refresh credentials rotate as stored hashes.",
+    "demo": "Register and call /auth/me. Run altered-signature/claims tests and reuse a consumed refresh token: 401, with session revocation. Specialized explanation tokens remain separate.",
+    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 6,
@@ -45,7 +85,15 @@
     "category": "Auth & Security —",
     "points": 0.2,
     "initial": "MISSING",
-    "evidence": "Implement Google OAuth/OIDC login."
+    "evidence": "Implement Google OAuth/OIDC login.",
+    "source": "backend/app/api/endpoints/oauth.py",
+    "symbol": "start, callback, resolve_account",
+    "tests": "backend/tests/test_workspace_oauth.py",
+    "meaning": "OAuth/OIDC delegates identity verification to Google. Authlib checks state, S256 PKCE and signed ID-token claims; existing email accounts require authenticated linking.",
+    "demo": "Run the mocked Google flow with real RSA/nonce validation. Wrong state, nonce, issuer, audience, expiry or signature redirects to a safe failure state; a valid fixture creates a viewer.",
+    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and registered /api/v1/auth/google/callback. Only mocked provider integration verified.",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 7,
@@ -53,7 +101,15 @@
     "category": "Auth & Security —",
     "points": 0.2,
     "initial": "MISSING",
-    "evidence": "Implement secure Argon2id password hashing for application accounts."
+    "evidence": "Implement secure Argon2id password hashing for application accounts.",
+    "source": "backend/app/auth/security.py",
+    "symbol": "password_hash, password_matches, revoke",
+    "tests": "backend/tests/test_workspace_security.py",
+    "meaning": "Argon2id is a memory-hard password hash with per-password salts; plaintext passwords are never stored. A password change invalidates existing sessions.",
+    "demo": "Register, inspect the stored $argon2id$ prefix in a throwaway DB, verify correct/incorrect passwords, then change the password and demonstrate old JWT rejection.",
+    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 8,
@@ -61,7 +117,15 @@
     "category": "Auth & Security —",
     "points": 0.2,
     "initial": "PARTIAL",
-    "evidence": "Existing AI usage quotas use SQLite. Upgrade to shared, deployment-safe rate limiting and cover other protected endpoints."
+    "evidence": "Existing AI usage quotas use SQLite. Upgrade to shared, deployment-safe rate limiting and cover other protected endpoints.",
+    "source": "backend/app/services/shared.py",
+    "symbol": "LIMIT_SCRIPT, limit; AI RESERVE_SCRIPT",
+    "tests": "backend/tests/test_workspace_security.py; backend/tests/test_workspace_services.py",
+    "meaning": "Atomic shared counters enforce limits across processes; Redis TTL bounds each window. Authentication, password changes, imports, checkout, WebSocket connections and AI calls use shared controls.",
+    "demo": "Run concurrent attempts: only the configured allowance succeeds, others get 429 with Retry-After. Disconnect Redis: protected work fails closed with 503.",
+    "configuration": "REDIS_URL; TEST_REDIS_URL must use dedicated DB 15",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 9,
@@ -69,7 +133,15 @@
     "category": "Auth & Security —",
     "points": 0.2,
     "initial": "MISSING",
-    "evidence": "Implement admin, researcher, and viewer roles with backend authorization checks."
+    "evidence": "Implement admin, researcher, and viewer roles with backend authorization checks.",
+    "source": "backend/app/auth/security.py",
+    "symbol": "current_user, require_roles",
+    "tests": "backend/tests/test_workspace_security.py; backend/tests/test_workspace_workflows.py",
+    "meaning": "RBAC checks authoritative database roles at the backend. Viewer reads, researcher imports/reviews feedback, and admin manages account roles.",
+    "demo": "Call an import route anonymously (401), as viewer (403), then as researcher (allowed). A researcher cannot list admin users; a signed fabricated role claim cannot grant access.",
+    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 10,
@@ -77,7 +149,15 @@
     "category": "Backend & System Design —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "`api/index.py` and `vercel.json` configure the FastAPI serverless application."
+    "evidence": "`api/index.py` and `vercel.json` configure the FastAPI serverless application.",
+    "source": "api/index.py",
+    "symbol": "app export; vercel.json rewrites",
+    "tests": "backend/tests/test_r3_deployment.py; backend/tests/test_portable_model.py",
+    "meaning": "A serverless ASGI entry point serves FastAPI while packaging the immutable portable model and runtime dependencies.",
+    "demo": "Inspect /api rewrites, run deployment configuration and minimal-runtime tests, then GET /api/v1/health locally: status ok. No new Vercel deployment was performed.",
+    "configuration": "Vercel project settings for deployment",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 11,
@@ -85,7 +165,15 @@
     "category": "Backend & System Design —",
     "points": 0.2,
     "initial": "MISSING",
-    "evidence": "Add safe CSV upload and research-metadata import functionality."
+    "evidence": "Add safe CSV upload and research-metadata import functionality.",
+    "source": "backend/app/api/endpoints/imports.py",
+    "symbol": "upload; parse_csv and write_rows in services/imports.py",
+    "tests": "backend/tests/test_workspace_workflows.py; backend/tests/test_workspace_services.py; __tests__/workspace.test.tsx",
+    "meaning": "File handling bounds multipart input, validates every CSV row, and imports only research evaluation metadata inside one transaction.",
+    "demo": "Sign in as researcher, create an import, submit the header template with approved metadata. Valid rows commit; unknown columns, invalid UTF-8, unsafe filenames and duplicate metrics fail without partial writes.",
+    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; existing model/cohort records",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 12,
@@ -93,7 +181,15 @@
     "category": "Backend & System Design —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing endpoints use 200, 201, 204, 401, 403, 404, 422, 429, 503 and other appropriate responses."
+    "evidence": "Existing endpoints use 200, 201, 204, 401, 403, 404, 422, 429, 503 and other appropriate responses.",
+    "source": "backend/app/main.py",
+    "symbol": "http_exception_handler; account/import/feedback endpoint responses",
+    "tests": "backend/tests/test_workspace_workflows.py; backend/tests/test_stage6_security.py",
+    "meaning": "HTTP status codes communicate success, validation failure, missing identity, denied access, conflicts, rate limits and unavailable services consistently.",
+    "demo": "Show 201 registration/import creation, 204 logout, 401 invalid JWT, 403 viewer import, 409 duplicate, 413 body cap, 422 invalid input, 429 quota and 503 unavailable integration.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 13,
@@ -101,7 +197,15 @@
     "category": "Backend & System Design —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "`backend/app/api/middleware.py` implements monitoring middleware and request IDs."
+    "evidence": "`backend/app/api/middleware.py` implements monitoring middleware and request IDs.",
+    "source": "backend/app/api/middleware.py",
+    "symbol": "MonitoringMiddleware; WorkspaceBodyLimit",
+    "tests": "tests/test_monitoring.py; backend/tests/test_workspace_workflows.py",
+    "meaning": "Middleware wraps requests for cross-cutting behavior such as request IDs, monitoring and pre-parser body limits.",
+    "demo": "Inspect middleware registration, request ID tests and the oversized auth request test. Bodies exceeding the cap are rejected before endpoint processing.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 14,
@@ -109,7 +213,15 @@
     "category": "Backend & System Design —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing 13-feature cardiovascular model, prediction contracts, model registry, and inference engine."
+    "evidence": "Existing 13-feature cardiovascular model, prediction contracts, model registry, and inference engine.",
+    "source": "backend/app/schemas/predict.py",
+    "symbol": "PredictRequest, PredictResponse; cardiovanta_ml.InferenceEngine",
+    "tests": "backend/tests/test_stage3.py; backend/tests/test_r1_feature_contract.py",
+    "meaning": "Problem modeling expresses a fixed 13-feature research prediction contract with explicit outcome and threshold semantics.",
+    "demo": "Submit a synthetic complete profile and inspect probability, feature directions and threshold_status. Missing inputs are rejected; the model artifacts are unchanged.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 15,
@@ -117,7 +229,15 @@
     "category": "Backend & System Design —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Pydantic validation, strict input schemas and validation exception handlers."
+    "evidence": "Pydantic validation, strict input schemas and validation exception handlers.",
+    "source": "backend/app/schemas/predict.py",
+    "symbol": "PredictRequest; Credentials, PasswordChange and Checkout models",
+    "tests": "backend/tests/test_stage2.py; backend/tests/test_workspace_workflows.py",
+    "meaning": "Request schemas enforce types, required fields, ranges and forbidden extras before business logic runs.",
+    "demo": "Run missing/extra/binary/categorical feature tests and the upload column tests; invalid requests return sanitized 422 responses.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 16,
@@ -125,7 +245,15 @@
     "category": "Backend & System Design —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing prediction, research, AI explanation and feedback endpoints."
+    "evidence": "Existing prediction, research, AI explanation and feedback endpoints.",
+    "source": "backend/app/api/endpoints/accounts.py",
+    "symbol": "register, login, me; imports create_batch/batch_status/upload",
+    "tests": "backend/tests/test_workspace_workflows.py; backend/tests/test_workspace_security.py",
+    "meaning": "REST endpoints represent resources and use HTTP methods for creation, retrieval, updates and deletion.",
+    "demo": "Trace POST /research/imports to an ID, GET that ID, then POST its file. Compare the feedback POST/GET/PATCH/DELETE routes.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 17,
@@ -133,7 +261,15 @@
     "category": "Backend & System Design —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "FastAPI exception handling and endpoint-specific error responses."
+    "evidence": "FastAPI exception handling and endpoint-specific error responses.",
+    "source": "backend/app/main.py",
+    "symbol": "validation_exception_handler, http_exception_handler; db.orm.session",
+    "tests": "backend/tests/test_stage6_security.py; backend/tests/test_secrets_config.py; backend/tests/test_workspace_workflows.py",
+    "meaning": "Server error handling maps failures to safe responses and rolls back incomplete work without exposing secrets or raw clinical input.",
+    "demo": "Run provider/storage failure tests and sanitized validation logging tests. Verify no connection string or provider payload is returned.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 18,
@@ -141,7 +277,15 @@
     "category": "Backend & System Design —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing Next.js + FastAPI + MongoDB + PostgreSQL + ML model architecture."
+    "evidence": "Existing Next.js + FastAPI + MongoDB + PostgreSQL + ML model architecture.",
+    "source": "backend/app/main.py",
+    "symbol": "router composition; src/lib/workspace.ts workspaceRequest",
+    "tests": "backend/tests/test_portable_model.py; __tests__/workspace.test.tsx",
+    "meaning": "System design separates browser interaction, API authorization, transactional metadata storage, optional shared infrastructure and immutable model inference.",
+    "demo": "Follow one import from Workspace through JWT/RBAC to SQL, then its durable status to ImportLive. Explain why prediction serving still starts without database/provider secrets.",
+    "configuration": "See HLD.md and SETUP_AND_VERIFICATION.md for optional services",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 19,
@@ -149,7 +293,15 @@
     "category": "Engineering Practices —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Pytest API tests and CI integration tests using PostgreSQL and MongoDB service containers."
+    "evidence": "Pytest API tests and CI integration tests using PostgreSQL and MongoDB service containers.",
+    "source": ".github/workflows/verify.yml",
+    "symbol": "verify-backend, quarantined-research-tests, verify-frontend",
+    "tests": "backend/tests/test_r3_deployment.py; backend/tests/test_workspace_security.py; backend/tests/test_workspace_workflows.py; backend/tests/test_workspace_services.py",
+    "meaning": "Automated API tests exercise contracts and failure cases; CI provisions real PostgreSQL, a Mongo replica set and Redis for integration tests.",
+    "demo": "Run the classified safe pytest suite and Jest. Show local skips explicitly and the CI rules that fail rather than skip when service URLs are missing.",
+    "configuration": "Real integration CI still needs to run on this branch",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 20,
@@ -157,7 +309,15 @@
     "category": "Engineering Practices —",
     "points": 0.5,
     "initial": "MISSING",
-    "evidence": "Add production-quality Dockerfiles and Docker Compose."
+    "evidence": "Add production-quality Dockerfiles and Docker Compose.",
+    "source": "docker-compose.yml",
+    "symbol": "frontend/backend/postgres/mongo/redis/migrate services",
+    "tests": ".github/workflows/workspace-containers.yml",
+    "meaning": "Containers package reproducible application runtimes; Compose supplies health-checked dependencies and persistent local volumes. App processes run as non-root users.",
+    "demo": "Run scripts/workspace_setup.py, docker compose --env-file .env.docker config --quiet, then up --build --wait. Verify both health endpoints and import WebSocket behavior.",
+    "configuration": "Docker Engine and Compose",
+    "pending": "Docker CLI is unavailable locally; builds and Compose health checks have not run.",
+    "final": "PARTIAL"
   },
   {
     "number": 21,
@@ -165,7 +325,15 @@
     "category": "Engineering Practices —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "`.env.example`, `backend/app/core/config.py`, `SecretStr` and environment-based configuration."
+    "evidence": "`.env.example`, `backend/app/core/config.py`, `SecretStr` and environment-based configuration.",
+    "source": "backend/app/core/config.py",
+    "symbol": "Settings, SECRET_SETTINGS, require_secret",
+    "tests": "backend/tests/test_secrets_config.py",
+    "meaning": "Environment configuration separates code from credentials; SecretStr masks values and integrations default to disabled.",
+    "demo": "Run python -m backend.app.core.config: only presence is reported. Verify .env files are ignored and .env.example contains empty secret values.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 22,
@@ -173,7 +341,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "`src/lib/api.ts`, prediction API and research fetching."
+    "evidence": "`src/lib/api.ts`, prediction API and research fetching.",
+    "source": "src/lib/api.ts",
+    "symbol": "prediction API helpers; workspaceRequest in src/lib/workspace.ts",
+    "tests": "__tests__/encoding-and-coldstart.test.tsx; __tests__/workspace.test.tsx",
+    "meaning": "Async fetching lets the UI await remote results while displaying loading and error states.",
+    "demo": "Submit a synthetic assessment or research import and inspect the network request plus pending, success and failure UI.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 23,
@@ -181,7 +357,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Next.js App Router, navigation links and `usePathname`."
+    "evidence": "Next.js App Router, navigation links and `usePathname`.",
+    "source": "src/components/shell/AppNav.tsx",
+    "symbol": "AppSidebar, MobileNav",
+    "tests": "__tests__/navigation.test.tsx",
+    "meaning": "Client-side routing changes App Router pages through Next links while preserving the shared shell.",
+    "demo": "Navigate Research → Workspace → Research or Heart Analysis; inspect active navigation and keyboard-accessible links.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 24,
@@ -189,7 +373,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Controlled assessment inputs using `useState` and `onChange`."
+    "evidence": "Controlled assessment inputs using `useState` and `onChange`.",
+    "source": "src/components/research/Workspace.tsx",
+    "symbol": "Workspace controlled email/password fields",
+    "tests": "__tests__/workspace.test.tsx; __tests__/interactions.test.tsx",
+    "meaning": "Controlled inputs keep displayed form values synchronized with React state so validation and submission use the same data.",
+    "demo": "Type an email and password; show onChange updating state and the exact submitted JSON in the component test.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 25,
@@ -197,7 +389,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Required fields, input constraints and server-side Pydantic validation."
+    "evidence": "Required fields, input constraints and server-side Pydantic validation.",
+    "source": "src/components/research/Workspace.tsx",
+    "symbol": "authenticate and import form",
+    "tests": "__tests__/workspace.test.tsx; __tests__/contract.test.ts",
+    "meaning": "Client validation gives early feedback; backend schemas remain authoritative against bypassed browser controls.",
+    "demo": "Create-account inputs require an email and at least 12 password characters; oversized CSV is rejected before import creation. Repeat invalid input directly against the API.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 26,
@@ -205,7 +405,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing Vercel deployment."
+    "evidence": "Existing Vercel deployment.",
+    "source": "next.config.ts",
+    "symbol": "standalone build and response headers",
+    "tests": "backend/tests/test_r3_deployment.py; npm run build",
+    "meaning": "A production frontend build produces deployable server HTML, client bundles and static assets for Vercel or the container runtime.",
+    "demo": "Run npm run build; show /research, /research/workspace and /support in the route output. This branch was built locally, not deployed.",
+    "configuration": "Vercel project or Docker runtime for publication",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 27,
@@ -213,7 +421,15 @@
     "category": "Frontend —",
     "points": 0.1,
     "initial": "FULL",
-    "evidence": "Async prediction flow and API calls."
+    "evidence": "Async prediction flow and API calls.",
+    "source": "src/lib/workspace.ts",
+    "symbol": "workspaceRequest, refreshAccount",
+    "tests": "__tests__/workspace.test.tsx; __tests__/async.test.ts",
+    "meaning": "async/await expresses nonblocking request sequencing with ordinary try/catch handling.",
+    "demo": "Walk through awaiting batch creation, a scheduling turn and multipart upload; a rejection reaches the visible error message.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 28,
@@ -221,7 +437,15 @@
     "category": "Frontend —",
     "points": 0.1,
     "initial": "FULL",
-    "evidence": "Existing callback handlers and React hooks close over component state and values."
+    "evidence": "Existing callback handlers and React hooks close over component state and values.",
+    "source": "src/components/research/ImportLive.tsx",
+    "symbol": "useEffect reconnect and cleanup closures",
+    "tests": "__tests__/import-live.test.tsx; __tests__/useEffectBehaviour.test.tsx",
+    "meaning": "Closures retain lexical state such as the current batch, reconnect delay and stopped flag across callbacks.",
+    "demo": "Inspect reconnect and the cleanup callback; unmounting closes the captured socket and clears captured timers, proven by the test.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 29,
@@ -229,7 +453,15 @@
     "category": "Frontend —",
     "points": 0.1,
     "initial": "PARTIAL",
-    "evidence": "Async callbacks and Promises exist, but an explicit microtask/macrotask demonstration and test are needed."
+    "evidence": "Async callbacks and Promises exist, but an explicit microtask/macrotask demonstration and test are needed.",
+    "source": "src/lib/workspace.ts",
+    "symbol": "afterStatusUpdate",
+    "tests": "__tests__/event-loop.test.ts",
+    "meaning": "JavaScript runs synchronous work first, Promise microtasks next, then timer tasks. The importer uses this boundary before starting its file request.",
+    "demo": "Run the real-timer Node test: sync, caller, microtask, timer. React can flush its status update before the timer continuation; a timer turn alone does not guarantee a browser paint.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 30,
@@ -237,7 +469,15 @@
     "category": "Frontend —",
     "points": 0.1,
     "initial": "FULL",
-    "evidence": "`src/lib/clinicalFormat.ts` and `__tests__/clinicalFormat.test.ts`."
+    "evidence": "`src/lib/clinicalFormat.ts` and `__tests__/clinicalFormat.test.ts`.",
+    "source": "src/lib/clinicalFormat.ts",
+    "symbol": "NO_ESTIMATE, describeEstimate",
+    "tests": "__tests__/clinicalFormat.test.ts",
+    "meaning": "Function declarations are initialized before module execution; lexical bindings still have a temporal dead zone.",
+    "demo": "Open NO_ESTIMATE calling describeEstimate before its declaration; run the declaration-vs-const hoisting tests and inspect fallback display text.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 31,
@@ -245,7 +485,15 @@
     "category": "Frontend —",
     "points": 0.1,
     "initial": "FULL",
-    "evidence": "`src/lib/async.ts` and `__tests__/async.test.ts`."
+    "evidence": "`src/lib/async.ts` and `__tests__/async.test.ts`.",
+    "source": "src/lib/async.ts",
+    "symbol": "delay, withTimeout",
+    "tests": "__tests__/async.test.ts",
+    "meaning": "Callbacks provide scheduled continuations; Promises model eventual completion and compose through race/await.",
+    "demo": "Follow delay wrapping a timer callback in a Promise, then withTimeout racing the request and clearing its losing timer. Run success, timeout and abort tests.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 32,
@@ -253,7 +501,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Assessment loading, timeout, error and retry states with tests."
+    "evidence": "Assessment loading, timeout, error and retry states with tests.",
+    "source": "src/components/research/Workspace.tsx",
+    "symbol": "loading, busy, error and notice states",
+    "tests": "__tests__/workspace.test.tsx; __tests__/encoding-and-coldstart.test.tsx",
+    "meaning": "Loading and error states explain what is happening and how to recover from unavailable services or failed requests.",
+    "demo": "Show account initialization, disabled configuration, incorrect-password error, pending import and a retryable checkout error.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 33,
@@ -261,7 +517,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing assessment, result panels, navigation and reusable components."
+    "evidence": "Existing assessment, result panels, navigation and reusable components.",
+    "source": "src/components/shell/DocShell.tsx",
+    "symbol": "DocShell composing Workspace, Support and ImportLive",
+    "tests": "__tests__/workspace.test.tsx; __tests__/page.test.tsx",
+    "meaning": "Component composition reuses the navigation/layout frame while isolating interactive account, import and support behavior.",
+    "demo": "Open the server page wrapping Workspace in DocShell, then inspect ImportLive as a child receiving batch state and an update callback.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 34,
@@ -269,7 +533,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Responsive layouts, mobile navigation and component styles."
+    "evidence": "Responsive layouts, mobile navigation and component styles.",
+    "source": "src/app/workspace.css",
+    "symbol": "workspace-page, workspace-form, mobile media query",
+    "tests": "__tests__/workspace.test.tsx; scripts/verify_workspace_ui.cjs; docs/viva/evidence/visual-check.json",
+    "meaning": "Responsive layout adapts spacing, wrapping and form controls to screen size while preserving keyboard focus and readable content.",
+    "demo": "Inspect desktop 1440px and mobile 390px screenshots; verify no horizontal overflow and usable input labels. Authenticated screenshots use explicitly synthetic browser fixtures.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 35,
@@ -277,7 +549,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing prediction warm-up, animation and research fetching effects with cleanup tests."
+    "evidence": "Existing prediction warm-up, animation and research fetching effects with cleanup tests.",
+    "source": "src/components/research/ImportLive.tsx",
+    "symbol": "useEffect socket lifecycle",
+    "tests": "__tests__/import-live.test.tsx; __tests__/useEffectBehaviour.test.tsx",
+    "meaning": "Effects synchronize component lifetimes with external subscriptions and clean up sockets/timers on dependency changes or unmount.",
+    "demo": "Run the socket cleanup test; navigate away during an import and verify the connection/timer are closed.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 36,
@@ -285,7 +565,15 @@
     "category": "Frontend —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing assessment state and UI state management."
+    "evidence": "Existing assessment state and UI state management.",
+    "source": "src/components/research/Workspace.tsx",
+    "symbol": "Workspace useState values",
+    "tests": "__tests__/workspace.test.tsx; __tests__/interactions.test.tsx",
+    "meaning": "useState holds changing account, form and import state, triggering render updates through setters.",
+    "demo": "Toggle sign-in/create-account, edit fields, select a file and display persisted import completion; each update comes from explicit state.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 37,
@@ -293,7 +581,15 @@
     "category": "NoSQL (MongoDB) —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "`backend/app/api/endpoints/feedback.py` uses `$group`, `$sum`, `$cond` and `$sort`."
+    "evidence": "`backend/app/api/endpoints/feedback.py` uses `$group`, `$sum`, `$cond` and `$sort`.",
+    "source": "backend/app/api/endpoints/feedback.py",
+    "symbol": "feedback_summary",
+    "tests": "backend/tests/test_feedback_crud.py",
+    "meaning": "Mongo aggregation groups feedback by section and calculates total/helpful counts without transferring every document to Python.",
+    "demo": "Create synthetic helpful/unhelpful feedback and GET /feedback/summary; inspect $group, $sum, $cond and $sort.",
+    "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 38,
@@ -301,7 +597,15 @@
     "category": "NoSQL (MongoDB) —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Feedback create, read, update and delete endpoints."
+    "evidence": "Feedback create, read, update and delete endpoints.",
+    "source": "backend/app/api/endpoints/feedback.py",
+    "symbol": "create_feedback, read_feedback, update_feedback, delete_feedback",
+    "tests": "backend/tests/test_feedback_crud.py; backend/tests/test_workspace_services.py",
+    "meaning": "Mongo CRUD persists anonymous votes and allows their owner to update or withdraw them using a one-time returned edit credential.",
+    "demo": "Create (201), read (200), update with X-Edit-Token (200), delete (204), then read (404). Incorrect tokens cannot modify the record.",
+    "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 39,
@@ -309,7 +613,15 @@
     "category": "NoSQL (MongoDB) —",
     "points": 0.2,
     "initial": "MISSING",
-    "evidence": "Add a meaningful embedded and referenced data model."
+    "evidence": "Add a meaningful embedded and referenced data model.",
+    "source": "backend/app/db/mongo_setup.py",
+    "symbol": "FEEDBACK_SCHEMA.metadata, EVENTS; feedback transaction writes",
+    "tests": "backend/tests/test_workspace_services.py",
+    "meaning": "Small bounded metadata is embedded for frequent reads; potentially growing audit events reference the parent ObjectId in another collection.",
+    "demo": "Inspect metadata embedded in a feedback document and two referenced create/update events. Delete the parent: a Mongo transaction deletes its events too.",
+    "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 40,
@@ -317,7 +629,15 @@
     "category": "NoSQL (MongoDB) —",
     "points": 0.2,
     "initial": "MISSING",
-    "evidence": "Add explicit query-supporting indexes and test them."
+    "evidence": "Add explicit query-supporting indexes and test them.",
+    "source": "backend/app/db/mongo_setup.py",
+    "symbol": "setup; research_feedback and research_feedback_events",
+    "tests": "backend/tests/test_workspace_services.py",
+    "meaning": "Compound Mongo indexes support equality filters followed by creation-date ordering, and parent-filtered event history.",
+    "demo": "Inspect section/date, model-version/date and parent/date indexes; run filtered/sorted queries and the explain-plan test. Each index corresponds to a real endpoint.",
+    "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 41,
@@ -325,7 +645,15 @@
     "category": "NoSQL (MongoDB) —",
     "points": 0.2,
     "initial": "PARTIAL",
-    "evidence": "Pydantic models control application data, but MongoDB-level schema validation needs to be added."
+    "evidence": "Pydantic models control application data, but MongoDB-level schema validation needs to be added.",
+    "source": "backend/app/db/mongo_setup.py",
+    "symbol": "FEEDBACK_SCHEMA, EVENT_SCHEMA, setup",
+    "tests": "backend/tests/test_workspace_services.py",
+    "meaning": "Database-level JSON Schema enforces types and allowed fields even when a writer bypasses FastAPI. The migration backfills safe metadata and refuses existing invalid documents.",
+    "demo": "Run setup twice; insert an invalid section or clinical_input directly with PyMongo and observe WriteError. Valid feedback remains accepted.",
+    "configuration": "MONGODB_URI to a replica set; python -m backend.app.db.mongo_setup; TEST_MONGODB_URI for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 42,
@@ -333,7 +661,15 @@
     "category": "SQL (Postgres) —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing research queries include `WHERE`, `ORDER BY` and `GROUP BY`."
+    "evidence": "Existing research queries include `WHERE`, `ORDER BY` and `GROUP BY`.",
+    "source": "backend/app/db/research.py",
+    "symbol": "VERSION_COVERAGE_SQL, UNEVALUATED_COHORTS_SQL",
+    "tests": "backend/tests/test_research_db.py",
+    "meaning": "SQL filtering, ordering and grouping turn research records into stable evaluation tables, coverage counts and missing-evaluation lists.",
+    "demo": "Run the three queries after migrations; explain WHERE IS NULL, ORDER BY and GROUP BY. Model versions without evaluations remain visible.",
+    "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 43,
@@ -341,7 +677,15 @@
     "category": "SQL (Postgres) —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Explicit indexes exist in `001_research_schema.sql`."
+    "evidence": "Explicit indexes exist in `001_research_schema.sql`.",
+    "source": "backend/app/db/sql/001_research_schema.sql",
+    "symbol": "evaluations_model_version_idx, evaluations_cohort_idx; migration 003 session indexes",
+    "tests": "backend/tests/test_research_db.py; backend/tests/test_workspace_services.py",
+    "meaning": "Indexes accelerate actual join/filter and cleanup access paths while uniqueness indexes prevent duplicate identities and metrics.",
+    "demo": "Inspect pg_indexes after migrations; relate evaluation FK indexes to joins and refresh expiry/family indexes to cleanup/revocation. Do not promise index scans on tiny tables.",
+    "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 44,
@@ -349,7 +693,15 @@
     "category": "SQL (Postgres) —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing separated research tables and relational constraints."
+    "evidence": "Existing separated research tables and relational constraints.",
+    "source": "backend/app/db/sql/003_accounts_operations.sql",
+    "symbol": "users, roles, user_roles, oauth_accounts, refresh_sessions",
+    "tests": "backend/tests/test_research_db.py; backend/tests/test_workspace_services.py",
+    "meaning": "Normalization separates users, roles, identities and sessions so repeated facts are not copied into unrelated rows.",
+    "demo": "Trace a user through its role and OAuth mapping, and an evaluation through model/cohort/metrics. Explain why a role change does not rewrite every session.",
+    "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 45,
@@ -357,7 +709,15 @@
     "category": "SQL (Postgres) —",
     "points": 0.2,
     "initial": "MISSING",
-    "evidence": "Add a suitable ORM integration for the existing Python backend."
+    "evidence": "Add a suitable ORM integration for the existing Python backend.",
+    "source": "backend/app/db/orm.py",
+    "symbol": "User, Role, RefreshSession, UploadBatch, SupportPayment, session",
+    "tests": "backend/tests/test_workspace_security.py; backend/tests/test_workspace_services.py",
+    "meaning": "SQLAlchemy 2 maps Python entities to SQL rows and coordinates identity, relationships and explicit transactions. It is the Python-stack equivalent of the rubric's Prisma/Sequelize examples.",
+    "demo": "Open registration adding User with Role relationships and session rotation adding RefreshSession. Compare ORM operations with the retained raw research JOIN queries.",
+    "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
+    "pending": "ORM API tests pass with SQLite; PostgreSQL mapping/migration integration remains unverified locally.",
+    "final": "PARTIAL"
   },
   {
     "number": 46,
@@ -365,7 +725,15 @@
     "category": "SQL (Postgres) —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "Existing primary keys, foreign keys, uniqueness and cascade constraints."
+    "evidence": "Existing primary keys, foreign keys, uniqueness and cascade constraints.",
+    "source": "backend/app/db/sql/003_accounts_operations.sql",
+    "symbol": "PRIMARY KEY, REFERENCES, UNIQUE, ON DELETE constraints",
+    "tests": "backend/tests/test_research_db.py; backend/tests/test_workspace_services.py",
+    "meaning": "Relational keys give rows stable identity, connect related entities and prevent orphaned or duplicate records.",
+    "demo": "Run migration/FK tests and attempt an orphan metric or role mapping in a transaction: PostgreSQL rejects it.",
+    "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 47,
@@ -373,7 +741,15 @@
     "category": "SQL (Postgres) —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "`backend/app/db/research.py` contains INNER JOIN, LEFT JOIN and anti-join queries."
+    "evidence": "`backend/app/db/research.py` contains INNER JOIN, LEFT JOIN and anti-join queries.",
+    "source": "backend/app/db/research.py",
+    "symbol": "EVALUATION_TABLE_SQL, VERSION_COVERAGE_SQL, UNEVALUATED_COHORTS_SQL",
+    "tests": "backend/tests/test_research_db.py",
+    "meaning": "INNER JOIN returns complete metric provenance; LEFT JOIN preserves models with no evaluations; an anti-join identifies unevaluated cohorts.",
+    "demo": "Run each query and point out the seeded zero-evaluation model and unevaluated cohorts. Compare why INNER JOIN would hide those gaps.",
+    "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 48,
@@ -381,7 +757,15 @@
     "category": "SQL (Postgres) —",
     "points": 0.2,
     "initial": "FULL",
-    "evidence": "`backend/app/db/migrate.py` explicitly uses PostgreSQL transactions."
+    "evidence": "`backend/app/db/migrate.py` explicitly uses PostgreSQL transactions.",
+    "source": "backend/app/db/migrate.py",
+    "symbol": "apply_migrations; imports.upload and services.imports.write_rows",
+    "tests": "backend/tests/test_research_db.py; backend/tests/test_workspace_services.py",
+    "meaning": "Transactions make migrations and multi-row imports atomic: either all intended writes commit or none survive.",
+    "demo": "Run migrations twice, then import a file whose second metric duplicates an existing one. The first new metric must also roll back.",
+    "configuration": "DATABASE_URL and migrations 001–003; TEST_DATABASE_URL for verification",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 49,
@@ -389,7 +773,15 @@
     "category": "System & Integration —",
     "points": 0.4,
     "initial": "MISSING",
-    "evidence": "Implement Redis-backed caching for appropriate non-clinical data."
+    "evidence": "Implement Redis-backed caching for appropriate non-clinical data.",
+    "source": "backend/app/services/shared.py",
+    "symbol": "cache_read, cache_write, invalidate_research",
+    "tests": "backend/tests/test_workspace_security.py; backend/tests/test_workspace_services.py",
+    "meaning": "Read-through Redis caching avoids repeated public research SQL queries; TTL bounds staleness and successful imports invalidate the cache. No individual predictions are cached.",
+    "demo": "GET research evaluations twice (MISS then HIT), import a metric (invalidation), and test expiration. Redis outage falls back to SQL for public reads, while security limits fail closed.",
+    "configuration": "REDIS_URL, RESEARCH_CACHE_TTL; DATABASE_URL",
+    "pending": "Real service integration was skipped locally; configured CI must run it before final certification.",
+    "final": "PARTIAL"
   },
   {
     "number": 50,
@@ -397,7 +789,15 @@
     "category": "System & Integration —",
     "points": 0.5,
     "initial": "MISSING",
-    "evidence": "Implement a safe Stripe test-mode support payment flow."
+    "evidence": "Implement a safe Stripe test-mode support payment flow.",
+    "source": "backend/app/api/endpoints/payments.py",
+    "symbol": "checkout, webhook, record_event",
+    "tests": "backend/tests/test_workspace_workflows.py",
+    "meaning": "Stripe Checkout handles payment details externally. Only signed test-mode webhook events can mark a support record paid; duplicate event IDs are idempotent.",
+    "demo": "Run synthetic signed-webhook tests, invalid signatures, repeated delivery and provider failure. With owner test credentials, complete Checkout and verify the Stripe event and PostgreSQL paid record.",
+    "configuration": "PAYMENTS_ENABLED=true, sk_test_ STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, DATABASE_URL, REDIS_URL",
+    "pending": "Mocked Stripe/signature tests pass; no real Stripe test event was processed and no payment is claimed.",
+    "final": "PARTIAL"
   },
   {
     "number": 51,
@@ -405,7 +805,15 @@
     "category": "System & Integration —",
     "points": 0.3,
     "initial": "MISSING",
-    "evidence": "Add a protected scheduled maintenance task using Vercel Cron."
+    "evidence": "Add a protected scheduled maintenance task using Vercel Cron.",
+    "source": "backend/app/api/endpoints/maintenance.py",
+    "symbol": "authorize, maintain, daily; vercel.json crons",
+    "tests": "backend/tests/test_workspace_workflows.py",
+    "meaning": "A protected daily cron removes expired authentication state, marks abandoned import attempts failed and records one idempotent maintenance result per UTC date.",
+    "demo": "Call without the cron bearer secret (401), call with it (completed), and repeat (already_completed). Inspect retained research/feedback and removed expired sessions.",
+    "configuration": "CRON_SECRET of at least 32 characters, DATABASE_URL; Vercel production cron at 03:00 UTC / 08:30 Asia/Kolkata",
+    "pending": "Local cleanup/auth/idempotence tests pass; Vercel cron invocation and PostgreSQL advisory-lock integration are not verified.",
+    "final": "PARTIAL"
   },
   {
     "number": 52,
@@ -413,7 +821,15 @@
     "category": "System & Integration —",
     "points": 0.5,
     "initial": "FULL",
-    "evidence": "Existing Next.js App Router Server Components, including the root layout and research page."
+    "evidence": "Existing Next.js App Router Server Components, including the root layout and research page.",
+    "source": "src/app/research/page.tsx",
+    "symbol": "ResearchPage; layout.tsx RootLayout; Workspace client boundary",
+    "tests": "npm run build; scripts/verify_workspace_deployment.py; docs/viva/evidence/verification.json",
+    "meaning": "Server Components render the research composition on the server; Client Components hydrate interactive state. These routes are statically prerendered server HTML, not request-time dynamic SSR.",
+    "demo": "Build production, inspect .next/server/app/research.html with JavaScript absent and find the Research heading. Root layout/research page have no use-client directive; DatabaseEvaluations and Workspace do.",
+    "configuration": "None",
+    "pending": "",
+    "final": "FULL"
   },
   {
     "number": 53,
@@ -421,6 +837,14 @@
     "category": "System & Integration —",
     "points": 0.5,
     "initial": "MISSING",
-    "evidence": "Implement real-time operational status or research import progress updates."
+    "evidence": "Implement real-time operational status or research import progress updates.",
+    "source": "backend/app/api/endpoints/realtime.py",
+    "symbol": "live, snapshot; src/components/research/ImportLive.tsx",
+    "tests": "backend/tests/test_workspace_workflows.py; __tests__/import-live.test.tsx; scripts/verify_workspace_deployment.py",
+    "meaning": "An authenticated WebSocket sends durable import states and heartbeats. Reconnects re-read PostgreSQL, so another serverless instance can resume without an in-memory job registry.",
+    "demo": "Create a batch, connect, send the JWT as the first message and upload metadata. Observe real status transitions, heartbeat and terminal state; wrong Origin/token/owner is rejected. Run the deployment verifier on the actual Vercel URL.",
+    "configuration": "AUTH_ENABLED, DATABASE_URL, REDIS_URL, JWT_SIGNING_KEY; SQL migration 003; HTTPS APP_ORIGIN and secure cookies in production; REALTIME_ENABLED=true, Vercel Fluid Compute, websockets dependency",
+    "pending": "Local WebSocket behavior passes; target-deployment WebSocket verification has not run.",
+    "final": "PARTIAL"
   }
 ]

@@ -31,13 +31,11 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 12
-      # Throwaway MongoDB for the explanation-feedback CRUD tests (backend/tests/test_feedback_crud.py).
-      mongo:
-        image: mongo:7
-        ports:
-          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
         options: >-
-          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'" --health-interval 5s --health-timeout 5s --health-retries 12
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - name: Checkout Code (research-data quarantine)
         # Sparse checkout keeps the locked Cleveland source, development indices, external cohorts and
@@ -78,7 +76,16 @@ jobs:
         run: |
           python -m pip install -r backend/requirements.txt -r api/requirements.txt
           python -m pip install "./cardiovanta_ml[test]"
-          python -m pip install pip-audit
+          python -m pip install pip-audit -r backend/requirements-test.txt
+
+      - name: Start throwaway MongoDB replica set
+        run: |
+          docker run -d --name mongo-workspace -p 27017:27017 mongo:7 mongod --replSet rs0 --bind_ip_all
+          for attempt in $(seq 1 30); do
+            if docker exec mongo-workspace mongosh --quiet --eval 'db.runCommand({ping:1}).ok'; then break; fi
+            sleep 2
+          done
+          docker exec mongo-workspace mongosh --quiet --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"localhost:27017"}]}); while (!db.hello().isWritablePrimary) { sleep(500) }'
 
       - name: Enable Data Quarantine Guard
         # PYTHONDONTWRITEBYTECODE: importing modules that live in write-protected directories (e.g.
@@ -130,7 +137,8 @@ jobs:
         env:
           CARDIOVANTA_RUN_INSTALL_TESTS: "1"
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cardiovanta_test
-          TEST_MONGODB_URI: mongodb://localhost:27017/cardiovanta_test
+          TEST_MONGODB_URI: mongodb://localhost:27017/cardiovanta_test?replicaSet=rs0
+          TEST_REDIS_URL: redis://localhost:6379/15
         run: |
           # Exactly the modules classified ci_safe in scripts/ci/test_classification.py
           python -m pytest $(python scripts/ci/test_classification.py --list ci_safe)
@@ -163,13 +171,11 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 12
-      # Throwaway MongoDB for the explanation-feedback CRUD tests (backend/tests/test_feedback_crud.py).
-      mongo:
-        image: mongo:7
-        ports:
-          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
         options: >-
-          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'" --health-interval 5s --health-timeout 5s --health-retries 12
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - name: Checkout Code (research-data quarantine)
         # Sparse checkout keeps the locked Cleveland source, development indices, external cohorts and
@@ -205,7 +211,16 @@ jobs:
       - name: Install Research Dependencies
         run: |
           pip install -r requirements.txt -r backend/requirements.txt -r api/requirements.txt
-          pip install pytest==9.1.1 pip-audit
+          pip install pytest==9.1.1 pip-audit -r backend/requirements-test.txt
+
+      - name: Start throwaway MongoDB replica set
+        run: |
+          docker run -d --name mongo-workspace -p 27017:27017 mongo:7 mongod --replSet rs0 --bind_ip_all
+          for attempt in $(seq 1 30); do
+            if docker exec mongo-workspace mongosh --quiet --eval 'db.runCommand({ping:1}).ok'; then break; fi
+            sleep 2
+          done
+          docker exec mongo-workspace mongosh --quiet --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"localhost:27017"}]}); while (!db.hello().isWritablePrimary) { sleep(500) }'
 
       - name: Enable Data Quarantine Guard
         # PYTHONDONTWRITEBYTECODE: importing modules that live in write-protected directories (e.g.
@@ -227,7 +242,8 @@ jobs:
       - name: Run Classified Safe Tests on the Research Stack (Python 3.11)
         env:
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cardiovanta_test
-          TEST_MONGODB_URI: mongodb://localhost:27017/cardiovanta_test
+          TEST_MONGODB_URI: mongodb://localhost:27017/cardiovanta_test?replicaSet=rs0
+          TEST_REDIS_URL: redis://localhost:6379/15
         run: |
           python -m pytest $(python scripts/ci/test_classification.py --list ci_safe --list ci_safe_research_deps)
 

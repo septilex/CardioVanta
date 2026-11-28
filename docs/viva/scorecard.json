@@ -1,0 +1,45 @@
+{
+  "totals": {
+    "PARTIAL": 20,
+    "FULL": 33
+  },
+  "categories": {
+    "AI App Engineering \u2014": {
+      "total": 3,
+      "PARTIAL": 1,
+      "FULL": 2
+    },
+    "Auth & Security \u2014": {
+      "total": 6,
+      "FULL": 5,
+      "PARTIAL": 1
+    },
+    "Backend & System Design \u2014": {
+      "total": 9,
+      "FULL": 8,
+      "PARTIAL": 1
+    },
+    "Engineering Practices \u2014": {
+      "total": 3,
+      "FULL": 2,
+      "PARTIAL": 1
+    },
+    "Frontend \u2014": {
+      "total": 15,
+      "FULL": 15
+    },
+    "NoSQL (MongoDB) \u2014": {
+      "total": 5,
+      "PARTIAL": 5
+    },
+    "SQL (Postgres) \u2014": {
+      "total": 7,
+      "PARTIAL": 7
+    },
+    "System & Integration \u2014": {
+      "total": 5,
+      "PARTIAL": 4,
+      "FULL": 1
+    }
+  }
+}
